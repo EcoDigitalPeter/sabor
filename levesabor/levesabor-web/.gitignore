@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+.env.local
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+/public/sw.js
+/public/workbox-*.js
+/playwright-report/
+/test-results/

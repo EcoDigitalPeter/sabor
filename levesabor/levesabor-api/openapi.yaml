@@ -1,0 +1,21 @@
+# MOCK-01 · Contrato da API — FONTE DE VERDADE FE↔BE (congelar no fim da Sprint 1.1)
+# Preencher a partir da tabela de endpoints de docs/plano/03-backend-plan.md §8.
+# O frontend gera tipos daqui (npm run gen:types); o springdoc valida a implementação contra isto.
+openapi: 3.0.3
+info:
+  title: Leve Sabor AI API
+  version: 0.1.0
+  description: Portal do cliente (Fase 1) + portal admin (Fase 2). Envelope ApiResponse e códigos LSAxxx.
+servers:
+  - url: /api/v1
+paths: {}
+# TODO MOCK-01: /auth/*, /me/profile, /me/meal-plans*, /me/shopping-list*, /me/recipes/{id}/feedback, /admin/*
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        status: { type: string, enum: [success, error] }
+        code: { type: string, description: "LSAxxx quando status=error" }
+        message: { type: string }
+        data: {}

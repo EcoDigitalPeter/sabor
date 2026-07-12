@@ -1,0 +1,49 @@
+# BE-A03 · Configuração base — segredos SÓ por env vars (docs/plano/03-backend-plan.md §10)
+spring:
+  application:
+    name: levesabor-api
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: validate   # schema é 100% Flyway
+    open-in-view: false
+  flyway:
+    enabled: true
+    placeholders:
+      seed_admin_bcrypt: ${SEED_ADMIN_BCRYPT}
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET}
+    access-ttl-minutes: ${JWT_ACCESS_TTL_MIN:15}
+    refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:14}
+
+app:
+  cors-origins: ${APP_CORS_ORIGINS}
+  ai:
+    api-key: ${OPENAI_API_KEY}
+    model: ${OPENAI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${OPENAI_TIMEOUT_S:60}
+    daily-limit: ${AI_DAILY_LIMIT:3}
+    price-per-1k-input: ${AI_PRICE_PER_1K_INPUT:0}
+    price-per-1k-output: ${AI_PRICE_PER_1K_OUTPUT:0}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    enabled: false   # ligado apenas no perfil dev

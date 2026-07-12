@@ -1,0 +1,15 @@
+# BE-A03 · Infra local de desenvolvimento — ver docs/plano/03-backend-plan.md §10
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: levesabor
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - levesabor_pgdata:/var/lib/postgresql/data
+
+volumes:
+  levesabor_pgdata:

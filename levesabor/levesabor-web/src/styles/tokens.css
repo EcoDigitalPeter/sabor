@@ -1,0 +1,60 @@
+/* FE-A02 · Design tokens — fonte única no código; valores de docs/plano/02-ui-ux-plan.md §1 (herdados da landing) */
+:root {
+  /* Cores */
+  --cream: #F6ECDC;
+  --cream-card: #FFFFFF;
+  --cream-card-alt: #FBF5EA;
+  --ink: #241A14;
+  --ink-soft: #2F231B;
+  --terracotta: #C43E1C;
+  --terracotta-dark: #A63417;
+  --amber: #E3A72E;
+  --amber-soft: #F0BC55;
+  --forest: #45614A;
+  --clay: #5B4A3A;
+  --clay-soft: #8A7A65;
+  --tan: #E7C9A0;
+  --muted-on-dark: #B8A88F;
+  --muted-on-dark-2: #C9BBA4;
+  --error: var(--terracotta);
+
+  /* Anel de macros — ordem fixa: proteína → carbs → gordura → fibra */
+  --macro-proteina: #C43E1C;
+  --macro-carbs: #E3A72E;
+  --macro-gordura: #E7C9A0;
+  --macro-fibra: #45614A;
+
+  /* Tipografia */
+  --font-display: "Bricolage Grotesque", sans-serif;
+  --font-body: "Work Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  /* Forma */
+  --radius-pill: 100px;
+  --radius-card: 18px;
+  --radius-card-sm: 12px;
+  --radius-input: 10px;
+
+  /* Foco visível (acessibilidade — padrão da landing) */
+  --focus-on-light: 3px solid var(--terracotta);
+  --focus-on-dark: 3px solid var(--amber);
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+
+/* Animações da marca (únicas permitidas) */
+@keyframes ls-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ls-ring-in {
+  from { opacity: 0; transform: scale(0.85) rotate(-90deg); }
+  to { opacity: 1; transform: scale(1) rotate(-90deg); }
+}

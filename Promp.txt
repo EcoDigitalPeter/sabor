@@ -1,0 +1,136 @@
+Quero transformar a cotação enviada ao cliente num plano técnico completo de implementação da aplicação.
+
+Contexto:
+
+* A cotação enviada ao cliente está neste link: https://claude.ai/code/artifact/ee590e77-6af4-4cbd-91ae-37e73af62e93?org=633b15d0-7e38-4243-b161-41ae03029084
+* O objetivo é criar um plano end-to-end para que uma equipa técnica consiga desenvolver frontend, backend e base de dados com clareza.
+* A base de dados será Supabase, mas apenas como PostgreSQL. Não devemos usar autenticação, storage, edge functions, realtime ou outros serviços proprietários do Supabase para evitar dependência da plataforma.
+* O backend será em Java Spring Boot.
+* O backend deve inspirar-se na arquitetura, estrutura e padrões do projeto local: `D:\Coding\irc-container`.
+* O resultado principal deve ser um ou mais ficheiros `.md` bem organizados.
+
+Tarefa:
+Cria um plano completo de implementação da aplicação, dividido por tipo de utilizador/persona e suas funcionalidades.
+
+Para cada tipo de utilizador, apresenta:
+
+1. Nome do utilizador/persona.
+2. Objetivo principal desse utilizador.
+3. Lista de funcionalidades disponíveis para esse utilizador.
+4. Para cada funcionalidade:
+
+   * Descrição funcional.
+   * Fluxo do utilizador.
+   * Regras de negócio.
+   * Tarefas de frontend.
+   * Tarefas de backend.
+   * Tarefas de base de dados.
+   * APIs/endpoints necessários.
+   * Validações.
+   * Estados possíveis.
+   * Critérios de aceitação.
+   * Prioridade: MVP, Fase 2 ou Futuro.
+
+Também quero que cries uma secção específica para UI/UX contendo:
+
+1. Lista de telas necessárias.
+2. Objetivo de cada tela.
+3. Componentes principais de cada tela.
+4. Campos, botões, tabelas, filtros e ações.
+5. Navegação entre telas.
+6. Estados de UI: loading, empty state, erro, sucesso.
+7. Para cada tela onde seja necessária uma imagem, banner, ilustração, ícone ou gráfico visual, cria um prompt específico para eu usar no ChatGPT para gerar essa imagem.
+
+Os prompts de imagem devem incluir:
+
+* Estilo visual.
+* Formato/tamanho recomendado.
+* Elementos que devem aparecer.
+* Elementos que não devem aparecer.
+* Cores sugeridas.
+* Contexto de uso dentro da aplicação.
+
+Também cria uma secção técnica com:
+
+1. Arquitetura geral da solução.
+2. Estrutura recomendada do frontend.
+3. Estrutura recomendada do backend Spring Boot.
+4. Estrutura recomendada da base de dados PostgreSQL.
+5. Entidades principais.
+6. Relacionamentos entre entidades.
+7. Sugestão de migrations SQL.
+8. Estratégia de autenticação e autorização sem dependência do Supabase Auth.
+9. Estratégia de logs, auditoria e rastreabilidade.
+10. Estratégia de tratamento de erros.
+11. Estratégia de permissões por perfil.
+12. Estratégia de testes.
+13. Estratégia de deploy.
+14. Variáveis de ambiente necessárias.
+15. Integrações externas, se existirem.
+
+Formato de entrega:
+Cria a documentação em Markdown, com a seguinte estrutura sugerida:
+
+* `README.md`
+
+  * Visão geral da aplicação
+  * Objetivo do sistema
+  * Personas/utilizadores
+  * Módulos principais
+  * Arquitetura geral
+
+* `01-functional-plan.md`
+
+  * Funcionalidades por utilizador
+  * Fluxos principais
+  * Regras de negócio
+  * Critérios de aceitação
+
+* `02-ui-ux-plan.md`
+
+  * Mapa de telas
+  * Componentes por tela
+  * Estados de UI
+  * Prompts para geração de imagens
+
+* `03-backend-plan.md`
+
+  * Arquitetura Spring Boot
+  * Módulos
+  * Controllers
+  * Services
+  * Repositories
+  * DTOs
+  * Validações
+  * Endpoints REST
+
+* `04-database-plan.md`
+
+  * Modelo de dados PostgreSQL
+  * Entidades
+  * Relacionamentos
+  * Migrations SQL
+  * Índices
+  * Constraints
+
+* `05-implementation-roadmap.md`
+
+  * Plano por fases
+  * Sprints sugeridas
+  * Ordem de implementação
+  * Dependências técnicas
+  * Riscos
+  * Checklist de entrega
+
+Regras importantes:
+
+* Não assumir funcionalidades fora da cotação sem indicar claramente que são sugestões.
+* Organizar tudo de forma prática para uma equipa técnica executar.
+* Separar claramente MVP, Fase 2 e Futuro.
+* Usar linguagem técnica clara.
+* Evitar descrições genéricas.
+* Sempre que possível, transformar funcionalidades em tarefas executáveis.
+* Considerar que o frontend, backend e base de dados serão desenvolvidos por equipas diferentes, por isso cada responsabilidade deve estar bem separada.
+
+Entrega esperada:
+Um plano técnico completo, estruturado em Markdown, pronto para ser usado como base de desenvolvimento da aplicação.

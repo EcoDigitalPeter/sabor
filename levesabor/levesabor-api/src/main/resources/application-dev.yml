@@ -1,0 +1,27 @@
+# BE-A03 · Perfil dev — Postgres do docker-compose.dev.yml; valores NÃO sensíveis
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/levesabor
+    username: dev
+    password: dev
+  flyway:
+    placeholders:
+      seed_admin_bcrypt: "$2a$10$DEV.ONLY.PLACEHOLDER.HASH.substituir.no.arranque"
+
+security:
+  jwt:
+    secret-key: ZGV2LW9ubHktc2VjcmV0LWtleS1jb20tMzItYnl0ZXMhIQ==   # dev only
+
+app:
+  cors-origins: http://localhost:3000
+  ai:
+    api-key: ${OPENAI_API_KEY:}   # em dev usar WireMock nos testes; chave real opcional
+    daily-limit: 50
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    mz.levesabor: DEBUG
