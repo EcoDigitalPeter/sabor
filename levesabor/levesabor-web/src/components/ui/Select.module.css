@@ -1,0 +1,62 @@
+/* FE-B01 · Select — radius-input, cream-card-alt, seta custom, foco terracotta/erro (docs/plano/02-ui-ux-plan.md §1) */
+
+.wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.select {
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card-alt);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  padding: 12px 40px 12px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.select:hover:not(:disabled):not(.error) {
+  border-color: var(--clay-soft);
+}
+
+.select:focus {
+  border-color: var(--terracotta);
+  outline: none;
+}
+
+.select:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  border-color: var(--error);
+}
+
+.error:focus-visible {
+  outline: 3px solid var(--error);
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--clay);
+  border-bottom: 2px solid var(--clay);
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}

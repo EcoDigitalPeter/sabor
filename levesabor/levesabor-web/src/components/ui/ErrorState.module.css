@@ -1,0 +1,46 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 32px 24px;
+  background: var(--cream-card);
+  border: 1px solid var(--terracotta);
+  border-radius: var(--radius-card);
+}
+
+.icon {
+  color: var(--terracotta);
+}
+
+.message {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.retry {
+  margin-top: 4px;
+  border: none;
+  cursor: pointer;
+  padding: 10px 24px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease;
+}
+
+.retry:hover {
+  background: var(--terracotta-dark);
+}
+
+.retry:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}

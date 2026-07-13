@@ -1,0 +1,74 @@
+/* FE-B03 · Modal — overlay centrado, superfície replica Card (--radius-card / --cream-card) */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(36, 26, 20, 0.55);
+}
+
+.dialog {
+  width: min(480px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  border-radius: var(--radius-card);
+  background: var(--cream-card);
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(36, 26, 20, 0.35);
+  animation: ls-rise 0.25s ease-out;
+}
+
+.dialog:focus {
+  outline: none;
+}
+
+.dialog:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.closeButton {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--clay);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-card-sm);
+}
+
+.closeButton:hover {
+  color: var(--ink);
+}
+
+.closeButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.content {
+  font-family: var(--font-body);
+  color: var(--ink-soft);
+}

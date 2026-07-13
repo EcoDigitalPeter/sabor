@@ -1,0 +1,22 @@
+/* FE-B02 · Chip — pílula IBM Plex Mono, compacta */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.tan {
+  background: var(--tan);
+}
+
+.cream {
+  background: var(--cream-card-alt);
+}

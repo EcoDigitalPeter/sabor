@@ -1,0 +1,49 @@
+/* FE-B01 · Input — radius-input, fundo cream-card-alt, foco terracotta/erro (docs/plano/02-ui-ux-plan.md §1) */
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card-alt);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  padding: 12px 16px;
+  transition: border-color 0.15s ease;
+}
+
+.input::placeholder {
+  color: var(--clay-soft);
+}
+
+.input:hover:not(:disabled):not(.error) {
+  border-color: var(--clay-soft);
+}
+
+.input:focus {
+  border-color: var(--terracotta);
+  outline: none;
+}
+
+.input:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  border-color: var(--error);
+}
+
+.error:focus {
+  border-color: var(--error);
+}
+
+.error:focus-visible {
+  outline: 3px solid var(--error);
+}

@@ -1,0 +1,71 @@
+/* FE-B05 · MacroRing — anel de macros (componente-assinatura, docs/plano/02-ui-ux-plan.md §1) */
+
+.track {
+  /* Default pensado para os contextos claros (cartões cream/branco) onde o anel é mais usado
+     na app; pode ser sobreposto por um antepassado com --macro-ring-track (ex.: um painel
+     escuro estilo a secção "Macros" da landing, que usa rgba(246,236,220,.1)). */
+  stroke: var(--macro-ring-track, rgba(36, 26, 20, 0.08));
+}
+
+.ringGroup {
+  /* Roda o grupo de círculos -90deg (segmento 1 passa a começar às 12h) e faz a entrada —
+     a keyframe ls-ring-in (tokens.css) termina em scale(1) rotate(-90deg) e fica assim
+     (animation ... both). O texto do kcal fica fora deste grupo, por isso não roda. */
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ls-ring-in 0.5s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringGroup {
+    animation-duration: 0.001ms;
+  }
+}
+
+.kcalText {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  fill: var(--macro-ring-text, var(--ink));
+  user-select: none;
+}
+
+.withLegend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(24px, 4vw, 40px);
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.legendLabel {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  color: var(--macro-ring-text, var(--clay));
+  flex: 1;
+}
+
+.legendValue {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--macro-ring-text, var(--ink));
+}

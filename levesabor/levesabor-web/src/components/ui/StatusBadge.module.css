@@ -1,0 +1,25 @@
+/* FE-B02 · StatusBadge — etiqueta pequena, fundo sólido por estado + texto branco (contraste acessível) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.forest {
+  background: var(--forest);
+}
+
+.terracotta {
+  background: var(--terracotta);
+}
+
+.claySoft {
+  background: var(--clay-soft);
+}

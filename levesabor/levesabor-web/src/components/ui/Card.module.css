@@ -1,0 +1,15 @@
+/* FE-B02 · Card — cartão flat/quente: sem sombra pesada, apenas borda subtil + sombra muito leve */
+.card {
+  border-radius: var(--radius-card);
+  padding: 20px;
+  border: 1px solid rgba(36, 26, 20, 0.08);
+  box-shadow: 0 1px 2px rgba(36, 26, 20, 0.04);
+}
+
+.default {
+  background: var(--cream-card);
+}
+
+.alt {
+  background: var(--cream-card-alt);
+}

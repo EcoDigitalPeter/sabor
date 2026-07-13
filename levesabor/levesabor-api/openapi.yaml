@@ -1,6 +1,3 @@
-# MOCK-01 · Contrato da API — FONTE DE VERDADE FE↔BE (congelar no fim da Sprint 1.1)
-# Preencher a partir da tabela de endpoints de docs/plano/03-backend-plan.md §8.
-# O frontend gera tipos daqui (npm run gen:types); o springdoc valida a implementação contra isto.
 openapi: 3.0.3
 info:
   title: Leve Sabor AI API
@@ -8,14 +5,1381 @@ info:
   description: Portal do cliente (Fase 1) + portal admin (Fase 2). Envelope ApiResponse e códigos LSAxxx.
 servers:
   - url: /api/v1
-paths: {}
-# TODO MOCK-01: /auth/*, /me/profile, /me/meal-plans*, /me/shopping-list*, /me/recipes/{id}/feedback, /admin/*
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ── Auth ──────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      summary: Registo de conta (F1-VIS-01)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "200":
+          description: Conta criada, sessão iniciada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponseEnvelope" }
+        "400": { $ref: "#/components/responses/Validation" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /auth/login:
+    post:
+      operationId: login
+      summary: Login (F1-VIS-02)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Autenticado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponseEnvelope" }
+        "401": { $ref: "#/components/responses/InvalidCredentials" }
+        "403": { $ref: "#/components/responses/Suspended" }
+
+  /auth/refresh:
+    post:
+      operationId: refresh
+      summary: Renovar sessão via cookie refresh httpOnly (F1-VIS-02)
+      security: []
+      responses:
+        "200":
+          description: Novo par de tokens
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponseEnvelope" }
+        "401": { description: Refresh inválido/expirado }
+
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: Terminar sessão, revoga refresh token (F1-VIS-02)
+      responses:
+        "200":
+          description: Sessão terminada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+
+  # ── Perfil ────────────────────────────────────────────────────────────
+  /me/profile:
+    get:
+      operationId: getMyProfile
+      summary: Consultar perfil de saúde (F1-CLI-01)
+      responses:
+        "200":
+          description: Perfil (ou 404 se ainda não preenchido)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      operationId: updateMyProfile
+      summary: Criar/atualizar perfil de saúde (F1-CLI-01)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileRequest" }
+      responses:
+        "200":
+          description: Perfil gravado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileEnvelope" }
+        "400": { $ref: "#/components/responses/Validation" }
+
+  # ── Planos ────────────────────────────────────────────────────────────
+  /me/meal-plans:
+    post:
+      operationId: requestMealPlanGeneration
+      summary: Pedir geração de plano semanal (F1-CLI-02)
+      responses:
+        "202":
+          description: Geração aceite, devolve id para polling
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GenerationHandleEnvelope" }
+        "409": { $ref: "#/components/responses/GenerationConflict" }
+        "429": { $ref: "#/components/responses/GenerationLimit" }
+
+  /me/meal-plans/{id}:
+    get:
+      operationId: getMealPlanGenerationStatus
+      summary: Estado/resultado de uma geração (F1-CLI-02)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Estado atual da geração
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MealPlanGenerationEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /me/meal-plans/active:
+    get:
+      operationId: getActiveMealPlan
+      summary: Plano ativo completo, payload único (F1-CLI-03)
+      responses:
+        "200":
+          description: Plano ativo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MealPlanEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /me/meal-plans/entries/{id}:
+    get:
+      operationId: getMealPlanEntry
+      summary: Detalhe de uma entrada/receita do plano (F1-CLI-04)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Entrada com receita snapshot
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MealPlanEntryEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /me/meal-plans/entries/{id}/swap:
+    post:
+      operationId: swapMealPlanEntry
+      summary: Propor/aplicar troca de refeição (F1-CLI-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+        - name: confirm
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+          description: false = propõe alternativa; true = aplica a troca
+      responses:
+        "200":
+          description: Alternativa proposta ou troca aplicada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SwapEnvelope" }
+        "409": { $ref: "#/components/responses/NoAlternative" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /me/recipes/{id}/feedback:
+    put:
+      operationId: setRecipeFeedback
+      summary: Marcar 👍/👎 numa receita (F1-CLI-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FeedbackRequest" }
+      responses:
+        "200":
+          description: Feedback gravado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ── Lista de compras ─────────────────────────────────────────────────
+  /me/shopping-list:
+    get:
+      operationId: getMyShoppingList
+      summary: Lista de compras do plano ativo (F1-CLI-06)
+      responses:
+        "200":
+          description: Lista agregada por categoria
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShoppingListEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /me/shopping-list/items/{id}:
+    patch:
+      operationId: setShoppingListItemChecked
+      summary: Marcar/desmarcar item (F1-CLI-06)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetCheckedRequest" }
+      responses:
+        "200":
+          description: Item atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShoppingListItemEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ── Admin: Utilizadores (Fase 2) ────────────────────────────────────
+  /admin/users:
+    get:
+      operationId: listUsers
+      summary: Listar utilizadores (F2-ADM-01)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+        - $ref: "#/components/parameters/SortQuery"
+        - $ref: "#/components/parameters/SearchQuery"
+      responses:
+        "200":
+          description: Página de utilizadores
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserPageEnvelope" }
+
+  /admin/users/{id}:
+    get:
+      operationId: getUser
+      summary: Detalhe de utilizador (F2-ADM-01)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Utilizador
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/users/{id}/health-profile:
+    get:
+      operationId: getUserHealthProfile
+      summary: Perfil de saúde do utilizador (ação auditada) (F2-ADM-01)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Perfil de saúde
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileEnvelope" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/users/{id}/status:
+    patch:
+      operationId: setUserStatus
+      summary: Suspender/reativar conta (F2-ADM-01)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetStatusRequest" }
+      responses:
+        "200":
+          description: Estado atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserEnvelope" }
+        "409": { $ref: "#/components/responses/LastAdmin" }
+
+  # ── Admin: Lojas (Fase 2) ────────────────────────────────────────────
+  /admin/stores:
+    get:
+      operationId: listStores
+      summary: Listar lojas (F2-ADM-02)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+        - $ref: "#/components/parameters/SortQuery"
+        - $ref: "#/components/parameters/SearchQuery"
+      responses:
+        "200":
+          description: Página de lojas
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StorePageEnvelope" }
+    post:
+      operationId: createStore
+      summary: Criar loja (F2-ADM-02)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StoreRequest" }
+      responses:
+        "200":
+          description: Loja criada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StoreEnvelope" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /admin/stores/{id}:
+    get:
+      operationId: getStore
+      summary: Detalhe de loja (F2-ADM-02)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Loja
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StoreEnvelope" }
+    put:
+      operationId: updateStore
+      summary: Atualizar loja (F2-ADM-02)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StoreRequest" }
+      responses:
+        "200":
+          description: Loja atualizada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StoreEnvelope" }
+    delete:
+      operationId: deleteStore
+      summary: Remover loja, confirmação dupla se houver produtos (F2-ADM-02)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Loja removida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+
+  /admin/stores/{id}/status:
+    patch:
+      operationId: setStoreStatus
+      summary: Suspender/reativar loja (F2-ADM-02)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetStatusRequest" }
+      responses:
+        "200":
+          description: Estado atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StoreEnvelope" }
+
+  # ── Admin: Produtos (Fase 2) ─────────────────────────────────────────
+  /admin/products:
+    get:
+      operationId: listProducts
+      summary: Listar produtos (F2-ADM-03)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+        - $ref: "#/components/parameters/SortQuery"
+        - $ref: "#/components/parameters/SearchQuery"
+      responses:
+        "200":
+          description: Página de produtos
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductPageEnvelope" }
+    post:
+      operationId: createProduct
+      summary: Criar produto (F2-ADM-03)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductRequest" }
+      responses:
+        "200":
+          description: Produto criado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductEnvelope" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /admin/products/{id}:
+    get:
+      operationId: getProduct
+      summary: Detalhe de produto (F2-ADM-03)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Produto
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductEnvelope" }
+    put:
+      operationId: updateProduct
+      summary: Atualizar produto (F2-ADM-03)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductRequest" }
+      responses:
+        "200":
+          description: Produto atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductEnvelope" }
+    delete:
+      operationId: deleteProduct
+      summary: Remover produto (F2-ADM-03)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Produto removido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+
+  /admin/products/{id}/prices/{storeId}:
+    put:
+      operationId: upsertProductPrice
+      summary: Definir preço do produto numa loja (F2-ADM-03)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+        - name: storeId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PriceRequest" }
+      responses:
+        "200":
+          description: Preço gravado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    delete:
+      operationId: deleteProductPrice
+      summary: Remover preço do produto numa loja (F2-ADM-03)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+        - name: storeId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Preço removido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+
+  /admin/products/import:
+    post:
+      operationId: importProducts
+      summary: Validar ficheiro de import Excel (F2-ADM-04)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        "200":
+          description: Job de import validado, com pré-visualização
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportJobEnvelope" }
+        "400": { $ref: "#/components/responses/InvalidFile" }
+
+  /admin/products/import/{jobId}/confirm:
+    post:
+      operationId: confirmImport
+      summary: Confirmar aplicação do import validado (F2-ADM-04)
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConfirmImportRequest" }
+      responses:
+        "200":
+          description: Import aplicado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportJobEnvelope" }
+        "409": { description: Job já aplicado ou inválido }
+
+  /admin/products/export:
+    get:
+      operationId: exportProducts
+      summary: Exportar catálogo atual (F2-ADM-04)
+      responses:
+        "200":
+          description: Ficheiro .xlsx
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /admin/products/import-template:
+    get:
+      operationId: getImportTemplate
+      summary: Descarregar template de import (F2-ADM-04)
+      responses:
+        "200":
+          description: Ficheiro .xlsx
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  # ── Admin: Receitas (Fase 2) ─────────────────────────────────────────
+  /admin/recipes:
+    get:
+      operationId: listRecipes
+      summary: Listar receitas (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+        - $ref: "#/components/parameters/SortQuery"
+        - $ref: "#/components/parameters/SearchQuery"
+      responses:
+        "200":
+          description: Página de receitas
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecipePageEnvelope" }
+    post:
+      operationId: createRecipe
+      summary: Criar receita (F2-ADM-05)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RecipeRequest" }
+      responses:
+        "200":
+          description: Receita criada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecipeEnvelope" }
+
+  /admin/recipes/{id}:
+    get:
+      operationId: getRecipe
+      summary: Detalhe de receita (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Receita
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecipeEnvelope" }
+    put:
+      operationId: updateRecipe
+      summary: Atualizar receita (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RecipeRequest" }
+      responses:
+        "200":
+          description: Receita atualizada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecipeEnvelope" }
+    delete:
+      operationId: deleteRecipe
+      summary: Remover receita (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Receita removida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+
+  /admin/recipes/{id}/status:
+    patch:
+      operationId: setRecipeStatus
+      summary: Publicar/despublicar receita (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetRecipeStatusRequest" }
+      responses:
+        "200":
+          description: Estado atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecipeEnvelope" }
+        "409": { $ref: "#/components/responses/RecipeIncomplete" }
+
+  # ── Admin: Ingredientes (Fase 2) ─────────────────────────────────────
+  /admin/ingredients:
+    get:
+      operationId: listIngredients
+      summary: Listar ingredientes (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+        - $ref: "#/components/parameters/SortQuery"
+        - $ref: "#/components/parameters/SearchQuery"
+      responses:
+        "200":
+          description: Página de ingredientes
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IngredientPageEnvelope" }
+    post:
+      operationId: createIngredient
+      summary: Criar ingrediente (F2-ADM-05)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IngredientRequest" }
+      responses:
+        "200":
+          description: Ingrediente criado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IngredientEnvelope" }
+
+  /admin/ingredients/{id}:
+    get:
+      operationId: getIngredient
+      summary: Detalhe de ingrediente (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Ingrediente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IngredientEnvelope" }
+    put:
+      operationId: updateIngredient
+      summary: Atualizar ingrediente (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IngredientRequest" }
+      responses:
+        "200":
+          description: Ingrediente atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IngredientEnvelope" }
+    delete:
+      operationId: deleteIngredient
+      summary: Remover ingrediente, bloqueado se em uso (F2-ADM-05)
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: Ingrediente removido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+        "409": { $ref: "#/components/responses/IngredientInUse" }
+
+  # ── Admin: Métricas (Fase 2) ─────────────────────────────────────────
+  /admin/metrics/summary:
+    get:
+      operationId: getMetricsSummary
+      summary: KPIs, séries e custo IA (F2-ADM-06)
+      parameters:
+        - name: period
+          in: query
+          required: false
+          schema: { type: integer, enum: [7, 30, 90], default: 30 }
+      responses:
+        "200":
+          description: Resumo de métricas
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MetricsSummaryEnvelope" }
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    PageQuery:
+      name: page
+      in: query
+      schema: { type: integer, default: 0 }
+    SizeQuery:
+      name: size
+      in: query
+      schema: { type: integer, default: 20 }
+    SortQuery:
+      name: sort
+      in: query
+      schema: { type: string, example: "createdAt,desc" }
+    SearchQuery:
+      name: q
+      in: query
+      schema: { type: string }
+
+  responses:
+    Validation:
+      description: LSA001 — dados inválidos
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    InvalidCredentials:
+      description: LSA002 — credenciais inválidas
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    Suspended:
+      description: LSA003 — conta suspensa
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    NotFound:
+      description: LSA005 — não encontrado
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    Duplicate:
+      description: LSA006 — já existe
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    GenerationConflict:
+      description: LSA010 perfil incompleto / LSA011 geração em curso
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    GenerationLimit:
+      description: LSA012 — limite diário de gerações atingido
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    NoAlternative:
+      description: LSA014 — sem alternativa disponível
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    InvalidFile:
+      description: LSA020 — ficheiro de import inválido
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    IngredientInUse:
+      description: LSA021 — ingrediente usado em receitas
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    LastAdmin:
+      description: LSA022 — tem de existir pelo menos um administrador ativo
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+    RecipeIncomplete:
+      description: LSA023 — receita não publicável
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+
   schemas:
-    ApiResponse:
+    ErrorCode:
+      type: string
+      enum:
+        - LSA001_VALIDATION
+        - LSA002_INVALID_CREDENTIALS
+        - LSA003_ACCOUNT_SUSPENDED
+        - LSA004_FORBIDDEN
+        - LSA005_NOT_FOUND
+        - LSA006_DUPLICATE
+        - LSA010_PROFILE_INCOMPLETE
+        - LSA011_GENERATION_IN_PROGRESS
+        - LSA012_GENERATION_LIMIT
+        - LSA013_AI_UNAVAILABLE
+        - LSA014_NO_ALTERNATIVE
+        - LSA020_IMPORT_INVALID_FILE
+        - LSA021_INGREDIENT_IN_USE
+        - LSA022_LAST_ADMIN
+        - LSA023_RECIPE_INCOMPLETE
+        - LSA099_INTERNAL
+
+    ApiResponseVoid:
       type: object
+      required: [status]
       properties:
         status: { type: string, enum: [success, error] }
-        code: { type: string, description: "LSAxxx quando status=error" }
+        code: { $ref: "#/components/schemas/ErrorCode" }
         message: { type: string }
-        data: {}
+        data: { nullable: true }
+
+    PageResponse:
+      type: object
+      properties:
+        items: { type: array, items: {} }
+        page: { type: integer }
+        size: { type: integer }
+        totalItems: { type: integer }
+        totalPages: { type: integer }
+
+    # ── Auth ──
+    RegisterRequest:
+      type: object
+      required: [name, email, password, confirmPassword, disclaimerAccepted]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        confirmPassword: { type: string, minLength: 8 }
+        disclaimerAccepted: { type: boolean }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    AuthResult:
+      type: object
+      properties:
+        accessToken: { type: string }
+        user:
+          type: object
+          properties:
+            id: { type: integer, format: int64 }
+            name: { type: string }
+            email: { type: string }
+            role: { type: string, enum: [CLIENTE, ADMIN] }
+
+    AuthResponseEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/AuthResult" }
+
+    # ── Perfil ──
+    Goal:
+      type: string
+      enum: [PERDER_PESO, COMER_MELHOR, GANHAR_MASSA, GERIR_CONDICAO]
+    HealthCondition:
+      type: string
+      enum: [NENHUMA, DIABETES_TIPO_2, HIPERTENSAO, DOENCA_CELIACA]
+    BudgetBand:
+      type: string
+      enum: [BAIXO, MEDIO, CONFORTAVEL]
+
+    Profile:
+      type: object
+      properties:
+        goal: { $ref: "#/components/schemas/Goal" }
+        healthCondition: { $ref: "#/components/schemas/HealthCondition" }
+        allergies: { type: array, items: { type: string, maxLength: 60 }, maxItems: 20 }
+        budgetBand: { $ref: "#/components/schemas/BudgetBand" }
+        mealsPerDay: { type: integer, minimum: 2, maximum: 5 }
+
+    UpdateProfileRequest:
+      allOf:
+        - $ref: "#/components/schemas/Profile"
+
+    ProfileEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/Profile" }
+
+    # ── Macros / Receita ──
+    Macros:
+      type: object
+      properties:
+        proteina: { type: number, description: "percentagem" }
+        carbs: { type: number }
+        gordura: { type: number }
+        fibra: { type: number }
+
+    RecipeStep:
+      type: object
+      properties:
+        order: { type: integer }
+        text: { type: string }
+
+    RecipeIngredientLine:
+      type: object
+      properties:
+        ingredientId: { type: integer, format: int64 }
+        name: { type: string }
+        quantity: { type: number }
+        unit: { type: string }
+
+    RecipeSnapshot:
+      type: object
+      properties:
+        recipeId: { type: integer, format: int64 }
+        name: { type: string }
+        kcal: { type: integer }
+        prepMinutes: { type: integer }
+        estimatedCostMt: { type: number, nullable: true }
+        macros: { $ref: "#/components/schemas/Macros" }
+        healthTags: { type: array, items: { type: string } }
+        healthNote: { type: string, nullable: true }
+        ingredients: { type: array, items: { $ref: "#/components/schemas/RecipeIngredientLine" } }
+        steps: { type: array, items: { $ref: "#/components/schemas/RecipeStep" } }
+
+    # ── Plano ──
+    MealPlanEntry:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        mealSlot: { type: string, enum: [PEQUENO_ALMOCO, ALMOCO, JANTAR, LANCHE] }
+        recipe: { $ref: "#/components/schemas/RecipeSnapshot" }
+        feedback: { type: string, enum: [NONE, LIKE, DISLIKE] }
+
+    MealPlanDay:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        weekday: { type: string }
+        totalKcal: { type: integer }
+        macros: { $ref: "#/components/schemas/Macros" }
+        entries: { type: array, items: { $ref: "#/components/schemas/MealPlanEntry" } }
+
+    MealPlan:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        weekStart: { type: string, format: date }
+        status: { type: string, enum: [ACTIVE, ARCHIVED] }
+        days: { type: array, items: { $ref: "#/components/schemas/MealPlanDay" } }
+
+    MealPlanEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/MealPlan" }
+
+    MealPlanEntryEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/MealPlanEntry" }
+
+    GenerationHandle:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        status: { type: string, enum: [GENERATING, READY, FAILED] }
+
+    GenerationHandleEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/GenerationHandle" }
+
+    MealPlanGenerationEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id: { type: integer, format: int64 }
+                status: { type: string, enum: [GENERATING, READY, FAILED] }
+                mealPlanId: { type: integer, format: int64, nullable: true }
+
+    FeedbackRequest:
+      type: object
+      required: [value]
+      properties:
+        value: { type: string, enum: [LIKE, DISLIKE, NONE] }
+
+    SwapAlternative:
+      type: object
+      properties:
+        recipe: { $ref: "#/components/schemas/RecipeSnapshot" }
+
+    SwapEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                state: { type: string, enum: [proposed, applied] }
+                alternative: { $ref: "#/components/schemas/SwapAlternative" }
+
+    # ── Lista de compras ──
+    ShoppingListItem:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        ingredientName: { type: string }
+        category: { type: string, enum: [CEREAIS_E_FARINHAS, PROTEINA, VEGETAIS_E_FOLHAS, LEGUMINOSAS, TEMPEROS_E_OLEOS, OUTROS] }
+        quantity: { type: number }
+        unit: { type: string }
+        checked: { type: boolean }
+        estimatedCostMt: { type: number, nullable: true }
+
+    ShoppingList:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        totalItems: { type: integer }
+        checkedItems: { type: integer }
+        estimatedCostMt: { type: number, nullable: true }
+        costIsPartial: { type: boolean }
+        items: { type: array, items: { $ref: "#/components/schemas/ShoppingListItem" } }
+
+    ShoppingListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ShoppingList" }
+
+    SetCheckedRequest:
+      type: object
+      required: [checked]
+      properties:
+        checked: { type: boolean }
+
+    ShoppingListItemEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ShoppingListItem" }
+
+    # ── Admin: Utilizadores ──
+    UserStatus:
+      type: string
+      enum: [ACTIVE, SUSPENDED]
+
+    User:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [CLIENTE, ADMIN] }
+        status: { $ref: "#/components/schemas/UserStatus" }
+        createdAt: { type: string, format: date-time }
+        lastLoginAt: { type: string, format: date-time, nullable: true }
+        mealPlanCount: { type: integer }
+
+    UserEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/User" }
+
+    UserPageEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: "#/components/schemas/PageResponse"
+                - type: object
+                  properties:
+                    items: { type: array, items: { $ref: "#/components/schemas/User" } }
+
+    SetStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ACTIVE, SUSPENDED] }
+
+    # ── Admin: Lojas ──
+    Store:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        city: { type: string }
+        neighborhood: { type: string, nullable: true }
+        contact: { type: string, nullable: true }
+        status: { type: string, enum: [ACTIVE, SUSPENDED] }
+        productCount: { type: integer }
+
+    StoreRequest:
+      type: object
+      required: [name, city]
+      properties:
+        name: { type: string }
+        city: { type: string }
+        neighborhood: { type: string, nullable: true }
+        contact: { type: string, nullable: true }
+
+    StoreEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/Store" }
+
+    StorePageEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: "#/components/schemas/PageResponse"
+                - type: object
+                  properties:
+                    items: { type: array, items: { $ref: "#/components/schemas/Store" } }
+
+    # ── Admin: Produtos ──
+    Product:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        category: { type: string }
+        unit: { type: string }
+        ingredientId: { type: integer, format: int64, nullable: true }
+        storePriceCount: { type: integer }
+
+    ProductRequest:
+      type: object
+      required: [name, category, unit]
+      properties:
+        name: { type: string }
+        category: { type: string }
+        unit: { type: string }
+        ingredientId: { type: integer, format: int64, nullable: true }
+
+    ProductEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/Product" }
+
+    ProductPageEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: "#/components/schemas/PageResponse"
+                - type: object
+                  properties:
+                    items: { type: array, items: { $ref: "#/components/schemas/Product" } }
+
+    PriceRequest:
+      type: object
+      required: [priceMt]
+      properties:
+        priceMt: { type: number }
+
+    ImportRowError:
+      type: object
+      properties:
+        row: { type: integer }
+        message: { type: string }
+
+    ImportJob:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        status: { type: string, enum: [VALIDATED, APPLIED, FAILED] }
+        validCount: { type: integer }
+        errorCount: { type: integer }
+        newCount: { type: integer }
+        updateCount: { type: integer }
+        errors: { type: array, items: { $ref: "#/components/schemas/ImportRowError" } }
+
+    ImportJobEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ImportJob" }
+
+    ConfirmImportRequest:
+      type: object
+      properties:
+        onlyValidRows: { type: boolean, default: false }
+
+    # ── Admin: Receitas ──
+    RecipeStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED]
+
+    Recipe:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        prepMinutes: { type: integer }
+        servings: { type: integer }
+        estimatedCostMt: { type: number, nullable: true }
+        healthTags: { type: array, items: { type: string } }
+        kcal: { type: integer }
+        macros: { $ref: "#/components/schemas/Macros" }
+        status: { $ref: "#/components/schemas/RecipeStatus" }
+        likeCount: { type: integer }
+        dislikeCount: { type: integer }
+        ingredients: { type: array, items: { $ref: "#/components/schemas/RecipeIngredientLine" } }
+        steps: { type: array, items: { $ref: "#/components/schemas/RecipeStep" } }
+
+    RecipeRequest:
+      type: object
+      required: [name, prepMinutes, servings, ingredients, steps]
+      properties:
+        name: { type: string }
+        description: { type: string, nullable: true }
+        prepMinutes: { type: integer }
+        servings: { type: integer }
+        estimatedCostMt: { type: number, nullable: true }
+        healthTags: { type: array, items: { type: string } }
+        macrosOverride: { $ref: "#/components/schemas/Macros" }
+        ingredients: { type: array, items: { $ref: "#/components/schemas/RecipeIngredientLine" } }
+        steps: { type: array, items: { $ref: "#/components/schemas/RecipeStep" } }
+
+    RecipeEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/Recipe" }
+
+    RecipePageEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: "#/components/schemas/PageResponse"
+                - type: object
+                  properties:
+                    items: { type: array, items: { $ref: "#/components/schemas/Recipe" } }
+
+    SetRecipeStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/RecipeStatus" }
+
+    # ── Admin: Ingredientes ──
+    Ingredient:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        category: { type: string }
+        baseUnit: { type: string }
+        kcalPer100g: { type: number }
+        proteinPer100g: { type: number }
+        carbsPer100g: { type: number }
+        fatPer100g: { type: number }
+        fiberPer100g: { type: number }
+        referencePriceMt: { type: number, nullable: true }
+        active: { type: boolean }
+
+    IngredientRequest:
+      type: object
+      required: [name, category, baseUnit]
+      properties:
+        name: { type: string }
+        category: { type: string }
+        baseUnit: { type: string }
+        kcalPer100g: { type: number }
+        proteinPer100g: { type: number }
+        carbsPer100g: { type: number }
+        fatPer100g: { type: number }
+        fiberPer100g: { type: number }
+        referencePriceMt: { type: number, nullable: true }
+        active: { type: boolean, default: true }
+
+    IngredientEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/Ingredient" }
+
+    IngredientPageEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: "#/components/schemas/PageResponse"
+                - type: object
+                  properties:
+                    items: { type: array, items: { $ref: "#/components/schemas/Ingredient" } }
+
+    # ── Admin: Métricas ──
+    MetricsSummary:
+      type: object
+      properties:
+        totalUsers: { type: integer }
+        newUsersInPeriod: { type: integer }
+        mealPlansGenerated: { type: integer }
+        aiSuccessRate: { type: number }
+        estimatedAiCostUsd: { type: number }
+        plansPerDay: { type: array, items: { type: object, properties: { date: { type: string, format: date }, count: { type: integer } } } }
+        topRecipes: { type: array, items: { type: object, properties: { recipeId: { type: integer, format: int64 }, name: { type: string }, likeCount: { type: integer }, dislikeCount: { type: integer } } } }
+        bottomRecipes: { type: array, items: { type: object, properties: { recipeId: { type: integer, format: int64 }, name: { type: string }, likeCount: { type: integer }, dislikeCount: { type: integer } } } }
+
+    MetricsSummaryEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseVoid"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/MetricsSummary" }

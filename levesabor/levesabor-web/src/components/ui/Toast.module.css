@@ -1,0 +1,52 @@
+/* FE-B03 · Toast — viewport fixo, pilha de toasts empilhados, entrada ls-rise */
+
+.viewport {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(92vw, 420px);
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 20px;
+  border-radius: var(--radius-card-sm);
+  background: var(--cream-card);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(36, 26, 20, 0.18);
+  border-left: 4px solid transparent;
+  animation: ls-rise 0.28s ease-out;
+}
+
+.success {
+  border-left-color: var(--forest);
+  background: rgba(69, 97, 74, 0.1);
+}
+
+.error {
+  border-left-color: var(--terracotta);
+  background: rgba(196, 62, 28, 0.1);
+}
+
+@media (min-width: 768px) {
+  .viewport {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    transform: none;
+    align-items: flex-end;
+  }
+}

@@ -24,10 +24,12 @@
   --macro-gordura: #E7C9A0;
   --macro-fibra: #45614A;
 
-  /* Tipografia */
-  --font-display: "Bricolage Grotesque", sans-serif;
-  --font-body: "Work Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  /* Tipografia — vars --font-bricolage/--font-work-sans/--font-ibm-plex-mono vêm do
+     next/font/google carregado em src/app/layout.tsx (className no <html>); fallback de
+     string literal mantido para quando essas vars não estão definidas (ex.: export de print). */
+  --font-display: var(--font-bricolage, "Bricolage Grotesque", sans-serif);
+  --font-body: var(--font-work-sans, "Work Sans", sans-serif);
+  --font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono", monospace);
 
   /* Forma */
   --radius-pill: 100px;

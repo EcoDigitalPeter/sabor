@@ -1,0 +1,79 @@
+/* FE-B01 · Checkbox — caixa custom, cor terracotta ao marcar, foco visível (docs/plano/02-ui-ux-plan.md §1) */
+
+.wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.wrapper.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.box {
+  position: relative;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 6px;
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card-alt);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.box::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.input:checked + .box {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+}
+
+.input:checked + .box::after {
+  opacity: 1;
+}
+
+.input:focus-visible + .box {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.wrapper.disabled .box {
+  cursor: not-allowed;
+}
+
+.label {
+  font-size: 15px;
+  line-height: 1.4;
+  padding-top: 1px;
+}

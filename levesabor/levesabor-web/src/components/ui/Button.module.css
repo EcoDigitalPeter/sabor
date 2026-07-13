@@ -1,0 +1,106 @@
+/* FE-B01 · Button — pílula 100px, variantes primary/secondary/ghost, foco visível (docs/plano/02-ui-ux-plan.md §1) */
+
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.button:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Tamanhos */
+.md {
+  padding: 14px 28px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.sm {
+  padding: 10px 20px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Variantes */
+.primary {
+  background: var(--terracotta);
+  color: #ffffff;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--terracotta-dark);
+}
+
+.secondary {
+  background: transparent;
+  border-color: var(--tan);
+  color: var(--ink);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--tan);
+}
+
+.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--terracotta);
+  padding-inline: 12px;
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--cream-card-alt);
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading .content {
+  opacity: 0;
+}
+
+.spinner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  animation: buttonSpin 0.7s linear infinite;
+}
+
+.secondary.loading .spinner,
+.ghost.loading .spinner {
+  border-color: rgba(196, 62, 28, 0.25);
+  border-top-color: var(--terracotta);
+}
+
+@keyframes buttonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
