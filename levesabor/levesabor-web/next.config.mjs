@@ -4,7 +4,9 @@ import withPWAInit from "@ducanh2912/next-pwa";
 
 const withPWA = withPWAInit({
   dest: "public",
-  disable: process.env.NODE_ENV === "development",
+  // Desligado em dev (comportamento original) e sempre que os mocks MSW estão ativos — os dois
+  // service workers (next-pwa e mockServiceWorker.js) disputariam o mesmo scope "/" (FE-P01).
+  disable: process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_USE_MOCKS === "true",
   workboxOptions: {
     // FE-C08: runtime cache stale-while-revalidate para plano ativo e lista de compras
     runtimeCaching: [
