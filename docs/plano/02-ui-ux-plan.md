@@ -57,15 +57,24 @@ T-01 Login ──────────────▶ T-04 Dashboard do plano
   │  ▲                       │        │        │          │         │
   ▼  │ (logout)              ▼        ▼        ▼          │         ├─▶ T-10 Utilizadores ─▶ T-11 Detalhe
 T-02 Registo               T-05     T-06     T-08         │         ├─▶ T-12 Lojas ────────▶ T-13 Form loja
-  │                        Receita  Compras  Perfil       │         ├─▶ T-14 Produtos ─────▶ T-15 Form produto
-  ▼ (1ª vez)                 │                 │          │         │        └─────────────▶ T-16 Import Excel
-T-03 Onboarding ─────────▶ T-07 A gerar plano ────────────┘         ├─▶ T-17 Receitas ─────▶ T-18 Form receita
-                                                                    └─▶ T-19 Ingredientes
+  │                        Receita  Compras  Perfil       │         ├─▶ T-17 Receitas ─────▶ T-18 Form receita
+  ▼ (1ª vez)                 │        │                   │         └─▶ T-19 Ingredientes
+T-03 Onboarding ─────────▶ T-07 A gerar plano ────────────┘
+                                      ▼ ("Encomendar")
+                             T-20 Escolher loja ─▶ T-21 Rever encomenda ─▶ T-22 Minhas encomendas
+
+PORTAL DA LOJA (role LOJISTA) — Fase 3
+──────────────────────────────────────
+T-01 Login (mesmo ecrã, redireciona por role)
+  ├─▶ T-23 Produtos da loja ──▶ T-24 Form produto
+  ├─▶ T-25 Import Excel (loja)
+  └─▶ T-26 Encomendas ─────────▶ T-27 Detalhe de encomenda
 ```
 
-- **Navegação do cliente (mobile):** bottom-nav fixa com 3 itens — `Plano` (T-04) · `Compras` (T-06) · `Perfil` (T-08). T-05 e T-07 são telas empilhadas (voltar).
-- **Navegação do admin (desktop-first, funciona em tablet):** sidebar esquerda — `Dashboard` · `Utilizadores` · `Lojas` · `Produtos` · `Receitas` · `Ingredientes`; topbar com nome do admin + logout.
-- Rotas protegidas por role; utilizador autenticado que abre `/login` é redirecionado para o seu portal.
+- **Navegação do cliente (mobile):** bottom-nav fixa com 3 itens — `Plano` (T-04) · `Compras` (T-06) · `Perfil` (T-08). T-05, T-07 e T-20/T-21/T-22 são telas empilhadas (voltar).
+- **Navegação do admin (desktop-first, funciona em tablet):** sidebar esquerda — `Dashboard` · `Utilizadores` · `Lojas` · `Receitas` · `Ingredientes`; topbar com nome do admin + logout.
+- **Navegação da loja (Fase 3, desktop-first):** sidebar esquerda — `Produtos` · `Encomendas`; topbar com nome da loja + logout.
+- Rotas protegidas por role (`CLIENTE` | `ADMIN` | `LOJISTA`); utilizador autenticado que abre `/login` é redirecionado para o seu portal.
 
 ### Estados de UI — padrão transversal
 
@@ -165,27 +174,11 @@ Toda a tela com dados remotos implementa os 4 estados:
 
 ### T-13 — Formulário de loja `(/admin/lojas/nova|{id})` — Fase 2
 
-- **Objetivo:** criar/editar loja; gerir preços da loja.
-- **Componentes:** campos nome, cidade, bairro, contacto; tab `Preços` (tabela produto + preço MT editável inline — F2-ADM-03).
+- **Objetivo:** registar/editar loja; opcionalmente criar a conta de acesso do lojista.
+- **Componentes:** campos nome, cidade, bairro, contacto; secção opcional "Criar acesso do lojista" (email + password inicial).
 - **Estados:** `edição · saving · saved · erro por campo · conflict`.
 
-### T-14 — Produtos `(/admin/produtos)` — Fase 2
-
-- **Objetivo:** catálogo de produtos e acesso ao import/export (F2-ADM-03/04).
-- **Componentes:** pesquisa, filtros (categoria, loja), tabela (nome, categoria, unidade, ingrediente associado, nº lojas com preço), botões `Novo produto`, `Importar Excel`, `Exportar Excel`.
-- **Estados:** `loading · ready · empty · erro`.
-
-### T-15 — Formulário de produto `(/admin/produtos/novo|{id})` — Fase 2
-
-- **Objetivo:** criar/editar produto e preços por loja.
-- **Componentes:** campos nome, categoria (select), unidade/tamanho, ingrediente associado (autocomplete, opcional); tabela de preços por loja (linha por loja ativa, input decimal MT).
-- **Estados:** `edição · saving · saved · erro por campo · conflict (nome duplicado)`.
-
-### T-16 — Import Excel `(/admin/produtos/importar)` — Fase 2
-
-- **Objetivo:** import em massa com pré-visualização segura (F2-ADM-04).
-- **Componentes:** zona drag-&-drop (.xlsx, máx 5 MB), links `Descarregar template` / `Exportar catálogo atual`, tabela de pré-visualização (linhas com erro destacadas a terracotta com motivo), resumo ("132 válidas · 4 com erro · 90 novas · 42 atualizações"), toggle "importar apenas linhas válidas", botão `Confirmar importação`, ecrã de resultado com contagens + download do relatório de erros.
-- **Estados:** `idle · uploading (progresso) · validating · preview · confirming · done · failed (ficheiro inválido/cabeçalhos errados)`.
+> T-14/T-15/T-16 (Produtos, Form. de produto, Import Excel no admin) foram **removidas** — mudança de plano: o catálogo passa a ser gerido por cada loja (ver T-23/T-24/T-25, Portal da Loja, mais abaixo).
 
 ### T-17 — Receitas `(/admin/receitas)` — Fase 2
 
@@ -205,6 +198,56 @@ Toda a tela com dados remotos implementa os 4 estados:
 - **Componentes:** pesquisa, tabela editável (nome, categoria, unidade base, kcal/100g, proteína, carbs, gordura, fibra, preço de referência MT opcional, estado), botão `Novo ingrediente`.
 - **Ações:** edição inline ou drawer; desativar; remover (bloqueado se em uso — modal lista as receitas afetadas).
 - **Estados:** `loading · ready · empty · saving · blocked_delete · erro`.
+
+### T-20 — Escolher loja `(/compras/encomendar)` — Fase 3
+
+- **Objetivo:** escolher a loja parceira para onde enviar a encomenda (F3-CLI-07).
+- **Componentes:** lista de lojas ativas (cartão: nome, cidade, contacto), pesquisa simples.
+- **Ações:** selecionar loja → T-21.
+- **Estados:** `loading · ready · empty (sem lojas ativas) · erro`.
+
+### T-21 — Rever e confirmar encomenda `(/compras/encomendar/{storeId})` — Fase 3
+
+- **Objetivo:** rever/ajustar os itens antes de enviar a encomenda (F3-CLI-07).
+- **Componentes:** lista de itens da lista de compras (checkbox pré-marcado, quantidade editável), campo de nota opcional, resumo (nº itens, custo estimado se houver preços), contacto da loja visível, botão `Confirmar encomenda`.
+- **Estados:** `ready · confirming · success (→ T-22) · erro`.
+
+### T-22 — Minhas encomendas `(/encomendas)` — Fase 3
+
+- **Objetivo:** acompanhar o estado das encomendas do cliente (F3-CLI-07).
+- **Componentes:** lista (loja, data, estado-badge, nº itens), detalhe simples (itens, nota, contacto da loja), botão `Cancelar` quando aplicável.
+- **Estados:** `loading · ready · empty (ainda sem encomendas) · acting (cancelar) · erro`.
+
+### T-23 — Produtos da loja `(/loja/produtos)` — Fase 3
+
+- **Objetivo:** catálogo de produtos da própria loja (F3-LOJ-01).
+- **Componentes:** pesquisa, filtro por categoria/estado, tabela (nome, categoria, unidade, preço MT, estado-badge), botões `Novo produto`, `Importar Excel`, `Exportar Excel`.
+- **Estados:** `loading · ready · empty ("Ainda sem produtos — cria o primeiro ou importa um Excel") · erro`.
+
+### T-24 — Formulário de produto da loja `(/loja/produtos/novo|{id})` — Fase 3
+
+- **Objetivo:** criar/editar produto e preço (F3-LOJ-01).
+- **Componentes:** campos nome, categoria (select), unidade/tamanho, preço (MT).
+- **Estados:** `edição · saving · saved · erro por campo · conflict (nome duplicado nesta loja)`.
+
+### T-25 — Import Excel da loja `(/loja/produtos/importar)` — Fase 3
+
+- **Objetivo:** import em massa do catálogo da loja (F3-LOJ-02).
+- **Componentes:** zona drag-&-drop (.xlsx, máx 5 MB), links `Descarregar template` / `Exportar catálogo atual`, tabela de pré-visualização (erros destacados a terracotta), resumo, toggle "importar apenas linhas válidas", botão `Confirmar importação`, ecrã de resultado.
+- **Estados:** `idle · uploading · validating · preview · confirming · done · failed`.
+
+### T-26 — Encomendas `(/loja/encomendas)` — Fase 3
+
+- **Objetivo:** listar os pedidos recebidos (F3-LOJ-03).
+- **Componentes:** filtro por estado, tabela (cliente, data, nº itens, estado-badge).
+- **Ações:** abrir detalhe (T-27).
+- **Estados:** `loading · ready · empty ("Ainda sem encomendas") · erro`.
+
+### T-27 — Detalhe de encomenda `(/loja/encomendas/{id})` — Fase 3
+
+- **Objetivo:** ver itens/contacto do cliente e avançar o estado (F3-LOJ-03).
+- **Componentes:** cartão do cliente (nome, contacto, nota), lista de itens (nome, quantidade, unidade, preço se aplicável), botões de transição de estado válidos para o estado atual (ex.: só mostra `Aceitar`/`Recusar` quando `PENDENTE`).
+- **Estados:** `loading · ready · acting · sucesso (toast) · erro`.
 
 ---
 
@@ -279,51 +322,63 @@ Toda a tela com dados remotos implementa os 4 estados:
 
 ---
 
-## 5. Estrutura recomendada do frontend (Next.js)
+## 5. Estrutura recomendada do projeto (Next.js fullstack)
 
-Projeto único Next.js (App Router) servindo os dois portais, com PWA apenas na área do cliente.
+> **Mudança de plano:** deploy no Vercel — um único projeto Next.js (App Router) serve os **três** portais (Cliente, Admin, Loja) **e** o backend (Route Handlers em `app/api/v1/**`, ver `03-backend-plan.md`). PWA apenas na área do cliente.
 
 ```
 levesabor-web/
 ├── next.config.mjs                  # + @ducanh2912/next-pwa (service worker só em produção)
+├── prisma/
+│   ├── schema.prisma                 # modelo de dados (ver 04-database-plan.md)
+│   └── migrations/                   # histórico versionado (prisma migrate)
 ├── public/
 │   ├── manifest.webmanifest         # nome, ícones, theme_color #C43E1C, background #F6ECDC
 │   └── icons/                       # PWA icons + ilustrações P-01..P-07 otimizadas
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/login/  (auth)/registo/           # T-01, T-02 (layout público)
+│   │   ├── (auth)/login/  (auth)/registo/            # T-01, T-02 (layout público)
 │   │   ├── (cliente)/                                # layout com bottom-nav; guarda role CLIENTE
 │   │   │   ├── onboarding/                           # T-03
 │   │   │   ├── plano/            page.tsx            # T-04
-│   │   │   ├── plano/gerar/      page.tsx            # T-07
+│   │   │   ├── plano/gerar/      page.tsx            # T-07 (maxDuration alargado — chamada síncrona à IA)
 │   │   │   ├── plano/refeicao/[entryId]/page.tsx     # T-05
 │   │   │   ├── compras/          page.tsx            # T-06
+│   │   │   ├── compras/encomendar/[storeId]/page.tsx # T-20, T-21 (Fase 3)
+│   │   │   ├── encomendas/       page.tsx            # T-22 (Fase 3)
 │   │   │   └── perfil/           page.tsx            # T-08
-│   │   └── admin/                                    # layout com sidebar; guarda role ADMIN
-│   │       ├── page.tsx                              # T-09
-│   │       ├── utilizadores/ [id]/                   # T-10, T-11
-│   │       ├── lojas/ nova|[id]/                     # T-12, T-13
-│   │       ├── produtos/ novo|[id]|importar/         # T-14, T-15, T-16
-│   │       ├── receitas/ nova|[id]/                  # T-17, T-18
-│   │       └── ingredientes/                         # T-19
+│   │   ├── admin/                                    # layout com sidebar; guarda role ADMIN
+│   │   │   ├── page.tsx                              # T-09
+│   │   │   ├── utilizadores/ [id]/                   # T-10, T-11
+│   │   │   ├── lojas/ nova|[id]/                     # T-12, T-13
+│   │   │   ├── receitas/ nova|[id]/                  # T-17, T-18
+│   │   │   └── ingredientes/                         # T-19
+│   │   ├── loja/                                     # layout com sidebar; guarda role LOJISTA — Fase 3
+│   │   │   ├── produtos/ novo|[id]|importar/          # T-23, T-24, T-25
+│   │   │   └── encomendas/ [id]/                      # T-26, T-27
+│   │   └── api/v1/**/route.ts                        # Backend — Route Handlers (ver 03-backend-plan.md)
+│   ├── server/                        # camada de backend (dentro do mesmo projeto)
+│   │   ├── services/ · repositories/ · dto/ · errors/ · security/   # ver 03-backend-plan.md §2
+│   │   └── prisma.ts                  # cliente Prisma singleton
 │   ├── components/
 │   │   ├── ui/                    # Button, Input, Card, Toast, Skeleton, EmptyState, Modal (tokens §1)
 │   │   ├── macro-ring/            # MacroRing sm|md|lg (SVG, técnica da landing)
 │   │   ├── plan/                  # MealCard, DayTabs, DaySummary
-│   │   └── admin/                 # DataTable paginada server-side, StatusBadge, ConfirmDialog, KpiCard
+│   │   └── admin/                 # DataTable paginada server-side, StatusBadge, ConfirmDialog, KpiCard (reutilizado por Admin e Loja)
 │   ├── lib/
-│   │   ├── api.ts                 # cliente HTTP: injeta Bearer, refresh automático em 401, desembrulha ApiResponse
+│   │   ├── api.ts                 # cliente HTTP do frontend: injeta Bearer, refresh automático em 401, desembrulha ApiResponse (mesma origem — sem CORS)
 │   │   ├── auth.ts                # sessão, roles, guards
 │   │   └── offline.ts             # cache do plano/lista, fila de toggles da lista
-│   ├── hooks/                     # useActivePlan, useShoppingList, usePlanGeneration (polling), …
-│   ├── types/                     # tipos gerados do OpenAPI do backend (openapi-typescript)
+│   ├── hooks/                     # useActivePlan, useShoppingList, useOrders, …
+│   ├── types/                     # tipos gerados do OpenAPI (openapi-typescript) — contrato partilhado FE/BE
 │   └── styles/tokens.css          # variáveis CSS = tabela §1 (fonte única no código)
 └── e2e/                           # Playwright: fluxos da checklist de entrega
 ```
 
 Diretrizes:
-- **Dados:** TanStack Query sobre `lib/api.ts`; sem estado global além de sessão + queries. Tipos do contrato gerados a partir do OpenAPI do backend (nunca escritos à mão).
-- **PWA/offline:** precache do shell; runtime cache stale-while-revalidate para `GET /me/meal-plans/active` e `GET /me/shopping-list`; rotas `/admin` excluídas do service worker (dados sensíveis, sempre frescos).
+- **Dados:** TanStack Query sobre `lib/api.ts`; sem estado global além de sessão + queries. Tipos do contrato gerados a partir do OpenAPI (nunca escritos à mão) — o mesmo contrato documenta as Route Handlers em `src/app/api/v1/**`.
+- **PWA/offline:** precache do shell; runtime cache stale-while-revalidate para `GET /me/meal-plans/active` e `GET /me/shopping-list`; rotas `/admin` e `/loja` excluídas do service worker (dados sensíveis, sempre frescos).
 - **Orçamento de dados móveis:** meta < 200 KB de JS inicial na área do cliente (gzip); fontes com `display=swap` e subsets latinos; imagens conforme §4.
-- **Server vs client components:** páginas do cliente são client components (interatividade + offline); tabelas admin podem usar RSC com paginação por URL.
+- **Server vs client components:** páginas do cliente são client components (interatividade + offline); tabelas admin/loja podem usar RSC com paginação por URL.
+- **Backend no mesmo projeto:** `src/server/**` nunca é importado por código client-side (só pelas Route Handlers) — separação de camadas mantida por convenção de pastas, não por deploy separado.
 - **i18n:** pt-PT único no MVP; strings centralizadas num módulo de mensagens para permitir futura tradução **[Sugestão]**.

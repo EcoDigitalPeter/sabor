@@ -1,213 +1,209 @@
-# 03 — Plano de Backend (Java Spring Boot)
+# 03 — Plano de Backend (Next.js / TypeScript)
 
-> Arquitetura inspirada no projeto de referência `D:\Coding\irc-container` (Maven, Java 17, Spring Boot 3, camadas controller/service/repository, envelope `ApiResponse<T>`, catálogo de erros em enum, `@RestControllerAdvice`, JWT stateless, auditoria em tabela, Lombok, injeção por construtor) — **com as práticas legadas desse projeto modernizadas** (ver §1.1).
+> **Mudança de plano (Jul/2026):** o deploy passa a ser no **Vercel**, que não suporta um processo Java/Spring Boot de longa duração. O backend deixa de ser um serviço separado e passa a viver **dentro do mesmo projeto Next.js** que o frontend (`levesabor-web`), como Route Handlers — um único deploy, base de dados remota (Supabase Postgres). Este documento substitui integralmente a versão anterior (Java/Spring Boot).
 
 ---
 
 ## 1. Arquitetura geral
 
-- **Stack:** Java 17 · Spring Boot 3.3.x · Maven (módulo único — ver nota) · PostgreSQL (Supabase, só JDBC) · Flyway · Spring Security + jjwt · springdoc-openapi · Apache POI · Lombok.
-- **Estilo:** monólito REST stateless, `/api/v1`, JSON. Sem sessões de servidor; escala horizontal trivial.
-- **Nota sobre módulos:** o irc-container é um reator multi-módulo porque integra vários adaptadores legados. Aqui não há essa necessidade — **um módulo Maven único** (`levesabor-api`) com pacotes bem separados. Se o motor de IA crescer, extrai-se para módulo próprio mais tarde.
+- **Stack:** TypeScript · Next.js (App Router), runtime **Node.js** (não Edge — Prisma exige Node) · PostgreSQL remoto (Supabase, só via Prisma) · **Prisma** (ORM + migrations) · `jose` (JWT) · `zod` (validação) · `exceljs` (Excel, Fase 3) · `pino` (logging) · deploy no **Vercel** (plano **Pro**, necessário para `maxDuration` alargado).
+- **Estilo:** API REST-like sob `/api/v1`, JSON, stateless (JWT — sem sessão de servidor). As mesmas convenções de contrato já usadas para gerar os mocks do frontend (`ApiResponse`, códigos `LSAxxx`, OpenAPI) mantêm-se — só a implementação muda de linguagem/stack.
+- **Nota de separação:** frontend e backend partilham o deploy mas não a camada de código — `src/server/**` (backend) nunca é importado por componentes client-side; só as Route Handlers em `src/app/api/v1/**` o chamam. Isto preserva as duas "equipas" (frontend/backend) como componentes distintos, apenas com um único pipeline de deploy.
 
-### 1.1 O que se herda do irc-container vs. o que se moderniza
+### 1.1 Convenções adotadas
 
-| Herdado (padrão a seguir) | Modernizado (não copiar do irc-container) |
+| Convenção | Racional |
 |---|---|
-| Camadas `controller / services (I* + impl) / dto / config / security / exceptions / utils` | Segredos em env vars (nunca em `pom.xml`/properties; o irc tem passwords hardcoded) |
-| Envelope único `ApiResponse<T>{status, message, data}` | …mas **aplicado de forma consistente**, incl. no handler de erros (no irc coexistem 3 formatos) |
-| Enum de códigos de erro com mensagens printf (`IRCxxx` → aqui `LSAxxx`) | SLF4J + Logback (o irc usa log4j 1.x) |
-| `@RestControllerAdvice` global | Controllers **não** engolem exceções em try/catch local (anti-pattern do irc) |
-| JWT stateless com filtro `OncePerRequestFilter` | Spring Security com regras reais por rota + roles (o irc faz `permitAll` em `/api/**`) |
-| Auditoria de operações em tabela dedicada | Utilizadores persistidos com BCrypt + RBAC (o irc tem 1 user hardcoded em memória) |
-| Lombok + injeção por construtor | Bean Validation (`jakarta.validation`) em vez de validação manual com listas de strings |
-| Nomes snake_case nas colunas | `@Transactional` explícito (inexistente no irc); Flyway (inexistente no irc); testes a correr no build (o irc faz skip); versionamento `/api/v1` (o irc usa sufixos `_v1`) |
+| Camadas `route handler (fino) → service → repository (Prisma) → dto/zod → errors` | Mesma separação de responsabilidades da versão Java, sem a bagagem de framework |
+| Envelope único `ApiResponse<T>` em toda resposta (sucesso e erro) | Contrato já consumido pelo frontend (mocks MSW) — não muda com a troca de stack |
+| Catálogo de erros `ErrorCodes` (`LSAxxx`) com mensagem + status HTTP | Mesma tabela de códigos já documentada; só a sintaxe (objeto TS em vez de enum Java) muda |
+| Validação com `zod` nos limites da API (nunca confiar em `any`) | Equivalente TS ao Bean Validation |
+| Prisma como única via de acesso à BD (sem SQL solto fora de `prisma/`) | Migrations versionadas e reprodutíveis, como o Flyway garantia antes |
+| `correlationId` por pedido + logging estruturado (`pino`) | Rastreabilidade, especialmente importante em funções serverless efémeras |
+| Testes correm no CI antes de qualquer deploy (`vitest run` bloqueia o pipeline) | Substitui a garantia que o `mvn verify` dava |
 
 ## 2. Estrutura do projeto
 
-Pacote base: **`mz.levesabor.api`**
+Vive dentro de `levesabor-web/` (mesmo projeto do frontend — ver `02-ui-ux-plan.md §5` para a árvore completa). Só a parte de backend:
 
 ```
-levesabor-api/
-├── pom.xml
-├── Dockerfile
-├── src/main/java/mz/levesabor/api/
-│   ├── LeveSaborApplication.java
-│   ├── config/
-│   │   ├── SecurityConfig.java          # filtros, regras por rota/role, CORS
-│   │   ├── OpenAiConfig.java            # client HTTP, timeouts, retries
-│   │   ├── AsyncConfig.java             # executor p/ geração de planos
-│   │   └── OpenApiConfig.java           # springdoc
-│   ├── security/
-│   │   ├── JwtService.java              # emissão/validação (HS256, jjwt)
-│   │   ├── JwtAuthFilter.java           # OncePerRequestFilter
-│   │   └── CurrentUser.java             # resolver do principal autenticado
-│   ├── controller/
-│   │   ├── AuthController.java
-│   │   ├── ProfileController.java
-│   │   ├── MealPlanController.java
-│   │   ├── ShoppingListController.java
-│   │   ├── FeedbackController.java
-│   │   └── admin/
-│   │       ├── AdminUserController.java
-│   │       ├── AdminStoreController.java
-│   │       ├── AdminProductController.java
-│   │       ├── AdminImportController.java
-│   │       ├── AdminRecipeController.java
-│   │       ├── AdminIngredientController.java
-│   │       └── AdminMetricsController.java
-│   ├── services/                        # convenção do irc: interface I* + impl
-│   │   ├── IAuthService.java            / impl/AuthServiceImpl.java
-│   │   ├── IProfileService.java         / impl/ProfileServiceImpl.java
-│   │   ├── IMealPlanService.java        / impl/MealPlanServiceImpl.java
-│   │   ├── IAiMealPlanService.java      / impl/OpenAiMealPlanService.java   # fornecedor trocável
-│   │   ├── IShoppingListService.java    / impl/ShoppingListServiceImpl.java
-│   │   ├── IFeedbackService.java        / impl/FeedbackServiceImpl.java
-│   │   ├── IRecipeCatalogService.java   / impl/RecipeCatalogServiceImpl.java # pré-filtro p/ IA
-│   │   ├── IStoreService / IProductService / IImportService (POI) / IMetricsService / IUserAdminService
-│   │   └── IAuditService.java           / impl/AuditServiceImpl.java
-│   ├── persist/                         # convenção do irc (módulo common): persist/entity + persist/repository
-│   │   ├── entity/                      # User, ClientProfile, Recipe, Ingredient, RecipeIngredient,
-│   │   │                                # MealPlan, MealPlanEntry, MealFeedback, ShoppingList(Item),
-│   │   │                                # Store, Product, StoreProduct, ImportJob, RefreshToken,
-│   │   │                                # AuditLog, AiGenerationLog  (+ BaseEntity @MappedSuperclass)
-│   │   └── repository/                  # Spring Data JPA, 1 por agregado
-│   ├── dto/                             # records Java; sub-pacotes por área (auth/, plan/, adminproduct/, …)
-│   │   ├── ApiResponse.java             # envelope único
-│   │   └── PageResponse.java            # paginação normalizada
-│   ├── exceptions/
-│   │   ├── ErrorCodes.java              # enum LSAxxx (padrão do irc)
-│   │   ├── ServiceException.java        # exceção de negócio c/ ErrorCode
-│   │   └── GlobalExceptionHandler.java  # @RestControllerAdvice
-│   └── utils/                           # UnitConverter, ExcelTemplate, CorrelationIdFilter
-├── src/main/resources/
-│   ├── application.yml                  # + application-dev.yml, application-prod.yml (perfis Spring, não Maven)
-│   └── db/migration/                    # V1__auth.sql … (ver 04-database-plan.md)
-└── src/test/java/...                    # unit + slice + integração (Testcontainers)
+levesabor-web/
+├── prisma/
+│   ├── schema.prisma                     # modelo de dados (ver 04-database-plan.md)
+│   └── migrations/                       # histórico versionado (prisma migrate)
+├── src/
+│   ├── app/
+│   │   └── api/v1/
+│   │       ├── auth/{register,login,refresh,logout}/route.ts
+│   │       ├── me/
+│   │       │   ├── profile/route.ts
+│   │       │   ├── meal-plans/route.ts · [id]/route.ts · entries/[id]/route.ts · entries/[id]/swap/route.ts
+│   │       │   ├── recipes/[id]/feedback/route.ts
+│   │       │   ├── shopping-list/route.ts · items/[id]/route.ts
+│   │       │   └── orders/route.ts · [id]/route.ts · [id]/cancel/route.ts        # Fase 3
+│   │       ├── admin/
+│   │       │   ├── users/route.ts · [id]/route.ts · [id]/status/route.ts · [id]/health-profile/route.ts
+│   │       │   ├── stores/route.ts · [id]/route.ts · [id]/status/route.ts
+│   │       │   ├── recipes/route.ts · [id]/route.ts · [id]/status/route.ts
+│   │       │   ├── ingredients/route.ts · [id]/route.ts
+│   │       │   └── metrics/summary/route.ts
+│   │       └── loja/                                                             # Fase 3 — role LOJISTA
+│   │           ├── products/route.ts · [id]/route.ts · [id]/status/route.ts
+│   │           ├── products/import/route.ts · import/[jobId]/confirm/route.ts
+│   │           ├── products/export/route.ts · products/import-template/route.ts
+│   │           └── orders/route.ts · [id]/route.ts · [id]/status/route.ts
+│   ├── server/                            # backend — só chamado pelas route handlers acima
+│   │   ├── config/
+│   │   │   └── openai.ts                  # client OpenAI, timeouts, retries
+│   │   ├── security/
+│   │   │   ├── jwt.ts                     # emissão/validação (jose)
+│   │   │   ├── authGuard.ts               # requireAuth(req) / requireRole(req, roles)
+│   │   │   └── currentUser.ts             # resolve utilizador do token (id, role, storeId)
+│   │   ├── services/                      # 1 ficheiro por domínio — authService, profileService,
+│   │   │                                  # mealPlanService, aiMealPlanService (+ openAiMealPlanService),
+│   │   │                                  # shoppingListService, feedbackService, recipeCatalogService,
+│   │   │                                  # orderService, lojaProductService, lojaImportService,
+│   │   │                                  # lojaOrderService, storeService, userAdminService,
+│   │   │                                  # metricsService, auditService
+│   │   ├── repositories/                  # wrappers finos sobre o Prisma Client, 1 por agregado
+│   │   ├── dto/                           # schemas zod + tipos inferidos, por área (auth/, plan/, order/, …)
+│   │   │   ├── apiResponse.ts             # ApiResponse<T> + helpers ok()/err()
+│   │   │   └── pageResponse.ts            # paginação normalizada
+│   │   ├── errors/
+│   │   │   ├── errorCodes.ts              # objeto LSAxxx (mensagem + status HTTP)
+│   │   │   ├── serviceError.ts            # erro de negócio com ErrorCode
+│   │   │   └── errorHandler.ts            # `withErrorHandling(handler)` — equivalente ao GlobalExceptionHandler
+│   │   ├── prisma.ts                      # Prisma Client singleton (evita esgotar ligações em serverless)
+│   │   └── utils/                         # unitConverter, excelTemplate (exceljs), correlationId, logger (pino)
+│   └── middleware.ts                      # regras de rota/role para /api/v1/admin/** e /api/v1/loja/**
+└── src/test/ (ou src/**/*.test.ts colocalizado)   # unit + integração (Vitest)
 ```
 
 ## 3. Convenções por camada
 
 ### 3.1 Envelope de resposta e paginação
 
-Tudo (sucesso **e** erro) responde `ApiResponse<T>`:
+```ts
+export type ApiResponse<T> =
+  | { status: "success"; data: T }
+  | { status: "error"; code: string; message: string };
 
-```java
-public record ApiResponse<T>(String status, String code, String message, T data) {
-    public static <T> ApiResponse<T> ok(T data) { return new ApiResponse<>("success", null, null, data); }
-    public static <T> ApiResponse<T> error(ErrorCodes code, String message) {
-        return new ApiResponse<>("error", code.name(), message, null);
-    }
-}
+export const ok = <T>(data: T): ApiResponse<T> => ({ status: "success", data });
+export const err = (code: ErrorCode, message: string): ApiResponse<never> =>
+  ({ status: "error", code: code.name, message });
 ```
 
-Listas paginadas: `PageResponse<T>{items, page, size, totalItems, totalPages}` dentro de `data`. Parâmetros normalizados: `?page=0&size=20&sort=campo,asc&q=texto`.
+Listas paginadas: `PageResponse<T>{ items, page, size, totalItems, totalPages }` dentro de `data`. Parâmetros normalizados: `?page=0&size=20&sort=campo,asc&q=texto`.
 
-### 3.2 Catálogo de erros (`ErrorCodes`, padrão do irc com printf)
+### 3.2 Catálogo de erros (`ErrorCodes`)
 
-```java
-@Getter
-public enum ErrorCodes {
-    LSA001_VALIDATION("Dados inválidos: %s", 400),
-    LSA002_INVALID_CREDENTIALS("Credenciais inválidas", 401),
-    LSA003_ACCOUNT_SUSPENDED("Conta suspensa — contacta o suporte", 403),
-    LSA004_FORBIDDEN("Sem permissão para esta operação", 403),
-    LSA005_NOT_FOUND("%s não encontrado", 404),
-    LSA006_DUPLICATE("%s já existe", 409),
-    LSA010_PROFILE_INCOMPLETE("Completa o teu perfil antes de gerar um plano", 409),
-    LSA011_GENERATION_IN_PROGRESS("Já existe uma geração em curso", 409),
-    LSA012_GENERATION_LIMIT("Limite diário de gerações atingido", 429),
-    LSA013_AI_UNAVAILABLE("Não foi possível gerar o plano — tenta novamente", 502),
-    LSA014_NO_ALTERNATIVE("Sem alternativa disponível para as tuas restrições", 409),
-    LSA020_IMPORT_INVALID_FILE("Ficheiro inválido: %s", 400),
-    LSA021_INGREDIENT_IN_USE("Ingrediente usado em %d receitas — desativa em vez de remover", 409),
-    LSA022_LAST_ADMIN("Tem de existir pelo menos um administrador ativo", 409),
-    LSA023_RECIPE_INCOMPLETE("Receita não publicável: %s", 409),
-    LSA099_INTERNAL("Erro interno — a equipa foi notificada", 500);
-    // mensagem printf + http status; getMessage(Object... args) com String.format (padrão do irc)
-}
+```ts
+export const ErrorCodes = {
+  LSA001_VALIDATION: { status: 400, message: (detail: string) => `Dados inválidos: ${detail}` },
+  LSA002_INVALID_CREDENTIALS: { status: 401, message: () => "Credenciais inválidas" },
+  LSA003_ACCOUNT_SUSPENDED: { status: 403, message: () => "Conta suspensa — contacta o suporte" },
+  LSA004_FORBIDDEN: { status: 403, message: () => "Sem permissão para esta operação" },
+  LSA005_NOT_FOUND: { status: 404, message: (what: string) => `${what} não encontrado` },
+  LSA006_DUPLICATE: { status: 409, message: (what: string) => `${what} já existe` },
+  LSA010_PROFILE_INCOMPLETE: { status: 409, message: () => "Completa o teu perfil antes de gerar um plano" },
+  LSA011_GENERATION_IN_PROGRESS: { status: 409, message: () => "Já existe uma geração em curso" },
+  LSA012_GENERATION_LIMIT: { status: 429, message: () => "Limite diário de gerações atingido" },
+  LSA013_AI_UNAVAILABLE: { status: 502, message: () => "Não foi possível gerar o plano — tenta novamente" },
+  LSA014_NO_ALTERNATIVE: { status: 409, message: () => "Sem alternativa disponível para as tuas restrições" },
+  LSA020_IMPORT_INVALID_FILE: { status: 400, message: (detail: string) => `Ficheiro inválido: ${detail}` },
+  LSA021_INGREDIENT_IN_USE: { status: 409, message: (n: number) => `Ingrediente usado em ${n} receitas — desativa em vez de remover` },
+  LSA022_LAST_ADMIN: { status: 409, message: () => "Tem de existir pelo menos um administrador ativo" },
+  LSA023_RECIPE_INCOMPLETE: { status: 409, message: (detail: string) => `Receita não publicável: ${detail}` },
+  LSA030_INVALID_ORDER_TRANSITION: { status: 409, message: (from: string, to: string) => `Transição de estado inválida: ${from} → ${to}` },
+  LSA031_STORE_INACTIVE: { status: 409, message: () => "Loja indisponível para encomendas" },
+  LSA099_INTERNAL: { status: 500, message: () => "Erro interno — a equipa foi notificada" },
+} as const;
 ```
 
-### 3.3 Controllers
+### 3.3 Route Handlers
 
-- Finos: validam (`@Valid`), delegam no service, devolvem `ApiResponse.ok(...)`. **Sem try/catch** — erros sobem para o `GlobalExceptionHandler`.
-- `@PreAuthorize("hasRole('ADMIN')")` nos controllers `admin/`; rotas `me/**` resolvem o utilizador do token (nunca aceitam `userId` no path/body).
+- Finos: fazem `parse` do body/query com `zod`, resolvem o utilizador autenticado (`currentUser.ts`), delegam no service, devolvem `NextResponse.json(ok(data))`.
+- **Sem try/catch manual** — todo handler é envolvido por `withErrorHandling(async (req) => {...})`, que apanha `ServiceError` (usa o `ErrorCode`), `ZodError` (→ `LSA001`), erros do Prisma (`P2002` unique constraint → `LSA006`) e qualquer outro (→ `LSA099`, logado com stack + `correlationId`).
+- Autorização por prefixo tratada em `src/middleware.ts`; ownership fino (um cliente só vê os seus dados; um lojista só vê a sua loja) é sempre verificado dentro do service, nunca confiando em `id`/`storeId` vindos do path/body do pedido.
+- Todas as rotas correm em runtime **Node.js** (`export const runtime = "nodejs"`) — Prisma não funciona em Edge sem adaptador dedicado.
 
 ### 3.4 Services
 
-- Interface `I*` + impl (convenção do irc), injeção por construtor (`@RequiredArgsConstructor`).
-- `@Transactional` na fronteira do service; leituras com `readOnly = true`.
-- Geração de plano é assíncrona: `MealPlanServiceImpl.requestGeneration()` cria o registo `GENERATING` e submete ao executor; o worker chama `IAiMealPlanService`, valida e persiste (`READY`/`FAILED`) em transação própria.
+- Funções assíncronas exportadas por domínio (`mealPlanService.generate(userId, ...)`); sem necessidade da convenção `I*`/`impl` do Java — TypeScript não precisa de interface só para trocar implementação (usa-se injeção simples de dependências via parâmetros/factory quando há mais que um fornecedor, ex. `AiMealPlanService`).
+- Operações multi-tabela usam `prisma.$transaction(...)` para atomicidade (equivalente ao `@Transactional`).
+- **Geração de plano é síncrona:** `mealPlanService.generate()` chama a IA, valida e persiste tudo dentro do mesmo pedido HTTP — sem fila nem worker (ver §5).
 
 ### 3.5 DTOs e validação
 
-- **Records** com Bean Validation; nunca expor entidades JPA.
+- **Zod** define o shape e infere o tipo TS; nunca se expõe o tipo gerado pelo Prisma diretamente na resposta.
 
-```java
-public record UpdateProfileRequest(
-    @NotNull Goal goal,
-    @NotNull HealthCondition healthCondition,
-    @Size(max = 20) List<@Size(max = 60) String> allergies,
-    BudgetBand budgetBand,
-    @Min(2) @Max(5) int mealsPerDay) {}
+```ts
+export const UpdateProfileRequest = z.object({
+  goal: z.enum(["PERDER_PESO", "COMER_MELHOR", "GANHAR_MASSA", "GERIR_CONDICAO"]),
+  healthCondition: z.enum(["NENHUMA", "DIABETES_TIPO_2", "HIPERTENSAO", "DOENCA_CELIACA"]),
+  allergies: z.array(z.string().max(60)).max(20),
+  budgetBand: z.enum(["BAIXO", "MEDIO", "CONFORTAVEL"]).optional(),
+  mealsPerDay: z.number().int().min(2).max(5),
+});
+export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequest>;
 ```
 
-- Mapeamento entidade↔DTO manual em métodos estáticos `from(entity)` (projeto pequeno; MapStruct é overkill — o irc também mapeia manualmente).
+- Mapeamento entidade↔DTO manual em funções `toDto(entity)` (projeto pequeno; um mapper automático seria overkill).
 
-### 3.6 Entidades
+### 3.6 Modelo de dados (Prisma)
 
-- `BaseEntity` (`@MappedSuperclass`): `id` (`GenerationType.IDENTITY`, como no irc), `created_at`/`updated_at` via auditing JPA (`@EnableJpaAuditing` — melhoria face aos timestamps manuais do irc).
-- Colunas snake_case explícitas em `@Column` (convenção do irc); enums persistidos como `varchar` (`@Enumerated(EnumType.STRING)`).
+- `schema.prisma` usa `@map`/`@@map` para preservar nomes de tabela/coluna em `snake_case` (paridade total com `04-database-plan.md`); `createdAt DateTime @default(now()) @map("created_at")`, `updatedAt DateTime @updatedAt @map("updated_at")`.
+- Enums de domínio modelados como `String` + `CHECK` na migration SQL (mesma escolha do plano original — mais simples de evoluir do que enums nativos do Postgres), com o tipo TS correspondente (`z.enum`) do lado da aplicação.
 
 ### 3.7 Tratamento de erros
 
-`GlobalExceptionHandler` (`@RestControllerAdvice`) — um único formato:
+`withErrorHandling` — um único formato:
 
-| Exceção | HTTP | Código |
+| Origem | HTTP | Código |
 |---|---|---|
-| `MethodArgumentNotValidException` / `ConstraintViolationException` | 400 | LSA001 (mensagem agrega os campos) |
-| `BadCredentialsException` | 401 | LSA002 |
-| `AccessDeniedException` / JWT inválido/expirado | 403 | LSA004 |
-| `ServiceException` | status do `ErrorCode` | o do `ErrorCode` |
-| `DataIntegrityViolationException` | 409 | LSA006 |
-| Restante (`Exception`) | 500 | LSA099 (logada com stack + correlation-id; resposta sem detalhes internos) |
+| `ZodError` (validação) | 400 | LSA001 (mensagem agrega os campos) |
+| Credenciais inválidas | 401 | LSA002 |
+| Token ausente/inválido/expirado ou role incorreta | 403 | LSA004 |
+| `ServiceError` | status do `ErrorCode` | o do `ErrorCode` |
+| `PrismaClientKnownRequestError` (`P2002`) | 409 | LSA006 |
+| Restante | 500 | LSA099 (logado com stack + `correlationId`; resposta sem detalhes internos) |
 
 ## 4. Segurança (autenticação e autorização sem Supabase Auth)
 
-- **Autenticação:** JWT próprio. `POST /auth/login` valida BCrypt → emite **access token** (HS256, 15 min; claims: `sub`=userId, `role`, `email`) + **refresh token** (opaco, 14 dias, rotativo, guardado com hash SHA-256 em `refresh_tokens`, entregue em cookie httpOnly `Secure SameSite=Strict`).
-- **Filtro:** `JwtAuthFilter` popula o `SecurityContext`; a autorização é feita pelas **regras do Spring Security** (não pelo filtro, ao contrário do irc):
+- **Autenticação:** JWT próprio com `jose`. `POST /auth/login` valida hash (bcrypt/argon2) → emite **access token** (15 min; claims `sub`=userId, `role`, `storeId?`) + **refresh token** (opaco, 14 dias, rotativo, hash SHA-256 em `refresh_tokens`, cookie httpOnly `Secure SameSite=Strict`).
+- **Guarda de rota** (`middleware.ts`):
 
-```java
-http.csrf(AbstractHttpConfigurer::disable)
-    .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
-    .authorizeHttpRequests(a -> a
-        .requestMatchers("/api/v1/auth/**", "/actuator/health").permitAll()
-        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-        .requestMatchers("/api/v1/me/**").hasAnyRole("CLIENTE", "ADMIN")
-        .anyRequest().denyAll());
+```ts
+const rules = [
+  { prefix: "/api/v1/auth", roles: null },                 // público
+  { prefix: "/api/v1/admin", roles: ["ADMIN"] },
+  { prefix: "/api/v1/loja", roles: ["LOJISTA"] },
+  { prefix: "/api/v1/me", roles: ["CLIENTE", "ADMIN"] },
+];
 ```
 
-- **Permissões por perfil:** 2 roles (`CLIENTE`, `ADMIN`) por rota, reforçadas com `@PreAuthorize`; **ownership** verificado no service para todo o recurso `me/**` (um cliente nunca acede a dados de outro). Suspensão revoga refresh tokens; access tokens expiram naturalmente (≤ 15 min).
-- Segredo JWT (`JWT_SECRET`, ≥ 256 bits) e credenciais de BD só via variáveis de ambiente. CORS restrito à origem do frontend (`APP_CORS_ORIGINS`).
+- **Permissões por perfil:** 3 roles (`CLIENTE`, `ADMIN`, `LOJISTA`); **ownership** sempre verificado no service — um cliente nunca acede a dados de outro (`me/**`), um lojista nunca acede a dados de outra loja (`loja/**`, filtro por `storeId` do token, nunca do path/body). Suspensão revoga refresh tokens; access tokens expiram naturalmente (≤ 15 min).
+- Segredo JWT (`JWT_SECRET`, ≥ 256 bits) e connection strings da BD só via **Vercel Environment Variables**; nunca commitados.
 
 ## 5. Integração OpenAI (única integração externa)
 
-- `IAiMealPlanService` (interface do domínio) → `OpenAiMealPlanService` (impl). Trocar de fornecedor = nova impl.
-- **Chamada:** Chat Completions com **Structured Outputs (JSON Schema estrito)** — o schema define `days[7].meals[N]{recipe_id, meal_slot}`. Input: perfil (objetivo, condição, alergias, orçamento, refeições/dia), preferências (👍/👎), e a **lista fechada de receitas elegíveis** (id, nome, tags, kcal, macros, custo) já pré-filtrada por `RecipeCatalogService` (filtros duros de saúde aplicados em código — nunca delegados à LLM).
-- **Validação da resposta:** todos os `recipe_id` ∈ lista enviada; 7 dias × N slots completos; senão retry (máx. 2) → `LSA013`.
-- **Resiliência:** timeout 60 s, retry com backoff em 429/5xx, circuit breaker simples (resilience4j — usado também no irc). Limite de 3 gerações/dia/cliente (configurável).
-- **Rastreabilidade/custo:** cada chamada regista em `ai_generation_log` modelo, prompt/completion tokens, duração, resultado. Dados enviados: mínimos necessários; nunca nome/email do cliente.
+- `AiMealPlanService` (interface do domínio) → `openAiMealPlanService` (impl com o SDK Node da OpenAI). Trocar de fornecedor = nova implementação.
+- **Chamada:** Chat Completions com **Structured Outputs (JSON Schema estrito)** — o schema define `days[7].meals[N]{recipeId, mealSlot}`. Input: perfil, preferências (👍/👎), e a **lista fechada de receitas elegíveis** já pré-filtrada por `recipeCatalogService` (filtros duros de saúde em código — nunca delegados à LLM).
+- **Execução síncrona, não assíncrona:** mudança de plano — em vez do padrão anterior (202 + polling + worker), a geração corre **dentro do próprio Route Handler** de `POST /me/meal-plans`, com `export const maxDuration = 120;` (Vercel **Pro** permite até 300 s) definido no ficheiro da rota. Simplifica o código (sem fila/cron) à custa de exigir o plano Pro; o frontend mostra o ecrã T-07 como um `await` com mensagens rotativas por temporizador local, não por polling de estado.
+- **Validação da resposta:** todos os `recipeId` ∈ lista enviada; 7 dias × N slots completos; senão retry (máx. 2) → `LSA013`.
+- **Resiliência:** timeout ~90 s, retry com backoff em 429/5xx (`p-retry` ou equivalente); sem circuit breaker dedicado no MVP (volume baixo) — **[Sugestão]** Futuro se necessário. Limite de 3 gerações/dia/cliente (configurável).
+- **Rastreabilidade/custo:** cada chamada regista em `ai_generation_log` modelo, tokens, duração, resultado. Dados enviados: mínimos necessários; nunca nome/email do cliente.
 
-## 6. Import/Export Excel (Apache POI)
+## 6. Import/Export Excel (`exceljs`) — Fase 3, escopado à loja
 
-- `ImportServiceImpl`: streaming (`XSSFWorkbook` com limites), validação linha-a-linha → `import_jobs` (`VALIDATED`) com erros em jsonb → confirmação aplica upsert transacional (`APPLIED`). Export e template gerados por POI com as colunas definidas em F2-ADM-04.
-- Limites: `.xlsx` apenas (verificar MIME real), ≤ 5 MB, ≤ 5 000 linhas.
+- `lojaImportService`: leitura streaming com `exceljs`, validação linha-a-linha → `import_jobs` (`VALIDATED`, com `storeId`) com erros em jsonb → confirmação aplica upsert transacional (`prisma.$transaction`, `APPLIED`), sempre restrito à loja do lojista autenticado. Export e template gerados também com `exceljs`.
+- Limites: `.xlsx` apenas (verificar MIME real), ≤ 5 MB, ≤ 2 000 linhas (catálogo de uma única loja).
 
 ## 7. Logs, auditoria e rastreabilidade
 
-- **Logs:** SLF4J + Logback, JSON em produção (fácil de indexar), pattern com `correlationId` via MDC. `CorrelationIdFilter` lê/gera `X-Correlation-Id` e devolve-o na resposta (formaliza a intenção do irc).
-- **Auditoria (tabela `audit_log`):** `IAuditService.record(actor, action, entityType, entityId, detail)` — síncrono e na mesma transação para ações críticas (login falhado, suspensão, acesso a perfil de saúde, publicação de receita, import aplicado, remoções); nunca regista conteúdo sensível, só o facto do acesso.
-- **Métricas técnicas:** Spring Boot Actuator (`/actuator/health` público para o orquestrador; restante fechado).
+- **Logs:** `pino` (JSON estruturado — adequado ao ambiente serverless do Vercel, visível no seu dashboard de logs), `correlationId` lido/gerado a partir do header `x-correlation-id` e devolvido na resposta.
+- **Auditoria (tabela `audit_log`):** `recordAudit(actor, action, entityType, entityId, detail)` — chamado dentro da mesma transação Prisma para ações críticas (login falhado, suspensão, acesso a perfil de saúde, publicação de receita, import aplicado, mudança de estado de encomenda, remoções); nunca regista conteúdo sensível, só o facto do acesso.
+- **Saúde do serviço:** rota `GET /api/v1/health` simples (sem Actuator — não há processo de longa duração a monitorizar; a observabilidade vive no dashboard do Vercel).
 
 ## 8. Tabela de endpoints REST (`/api/v1`)
 
@@ -218,58 +214,62 @@ http.csrf(AbstractHttpConfigurer::disable)
 | POST | `/auth/refresh` | cookie refresh | F1-VIS-02 | 401 |
 | POST | `/auth/logout` | autenticado | F1-VIS-02 | — |
 | GET / PUT | `/me/profile` | CLIENTE | F1-CLI-01 | 400 LSA001 |
-| POST | `/me/meal-plans` | CLIENTE | F1-CLI-02 (202 + id) | 409 LSA010/LSA011 · 429 LSA012 |
-| GET | `/me/meal-plans/{id}` | CLIENTE | F1-CLI-02 (estado) | 404 LSA005 |
+| POST | `/me/meal-plans` | CLIENTE | F1-CLI-02 (síncrono — devolve o plano pronto) | 409 LSA010/LSA011 · 429 LSA012 · 502 LSA013 |
+| GET | `/me/meal-plans/{id}` | CLIENTE | F1-CLI-02 (consulta) | 404 LSA005 |
 | GET | `/me/meal-plans/active` | CLIENTE | F1-CLI-03 | 404 LSA005 (sem plano) |
 | GET | `/me/meal-plans/entries/{id}` | CLIENTE | F1-CLI-04 | 404 LSA005 |
 | POST | `/me/meal-plans/entries/{id}/swap` | CLIENTE | F1-CLI-05 (`?confirm=`) | 409 LSA014 |
 | PUT | `/me/recipes/{id}/feedback` | CLIENTE | F1-CLI-05 | 404 LSA005 |
 | GET | `/me/shopping-list` | CLIENTE | F1-CLI-06 | 404 LSA005 |
 | PATCH | `/me/shopping-list/items/{id}` | CLIENTE | F1-CLI-06 | 404 LSA005 |
+| POST | `/me/orders` | CLIENTE | F3-CLI-07 | 409 LSA031 |
+| GET | `/me/orders` · GET `/me/orders/{id}` | CLIENTE | F3-CLI-07 | 404 LSA005 |
+| PATCH | `/me/orders/{id}/cancel` | CLIENTE | F3-CLI-07 | 409 LSA030 |
 | GET | `/admin/users` · GET `/admin/users/{id}` | ADMIN | F2-ADM-01 | — |
 | GET | `/admin/users/{id}/health-profile` | ADMIN | F2-ADM-01 (auditado) | 404 |
 | PATCH | `/admin/users/{id}/status` | ADMIN | F2-ADM-01 | 409 LSA022 |
+| POST | `/admin/users` | ADMIN | F2-ADM-01 (criar admin/lojista) | 409 LSA006 |
 | GET/POST | `/admin/stores` · GET/PUT/DELETE `/admin/stores/{id}` · PATCH `.../status` | ADMIN | F2-ADM-02 | 409 LSA006 |
-| GET/POST | `/admin/products` · GET/PUT/DELETE `/admin/products/{id}` | ADMIN | F2-ADM-03 | 409 LSA006 |
-| PUT/DELETE | `/admin/products/{id}/prices/{storeId}` | ADMIN | F2-ADM-03 | 404 |
-| POST | `/admin/products/import` (multipart) | ADMIN | F2-ADM-04 (valida) | 400 LSA020 |
-| POST | `/admin/products/import/{jobId}/confirm` | ADMIN | F2-ADM-04 | 409 |
-| GET | `/admin/products/export` · `/admin/products/import-template` | ADMIN | F2-ADM-04 | — |
 | GET/POST | `/admin/recipes` · GET/PUT/DELETE `/admin/recipes/{id}` · PATCH `.../status` | ADMIN | F2-ADM-05 | 409 LSA023 |
 | GET/POST | `/admin/ingredients` · GET/PUT/DELETE `/admin/ingredients/{id}` | ADMIN | F2-ADM-05 | 409 LSA021 |
 | GET | `/admin/metrics/summary?period=` | ADMIN | F2-ADM-06 | 400 |
+| GET/POST | `/loja/products` · GET/PUT/DELETE `/loja/products/{id}` · PATCH `.../status` | LOJISTA | F3-LOJ-01 | 409 LSA006 |
+| POST | `/loja/products/import` (multipart) | LOJISTA | F3-LOJ-02 (valida) | 400 LSA020 |
+| POST | `/loja/products/import/{jobId}/confirm` | LOJISTA | F3-LOJ-02 | 409 |
+| GET | `/loja/products/export` · `/loja/products/import-template` | LOJISTA | F3-LOJ-02 | — |
+| GET | `/loja/orders` · GET `/loja/orders/{id}` | LOJISTA | F3-LOJ-03 | 404 LSA005 |
+| PATCH | `/loja/orders/{id}/status` | LOJISTA | F3-LOJ-03 | 409 LSA030 |
 
-Documentação viva: springdoc-openapi em `/swagger-ui` (apenas perfis não-prod).
+Documentação viva: OpenAPI gerado/mantido manualmente em `openapi.yaml` (já existente no repo) + Swagger UI servido apenas em `preview`/`development` (nunca em `production`).
 
 ## 9. Estratégia de testes
 
 | Nível | Ferramentas | Alvo mínimo |
 |---|---|---|
-| Unit | JUnit 5 + Mockito + AssertJ | Services com regras: filtros de saúde/alergias, validação da resposta da IA, agregação da lista (conversão de unidades), regras de publicação, seleção de alternativa no swap |
-| Slice web | `@WebMvcTest` + MockMvc | Contratos dos controllers, validação Bean Validation, formato do `ApiResponse` de erro |
-| Slice JPA | `@DataJpaTest` + **Testcontainers (postgres)** | Repositories, constraints e migrations Flyway reais |
-| Integração | `@SpringBootTest` + Testcontainers + WireMock (OpenAI mockada) | Fluxos ponta-a-ponta: registo→perfil→geração→plano→lista; import Excel; autorização (CLIENTE vs ADMIN vs anónimo, ownership) |
+| Unit | Vitest | Services com regras: filtros de saúde/alergias, validação da resposta da IA, agregação da lista (conversão de unidades), regras de publicação, seleção de alternativa no swap, máquina de estados das encomendas |
+| Route Handler (contrato) | Vitest + `next-test-api-route-handler` (ou invocação direta do handler com `Request`/`NextRequest`) | Validação Zod, formato do `ApiResponse` de erro, guardas de role |
+| Integração com BD | Vitest + Postgres efémero (container Docker no CI) + Prisma real | Repositórios, constraints e migrations reais |
+| Integração ponta-a-ponta | Vitest + Postgres efémero + OpenAI mockada (`nock`/`msw`) | Fluxos: registo→perfil→geração→plano→lista; import Excel; autorização (CLIENTE vs ADMIN vs LOJISTA vs anónimo, ownership) |
 
-- Convenção de nomes: `XxxTest` / `XxxIT` (padrão do irc); **os testes correm no build** (`mvn verify` falha o pipeline — ao contrário do irc, que os salta).
-- A OpenAI é sempre mockada em testes; um teste de contrato opcional (perfil `live-ai`) corre manualmente.
+- Convenção de nomes: `*.test.ts` (unit) / `*.integration.test.ts` (integração); **os testes correm no CI** (`vitest run` bloqueia o merge/deploy).
+- A OpenAI é sempre mockada em testes; um teste de contrato opcional (flag `LIVE_AI=1`) corre manualmente contra a API real.
 
 ## 10. Variáveis de ambiente
 
-| Variável | Exemplo | Notas |
-|---|---|---|
-| `DB_URL` | `jdbc:postgresql://db.<proj>.supabase.co:5432/postgres?sslmode=require` | Supabase = só um Postgres |
-| `DB_USERNAME` / `DB_PASSWORD` | — | nunca em ficheiros versionados |
-| `JWT_SECRET` | base64, ≥ 256 bits | rotação = re-login geral |
-| `JWT_ACCESS_TTL_MIN` / `JWT_REFRESH_TTL_DAYS` | `15` / `14` | |
-| `OPENAI_API_KEY` | — | |
-| `OPENAI_MODEL` | ex. `gpt-4o-mini` | equilíbrio custo/qualidade; configurável |
-| `OPENAI_TIMEOUT_S` / `AI_DAILY_LIMIT` | `60` / `3` | |
-| `AI_PRICE_PER_1K_INPUT` / `_OUTPUT` | — | p/ custo nas métricas |
-| `APP_CORS_ORIGINS` | `https://app.levesabor.co.mz` | |
-| `SPRING_PROFILES_ACTIVE` | `dev` / `prod` | perfis **Spring** (não Maven, ao contrário do irc) |
+Geridas em **Vercel Environment Variables** (não em ficheiros versionados). Ver tabela completa por ambiente em [`05-implementation-roadmap.md §5`](05-implementation-roadmap.md); resumo do que a app lê:
+
+| Variável | Notas |
+|---|---|
+| `DATABASE_URL` | Supabase — connection string **pooled** (`pgbouncer=true`), usada em runtime |
+| `DIRECT_URL` | Supabase — connection string **direta**, usada só por `prisma migrate deploy` |
+| `JWT_SECRET`, `JWT_ACCESS_TTL_MIN`, `JWT_REFRESH_TTL_DAYS` | Segredo ≥ 256 bits; rotação = re-login geral |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_TIMEOUT_S` | Modelo económico configurável |
+| `AI_DAILY_LIMIT`, `AI_PRICE_PER_1K_INPUT`, `AI_PRICE_PER_1K_OUTPUT` | Controlo de custo e cálculo nas métricas |
+| `SEED_ADMIN_BCRYPT` | Usado só pelo script de seed inicial |
 
 ## 11. Integrações externas
 
-1. **OpenAI API** (Fase 1) — única integração; detalhada em §5.
-2. **Supabase** — não é integração aplicacional: é apenas o host do PostgreSQL (JDBC). Sem SDK Supabase no código.
-3. Futuras **[Sugestão]**: fornecedor de email (FUT-05), WhatsApp Business API (FUT-02), logística/pagamentos (FUT-01).
+1. **OpenAI API** (Fase 1) — única integração aplicacional; detalhada em §5.
+2. **Supabase** — não é integração aplicacional: é apenas o host do PostgreSQL, acedido via Prisma. Sem SDK Supabase no código.
+3. **Vercel** — plataforma de deploy; define constraints técnicas (runtime Node obrigatório para rotas com Prisma, `maxDuration` configurável por rota, variáveis de ambiente por ambiente) mas não é uma dependência de dados.
+4. Futuras **[Sugestão]**: fornecedor de email (FUT-05), WhatsApp Business API (FUT-02), logística/pagamentos (FUT-01).

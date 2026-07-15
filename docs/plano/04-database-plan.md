@@ -1,6 +1,6 @@
 # 04 — Plano de Base de Dados (PostgreSQL)
 
-> A BD corre no **Supabase usado exclusivamente como PostgreSQL gerido** — acesso por JDBC, schema `public`, gerido a 100% por **migrations Flyway** versionadas no repositório do backend (`src/main/resources/db/migration/`). Não usar Supabase Auth/Storage/Realtime/Edge Functions nem depender de RLS: migrar de fornecedor deve custar apenas trocar a connection string.
+> A BD corre no **Supabase usado exclusivamente como PostgreSQL gerido remoto** — acesso via **Prisma** (`prisma/schema.prisma` + `prisma/migrations/`, aplicadas com `prisma migrate deploy`), schema `public`, 100% versionado no repositório do projeto Next.js (`levesabor-web`). **Mudança de plano:** o motor de migrations passou de Flyway (Java) para Prisma Migrate (Node) — o SQL abaixo é a definição de referência; em Prisma é expresso em `schema.prisma` e as migrations `.sql` geradas ficam versionadas tal como antes. Não usar Supabase Auth/Storage/Realtime/Edge Functions nem depender de RLS: migrar de fornecedor deve custar apenas trocar a connection string. Ligação **pooled** (`pgbouncer=true`) obrigatória em runtime — funções serverless do Vercel não sustentam ligações persistentes; a connection string **direta** só é usada para correr as migrations.
 
 ## 1. Convenções
 
@@ -19,13 +19,16 @@ users 1──* meal_plans 1──* meal_plan_entries *──1 recipes (referênc
 users 1──* meal_feedback *──1 recipes
 meal_plans 1──1 shopping_lists 1──* shopping_list_items *──1 ingredients
 recipes 1──* recipe_ingredients *──1 ingredients
-stores 1──* store_products *──1 products *──?1 ingredients   (Fase 2)
-users 1──* import_jobs                                        (Fase 2)
+stores 1──* users (role LOJISTA, via users.store_id)          (Fase 2 registo / Fase 3 acesso)
+stores 1──* products *──?1 ingredients                         (Fase 3 — produto já pertence à loja)
+stores 1──* import_jobs                                        (Fase 3)
+stores 1──* orders *──* order_items *──?1 products              (Fase 3)
+users(CLIENTE) 1──* orders
 users 1──* ai_generation_log ?──1 meal_plans
 audit_log (referências fracas: actor_user_id, entity_type + entity_id)
 ```
 
-## 3. Migrations Flyway
+## 3. Migrations (Prisma)
 
 ### `V1__auth_and_audit.sql` — Fase 1
 
@@ -219,7 +222,7 @@ create table ai_generation_log (
 create index ix_ai_log_user_day on ai_generation_log (user_id, created_at);  -- p/ limite diário e métricas
 ```
 
-### `V4__stores_products_imports.sql` — Fase 2
+### `V4__stores.sql` — Fase 2
 
 ```sql
 create table stores (
@@ -233,53 +236,16 @@ create table stores (
     updated_at timestamptz  not null default now()
 );
 create unique index ux_stores_name_city on stores (lower(name), lower(city));
-
-create table products (
-    id            bigint generated always as identity primary key,
-    name          varchar(160) not null,
-    category      varchar(24)  not null
-                  check (category in ('CEREAIS','PROTEINA','VEGETAIS','LEGUMINOSAS','TEMPEROS','OUTROS')),
-    unit_label    varchar(40)  not null,          -- ex.: "1 kg", "500 g", "garrafa 750 ml"
-    ingredient_id bigint       references ingredients(id) on delete set null,   -- ligação opcional ao domínio nutricional
-    created_at    timestamptz  not null default now(),
-    updated_at    timestamptz  not null default now()
-);
-create unique index ux_products_name on products (lower(name));
-create index ix_products_ingredient on products (ingredient_id);
-
-create table store_products (
-    id         bigint generated always as identity primary key,
-    store_id   bigint        not null references stores(id) on delete cascade,
-    product_id bigint        not null references products(id) on delete cascade,
-    price_mt   numeric(10,2) not null check (price_mt > 0),
-    updated_at timestamptz   not null default now(),
-    constraint ux_store_product unique (store_id, product_id)
-);
-create index ix_store_products_product on store_products (product_id);
-
-create table import_jobs (
-    id            bigint generated always as identity primary key,
-    created_by    bigint      not null references users(id),
-    filename      varchar(255) not null,
-    status        varchar(16)  not null default 'VALIDATED'
-                  check (status in ('VALIDATED','APPLIED','DISCARDED','FAILED')),
-    total_rows    integer      not null default 0,
-    valid_rows    integer      not null default 0,
-    error_rows    integer      not null default 0,
-    created_count integer,
-    updated_count integer,
-    errors        jsonb        not null default '[]'::jsonb,  -- [{row, column, message}]
-    payload       jsonb,                                       -- linhas validadas, aplicadas na confirmação
-    created_at    timestamptz  not null default now(),
-    updated_at    timestamptz  not null default now()
-);
-create index ix_import_jobs_creator on import_jobs (created_by, created_at);
 ```
 
-### `V5__seed.sql` — Fase 1
+> **Mudança de plano:** `products`, `store_products` e `import_jobs` saíram desta migration — o catálogo comercial deixou de ser gerido pelo admin. Ver `V6__store_portal_and_orders.sql` (Fase 3) mais abaixo, onde `products` é redesenhado como pertencendo diretamente a uma loja.
+
+### `V5` — Seed — Fase 1
+
+> **Mudança de plano:** o Prisma Migrate não tem substituição de placeholders como o Flyway — o seed passa a ser um script separado (`prisma/seed.ts`, executado com `prisma db seed`), que lê `SEED_ADMIN_BCRYPT` do ambiente em vez de o injetar numa migration versionada. O SQL abaixo descreve o conteúdo de referência do seed (equivalente ao que o script faz via Prisma Client, não uma migration `.sql` literal):
 
 ```sql
--- Admin inicial (password definida por placeholder Flyway ${seed_admin_bcrypt}, injetado por env var no arranque;
+-- Admin inicial (hash de password lido de process.env.SEED_ADMIN_BCRYPT pelo script de seed;
 -- NUNCA um hash de password real versionado no repositório)
 insert into users (name, email, password_hash, role, status, disclaimer_accepted_at)
 values ('Admin Leve Sabor', 'admin@levesabor.co.mz', '${seed_admin_bcrypt}', 'ADMIN', 'ACTIVE', now());
@@ -298,6 +264,79 @@ values ('Farinha de milho', 'CEREAIS', 'G', 362, 8.1, 76.9, 3.9, 7.3),
 --   baixo_sodio, acucar_controlado, …) + recipe_ingredients correspondentes.
 ```
 
+### `V6__store_portal_and_orders.sql` — Fase 3
+
+```sql
+-- Acesso do lojista: extensão do modelo de utilizador existente (sem tabela de identidade separada)
+alter table users add column store_id bigint references stores(id);
+alter table users drop constraint users_role_check;
+alter table users add constraint users_role_check check (role in ('CLIENTE','ADMIN','LOJISTA'));
+create index ix_users_store on users (store_id);
+-- (regra de aplicação, não de BD: store_id obrigatório quando role = 'LOJISTA', null nos restantes)
+
+-- Catálogo comercial redesenhado: cada produto pertence diretamente a UMA loja (substitui products/store_products da V4)
+create table products (
+    id            bigint generated always as identity primary key,
+    store_id      bigint       not null references stores(id) on delete cascade,
+    name          varchar(160) not null,
+    category      varchar(24)  not null
+                  check (category in ('CEREAIS','PROTEINA','VEGETAIS','LEGUMINOSAS','TEMPEROS','OUTROS')),
+    unit_label    varchar(40)  not null,          -- ex.: "1 kg", "500 g", "garrafa 750 ml"
+    price_mt      numeric(10,2) not null check (price_mt > 0),
+    ingredient_id bigint       references ingredients(id) on delete set null,   -- ligação opcional (custeio futuro, FUT-03)
+    status        varchar(16)  not null default 'ACTIVE' check (status in ('ACTIVE','INACTIVE')),
+    created_at    timestamptz  not null default now(),
+    updated_at    timestamptz  not null default now()
+);
+create unique index ux_products_store_name on products (store_id, lower(name));
+create index ix_products_store on products (store_id);
+
+create table import_jobs (
+    id            bigint generated always as identity primary key,
+    store_id      bigint      not null references stores(id) on delete cascade,
+    created_by    bigint      not null references users(id),
+    filename      varchar(255) not null,
+    status        varchar(16)  not null default 'VALIDATED'
+                  check (status in ('VALIDATED','APPLIED','DISCARDED','FAILED')),
+    total_rows    integer      not null default 0,
+    valid_rows    integer      not null default 0,
+    error_rows    integer      not null default 0,
+    created_count integer,
+    updated_count integer,
+    errors        jsonb        not null default '[]'::jsonb,
+    payload       jsonb,
+    created_at    timestamptz  not null default now(),
+    updated_at    timestamptz  not null default now()
+);
+create index ix_import_jobs_store on import_jobs (store_id, created_at);
+
+-- Encomendas: cliente pede a UMA loja; sem pagamento nem logística modelados (decisão explícita de âmbito)
+create table orders (
+    id            bigint generated always as identity primary key,
+    user_id       bigint      not null references users(id),
+    store_id      bigint      not null references stores(id),
+    status        varchar(16) not null default 'PENDENTE'
+                  check (status in ('PENDENTE','ACEITE','EM_PREPARACAO','PRONTA','CONCLUIDA','RECUSADA','CANCELADA')),
+    note          varchar(300),
+    reject_reason varchar(200),
+    created_at    timestamptz not null default now(),
+    updated_at    timestamptz not null default now()
+);
+create index ix_orders_user on orders (user_id, created_at);
+create index ix_orders_store_status on orders (store_id, status);
+
+create table order_items (
+    id            bigint generated always as identity primary key,
+    order_id      bigint       not null references orders(id) on delete cascade,
+    product_id    bigint       references products(id) on delete set null,   -- sem cascade forte: nome/preço ficam em snapshot
+    name          varchar(160) not null,     -- snapshot do nome (ingrediente ou produto) no momento do pedido
+    quantity      numeric(10,2) not null check (quantity > 0),
+    unit          varchar(8)    not null,
+    unit_price_mt numeric(10,2) check (unit_price_mt > 0)   -- snapshot do preço, se havia correspondência no catálogo da loja
+);
+create index ix_order_items_order on order_items (order_id);
+```
+
 ## 4. Decisões de modelação (racional)
 
 | Decisão | Racional |
@@ -308,9 +347,13 @@ values ('Farinha de milho', 'CEREAIS', 'G', 362, 8.1, 76.9, 3.9, 7.3),
 | Passos como jsonb (não tabela) | Passos não são pesquisáveis nem relacionais; simplifica o CRUD |
 | `health_tags` text[] + GIN | Pré-filtro de segurança rápido (`where health_tags @> '{sem_gluten}'`) |
 | `shopping_list_items.category` desnormalizado | Lista agrupa por categoria sem join, num payload só (poupança de dados móveis) |
-| `products.ingredient_id` opcional | O catálogo comercial (Fase 2) evolui separado do nutricional; a ligação ativa FUT-03 quando existir |
+| `products.ingredient_id` opcional | O catálogo comercial (Fase 3) evolui separado do nutricional; a ligação ativa FUT-03 quando existir |
 | `import_jobs.payload` jsonb | O ciclo validar→confirmar não precisa de re-upload nem de re-parse |
 | Sem RLS/policies do Supabase | Autorização vive no backend; a BD é portável para qualquer Postgres |
+| `products.store_id` obrigatório (sem `store_products`) | Mudança de plano: cada produto já pertence a uma única loja na Fase 3 — simplifica o modelo face à V4 original, que previa catálogo partilhado entre lojas |
+| `order_items.name`/`unit_price_mt` como snapshot | Preço/nome no momento do pedido não deve mudar retroativamente se o lojista editar o produto depois |
+| Sem colunas de pagamento/entrega em `orders` | Decisão de âmbito explícita: entrega e pagamento tratam-se fora do sistema, diretamente entre cliente e loja |
+| Ligação **pooled** obrigatória em runtime (`DATABASE_URL` com `pgbouncer=true`) | Funções serverless do Vercel abrem/fecham ligações com muita frequência; sem pooling esgota-se o limite de conexões do Postgres |
 
 ## 5. Volumetria e performance (estimativa inicial)
 

@@ -2,7 +2,7 @@
 
 > Funcionalidades organizadas por persona. Cada funcionalidade tem: descrição, fluxo, regras de negócio, tarefas separadas por equipa (frontend / backend / base de dados), endpoints, validações, estados, critérios de aceitação e prioridade.
 >
-> **Prioridades**: `MVP` = Fase 1 (cotação) · `Fase 2` = Portal Admin (cotação) · `Futuro` = fora da cotação. Tudo o que é `Futuro` ou não consta explicitamente da cotação está marcado **[Sugestão]**.
+> **Prioridades**: `MVP` = Fase 1 · `Fase 2` = Portal Admin · `Fase 3` = Portal da Loja + Encomendas · `Futuro` = fora do âmbito atual. Tudo o que é `Futuro` ou não consta explicitamente das 3 fases está marcado **[Sugestão]**.
 >
 > Endpoints detalhados (payloads, códigos de resposta): [`03-backend-plan.md`](03-backend-plan.md). Tabelas: [`04-database-plan.md`](04-database-plan.md). Telas: [`02-ui-ux-plan.md`](02-ui-ux-plan.md).
 
@@ -88,7 +88,7 @@ Funcionalidades: `F1-VIS-01` Registo · `F1-VIS-02` Login · `F1-VIS-03` Recuper
 
 **Tarefas — Backend.**
 - `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout` (revoga refresh token).
-- `JwtService` (emissão/validação), filtro `JwtAuthFilter`, regras de autorização por rota + role.
+- `JwtService` (emissão/validação com `jose`), guarda de autorização em `middleware.ts`, regras de autorização por rota + role.
 
 **Tarefas — Base de dados.**
 - Tabela `refresh_tokens` (V1): hash do token, `user_id`, `expires_at`, `revoked_at`.
@@ -132,9 +132,9 @@ Funcionalidades: `F1-VIS-01` Registo · `F1-VIS-02` Login · `F1-VIS-03` Recuper
 
 ## Persona 2 — Cliente
 
-**Objetivo principal:** receber um plano alimentar semanal adequado ao seu objetivo, condição de saúde, gostos e orçamento — com receitas e lista de compras — gastando pouco dado móvel.
+**Objetivo principal:** receber um plano alimentar semanal adequado ao seu objetivo, condição de saúde, gostos e orçamento — com receitas e lista de compras — gastando pouco dado móvel; e, a partir da Fase 3, encomendar o rancho a uma loja parceira.
 
-Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano por IA · `F1-CLI-03` Consulta do plano · `F1-CLI-04` Receita da refeição · `F1-CLI-05` Feedback e troca de refeição · `F1-CLI-06` Lista de compras.
+Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano por IA · `F1-CLI-03` Consulta do plano · `F1-CLI-04` Receita da refeição · `F1-CLI-05` Feedback e troca de refeição · `F1-CLI-06` Lista de compras · `F3-CLI-07` Encomendar rancho a uma loja.
 
 ---
 
@@ -210,24 +210,24 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 - O plano guarda um snapshot dos dados nutricionais no momento da geração (edições posteriores do admin às receitas não alteram planos já entregues).
 
 **Tarefas — Frontend.**
-- CTA de geração + ecrã de progresso (polling `GET /meal-plans/{id}` até `status=READY|FAILED`, intervalo 2–3 s).
+- CTA de geração + ecrã de progresso: chamada **síncrona** ao endpoint (`await`, sem polling), mensagens rotativas por temporizador local enquanto aguarda a resposta (10–30 s).
 - Tratamento de erro com retry manual e mensagem quando o limite diário é atingido.
 
 **Tarefas — Backend.**
-- `POST /api/v1/me/meal-plans` (assíncrono: devolve 202 + id; worker gera).
-- `MealPlanGenerationService`: pré-filtro de receitas → prompt → chamada OpenAI (JSON Schema estrito) → validação de ids/estrutura → persistência do plano + entradas + snapshot.
-- `IAiMealPlanService` (interface) + `OpenAiMealPlanService` (impl) — fornecedor trocável.
+- `POST /api/v1/me/meal-plans` — **síncrono**: o Route Handler chama a IA, valida e persiste tudo antes de responder (`maxDuration` alargado — Vercel Pro; mudança de plano face ao padrão assíncrono original). Devolve o plano pronto.
+- `mealPlanService.generate()`: pré-filtro de receitas → prompt → chamada OpenAI (JSON Schema estrito) → validação de ids/estrutura → persistência do plano + entradas + snapshot (numa transação Prisma).
+- `AiMealPlanService` (interface) + `openAiMealPlanService` (impl) — fornecedor trocável.
 - Registo em `ai_generation_log`; limite diário; timeouts + retries com backoff.
 
 **Tarefas — Base de dados.**
 - Tabelas `meal_plans`, `meal_plan_entries` (V3), `ai_generation_log` (V3).
 - Catálogo mínimo: seed de ≥ 40 receitas moçambicanas com tags e macros (V5 — pré-condição funcional do MVP; conteúdo fornecido/validado pelo cliente do projeto).
 
-**Endpoints.** `POST /api/v1/me/meal-plans` · `GET /api/v1/me/meal-plans/{id}` (estado/resultado).
+**Endpoints.** `POST /api/v1/me/meal-plans` (síncrono — devolve o plano pronto) · `GET /api/v1/me/meal-plans/{id}` (consulta pontual de um plano específico, ex. deep-link).
 
 **Validações.** Perfil completo; sem geração já em curso; limite diário não excedido; resposta da IA validada contra JSON Schema + ids do catálogo + cobertura completa (7 dias × N refeições).
 
-**Estados possíveis.** Plano: `GENERATING → READY | FAILED`; e `ACTIVE → ARCHIVED`. UI: `idle → requesting → generating(progresso) → ready | failed(retry) | limit_reached`.
+**Estados possíveis.** Plano: `READY | FAILED`; e `ACTIVE → ARCHIVED`. UI: `idle → requesting(a aguardar resposta) → ready | failed(retry) | limit_reached`.
 
 **Critérios de aceitação.**
 - [ ] Plano gerado tem 7 dias × N refeições, todas com receita existente no catálogo.
@@ -415,11 +415,62 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 
 ---
 
+### F3-CLI-07 — Encomendar rancho/compras a uma loja parceira
+
+| | |
+|---|---|
+| **Prioridade** | **Fase 3** — mudança de plano: o cliente passa a poder encomendar os itens da lista de compras a uma loja parceira |
+| **Telas** | T-06 Lista de compras (CTA "Encomendar"), T-20 Escolher loja, T-21 Rever e confirmar encomenda, T-22 Minhas encomendas |
+
+**Descrição funcional.** A partir da lista de compras (F1-CLI-06), o cliente escolhe uma loja parceira ativa e envia os itens (todos ou uma seleção) como um pedido de encomenda. A loja recebe o pedido no seu portal (F3-LOJ-03) e atualiza o estado à medida que o prepara. **O sistema não gere entrega nem pagamento** — esses combinam-se diretamente entre cliente e loja (o contacto da loja fica visível no pedido); a plataforma só regista o pedido e o seu estado.
+
+**Fluxo do utilizador.**
+1. Em `/compras`, o cliente toca **"Encomendar rancho"**.
+2. Escolhe uma loja parceira ativa de uma lista simples (nome, cidade, contacto).
+3. Revê a lista de itens pré-selecionada (todos marcados por omissão); pode desmarcar itens ou ajustar quantidade; opcionalmente escreve uma nota (ex. "posso levantar depois das 18h").
+4. Confirma → encomenda criada com estado `PENDENTE` → ecrã de confirmação com o contacto da loja.
+5. Em `/encomendas` ("Minhas encomendas"), acompanha o estado (`PENDENTE → ACEITE → EM_PREPARACAO → PRONTA → CONCLUIDA`, ou `RECUSADA`/`CANCELADA`).
+
+**Regras de negócio.**
+- Uma encomenda pertence a **uma única loja** (sem split entre lojas na v1 — o cliente repete o fluxo se quiser encomendar a mais do que uma loja).
+- Itens da encomenda são um snapshot (nome, quantidade, unidade) no momento do pedido; alterações posteriores à lista de compras não afetam encomendas já enviadas.
+- Preço não é obrigatório: se a loja tiver o produto no seu catálogo (F3-LOJ-01) com preço, o item mostra preço unitário e total estimado; senão, mostra apenas quantidade (sem custo).
+- Cliente pode **cancelar** enquanto a encomenda estiver `PENDENTE` ou `ACEITE`; depois de `EM_PREPARACAO` já não.
+- Loja suspensa não aparece na lista de escolha.
+- Contacto da loja (`stores.contact`) é sempre visível ao cliente após confirmar; é assim que entrega e pagamento se combinam, fora do sistema.
+- Todas as mudanças de estado ficam em `audit_log`.
+
+**Tarefas — Frontend.**
+- CTA "Encomendar rancho" em T-06; T-20 lista de lojas ativas; T-21 revisão de itens (checkbox + quantidade editável + nota) com confirmação; T-22 "Minhas encomendas" (lista com estado-badge + detalhe simples).
+- Atualização de estado por refresh/polling manual (sem push no MVP da Fase 3).
+
+**Tarefas — Backend.**
+- `POST /api/v1/me/orders` — cria encomenda a partir de itens selecionados da lista de compras ativa.
+- `GET /api/v1/me/orders` (lista, paginada) · `GET /api/v1/me/orders/{id}` (detalhe) · `PATCH /api/v1/me/orders/{id}/cancel`.
+- Resolver preço unitário por correspondência (por nome, best-effort) no catálogo da loja escolhida, sem obrigar ligação forte produto↔ingrediente.
+
+**Tarefas — Base de dados.**
+- Tabelas `orders`, `order_items` (V6 — Fase 3). Ver `04-database-plan.md`.
+
+**Endpoints.** `POST /api/v1/me/orders` · `GET /api/v1/me/orders` · `GET /api/v1/me/orders/{id}` · `PATCH /api/v1/me/orders/{id}/cancel`.
+
+**Validações.** Loja existente e `ACTIVE`; ≥ 1 item selecionado; quantidade > 0; ownership (cliente só vê as suas encomendas); cancelamento só em `PENDENTE`/`ACEITE`.
+
+**Estados possíveis.** Encomenda: `PENDENTE | ACEITE | EM_PREPARACAO | PRONTA | CONCLUIDA | RECUSADA | CANCELADA`. UI: `loading | ready | empty (sem encomendas) | confirming | error`.
+
+**Critérios de aceitação.**
+- [ ] Cliente consegue enviar uma encomenda com um subconjunto da lista de compras a uma loja ativa.
+- [ ] Encomenda mostra sempre o contacto da loja; não existe nenhum ecrã de pagamento ou de escolha de entrega.
+- [ ] Estado da encomenda atualizado pela loja aparece em "Minhas encomendas" do cliente.
+- [ ] Cancelamento só é possível antes de `EM_PREPARACAO`.
+
+---
+
 ## Persona 3 — Administrador
 
-**Objetivo principal:** manter os dados que alimentam a IA (receitas, ingredientes, nutrição), gerir clientes, lojas e produtos, e acompanhar a utilização da plataforma.
+**Objetivo principal:** manter os dados que alimentam a IA (receitas, ingredientes, nutrição), gerir clientes e o registo de lojas parceiras, e acompanhar a utilização da plataforma. **Mudança de plano:** a gestão do catálogo de produtos/preços deixou de ser responsabilidade do admin — passa a ser feita por cada loja no seu próprio portal (Fase 3, ver Persona 4 — Lojista).
 
-Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de lojas · `F2-ADM-03` CRUD de produtos e preços · `F2-ADM-04` Import/export Excel · `F2-ADM-05` Dados da IA (receitas/ingredientes/nutrição) · `F2-ADM-06` Métricas.
+Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de lojas · `F2-ADM-05` Dados da IA (receitas/ingredientes/nutrição) · `F2-ADM-06` Métricas.
 
 > Acesso: todas as rotas `/admin/**` (FE) e `/api/v1/admin/**` (BE) exigem role `ADMIN`. O primeiro admin é criado por seed de migration; admins adicionais via F2-ADM-01.
 
@@ -449,7 +500,7 @@ Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de loja
 - Tabela paginada server-side (pesquisa, filtros, ordenação), página de detalhe, diálogos de confirmação.
 
 **Tarefas — Backend.**
-- `GET /api/v1/admin/users` (paginado, filtros) · `GET /api/v1/admin/users/{id}` · `PATCH /api/v1/admin/users/{id}/status` · `POST /api/v1/admin/users` (criar admin) **[Sugestão]**.
+- `GET /api/v1/admin/users` (paginado, filtros) · `GET /api/v1/admin/users/{id}` · `PATCH /api/v1/admin/users/{id}/status` · `POST /api/v1/admin/users` (criar admin ou lojista — lojista exige `storeId` válido) **[Sugestão para admin; obrigatório para lojista — ver F2-ADM-02]**.
 - Revogação de refresh tokens na suspensão; guarda de "último admin".
 
 **Tarefas — Base de dados.**
@@ -485,8 +536,9 @@ Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de loja
 
 **Regras de negócio.**
 - Nome + cidade únicos (evitar duplicados).
-- **Suspender**: a loja e os seus preços deixam de ser considerados em qualquer funcionalidade voltada ao cliente, mas os dados mantêm-se.
-- **Remover**: hard delete apenas se a loja não tiver produtos associados; caso tenha, a UI oferece suspender ou remover em cascata os `store_products` mediante confirmação dupla.
+- **Suspender**: a loja deixa de ser selecionável no fluxo de encomenda do cliente (F3-CLI-07) e o seu catálogo deixa de ser editável pelo lojista, mas os dados mantêm-se.
+- **Remover**: hard delete apenas se a loja não tiver conta de lojista, produtos ou encomendas associadas (Fase 3); caso tenha, a UI só permite suspender.
+- Ao criar uma loja, o admin pode (opcional) criar de imediato a conta de acesso do lojista (`role=LOJISTA`, ligada via `users.store_id`) — ou fazê-lo depois em F2-ADM-01.
 - Operações ficam em `audit_log` (quem, quando, o quê).
 
 **Tarefas — Frontend.**
@@ -511,92 +563,7 @@ Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de loja
 
 ---
 
-### F2-ADM-03 — CRUD de produtos e preços por loja
-
-| | |
-|---|---|
-| **Prioridade** | **Fase 2** — "CRUD de produtos e preços por loja — via interface ou importação/exportação em Excel" na cotação |
-| **Telas** | T-14 Lista de produtos, T-15 Formulário de produto, T-13 (tab preços da loja) |
-
-**Descrição funcional.** Catálogo de produtos (ex.: "Arroz agulha 1 kg", "Amendoim torrado 500 g") com preço por loja. Um produto liga-se opcionalmente a um `ingredient` do domínio nutricional — é essa ligação que futuramente permite custear a lista de compras com preços reais (`FUT-03` **[Sugestão]**).
-
-**Fluxo do utilizador.**
-1. `/admin/produtos`: tabela (pesquisa por nome, filtro por loja/categoria).
-2. "Novo produto" → nome, categoria, unidade/tamanho, ingrediente associado (opcional) → guardar.
-3. No produto (ou na tab "Preços" da loja): definir/atualizar preço por loja (MT).
-
-**Regras de negócio.**
-- Preço é por par (produto, loja) — `store_products` — com histórico simples (`updated_at`; histórico completo de preços é **[Sugestão]** Futuro).
-- Preço em MT, > 0, 2 casas decimais.
-- Remover produto remove os seus preços (cascade) mediante confirmação.
-- Produtos de lojas suspensas mantêm preço mas não são considerados em cálculos de cliente.
-
-**Tarefas — Frontend.**
-- Tabela de produtos; formulário; editor de preços por loja (tabela inline editável); seletor de ingrediente com autocomplete.
-
-**Tarefas — Backend.**
-- `GET/POST /api/v1/admin/products` · `GET/PUT/DELETE /api/v1/admin/products/{id}` · `PUT /api/v1/admin/products/{id}/prices/{storeId}` · `DELETE /api/v1/admin/products/{id}/prices/{storeId}`.
-
-**Tarefas — Base de dados.**
-- Tabelas `products` e `store_products` (V4); FK opcional `products.ingredient_id → ingredients`.
-
-**Endpoints.** Ver acima.
-
-**Validações.** Nome 2–160 único (lower); categoria no enum; preço decimal(10,2) > 0; loja e produto existentes e não removidos.
-
-**Estados possíveis.** UI: `loading | ready | empty | saving | deleting | error | conflict`.
-
-**Critérios de aceitação.**
-- [ ] CRUD de produtos e edição de preços por loja funcionais.
-- [ ] O mesmo produto pode ter preços diferentes em lojas diferentes.
-- [ ] Associação produto↔ingrediente é opcional e editável.
-
----
-
-### F2-ADM-04 — Importação/exportação Excel de produtos e preços
-
-| | |
-|---|---|
-| **Prioridade** | **Fase 2** — parte explícita da cotação ("via interface ou importação/exportação em Excel") |
-| **Telas** | T-16 Import Excel (upload → pré-visualização → resultado) |
-
-**Descrição funcional.** Alternativa em massa ao CRUD: o admin descarrega um template `.xlsx`, preenche produtos e preços por loja, e importa. O sistema valida linha a linha, mostra pré-visualização com erros e aplica apenas quando o admin confirma. Exportação devolve o catálogo atual no mesmo formato (round-trip).
-
-**Fluxo do utilizador.**
-1. `/admin/produtos/importar`: descarrega template ou exportação atual.
-2. Faz upload do `.xlsx` → backend valida e devolve pré-visualização: nº linhas OK, linhas com erro (nº da linha + motivo), diff (novos/atualizados).
-3. Admin confirma → import aplicado transacionalmente → relatório final (criados/atualizados/ignorados) + download do relatório de erros.
-
-**Regras de negócio.**
-- Formato do template (colunas): `produto` (nome), `categoria`, `unidade`, `ingrediente` (nome, opcional), `loja` (nome), `cidade_loja`, `preco_mt`.
-- Upsert por chave natural: produto = lower(nome); preço = (produto, loja). Lojas/ingredientes **não** são criados pelo import — linha com loja/ingrediente inexistente é erro (evita catálogo sujo).
-- Import é tudo-ou-nada por defeito; opção "importar apenas linhas válidas" disponível na confirmação.
-- Limites: ≤ 5 000 linhas, ficheiro ≤ 5 MB, apenas `.xlsx`.
-- Cada import gera registo em `import_jobs` (quem, quando, ficheiro, contagens, estado) — rastreabilidade.
-- Export inclui todas as colunas do template + `atualizado_em`.
-
-**Tarefas — Frontend.**
-- Tela de upload (drag & drop), tabela de pré-visualização com destaque de erros, passo de confirmação, ecrã de resultado, botões de template/export.
-
-**Tarefas — Backend.**
-- `POST /api/v1/admin/products/import` (multipart; modo `validate`) → pré-visualização; `POST .../import/{jobId}/confirm` → aplica.
-- `GET /api/v1/admin/products/export` e `GET /api/v1/admin/products/import-template` (Apache POI, streaming).
-- Parser/validador POI com erros por linha/coluna.
-
-**Tarefas — Base de dados.**
-- Tabela `import_jobs` (V4): estado, contagens, erros (jsonb), `created_by`.
-
-**Endpoints.** Ver acima.
-
-**Validações.** Extensão/MIME/tamanho do ficheiro; cabeçalhos do template; por linha: nome obrigatório, categoria no enum, preço > 0, loja existente (nome+cidade), ingrediente existente se preenchido.
-
-**Estados possíveis.** Job: `VALIDATED → APPLIED | DISCARDED | FAILED`. UI: `idle → uploading → validating → preview(ok/erros) → confirming → done | failed`.
-
-**Critérios de aceitação.**
-- [ ] Round-trip: exportar → reimportar sem alterações produz 0 criados / 0 erros.
-- [ ] Ficheiro com erros mostra linha e motivo em português e nada é aplicado sem confirmação.
-- [ ] Import de 1 000 linhas completa em < 30 s.
-- [ ] Todos os imports ficam em `import_jobs` com autor e contagens.
+> **F2-ADM-03 e F2-ADM-04 (CRUD de produtos/preços e import/export Excel) saíram do âmbito do Portal Admin.** Mudança de plano: cada loja passa a manter o seu próprio catálogo, no novo Portal da Loja — ver `F3-LOJ-01` e `F3-LOJ-02` na Persona 4 — Lojista, mais abaixo.
 
 ---
 
@@ -687,13 +654,153 @@ Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de loja
 
 ---
 
+## Persona 4 — Lojista
+
+**Objetivo principal:** manter o catálogo de produtos e preços da sua própria loja (manual ou Excel) e gerir o estado das encomendas recebidas dos clientes — sem se preocupar com entrega nem pagamento, tratados fora do sistema.
+
+Funcionalidades: `F3-LOJ-01` Catálogo de produtos da loja · `F3-LOJ-02` Import/export Excel do catálogo · `F3-LOJ-03` Gestão de encomendas.
+
+> Acesso: todas as rotas `/loja/**` (FE) e `/api/v1/loja/**` (BE) exigem role `LOJISTA`; o lojista só vê e edita dados da **sua própria loja** (`store_id` do token) — nunca escolhe nem vê outras lojas. Conta criada pelo admin (F2-ADM-01/02); sem self-registo público na Fase 3.
+
+---
+
+### F3-LOJ-01 — Catálogo de produtos e preços da loja
+
+| | |
+|---|---|
+| **Prioridade** | **Fase 3** — substitui o antigo F2-ADM-03, agora escopado à própria loja |
+| **Telas** | T-23 Lista de produtos da loja, T-24 Formulário de produto |
+
+**Descrição funcional.** O lojista mantém a lista de produtos que vende (ex. "Arroz agulha 1 kg", "Amendoim torrado 500 g") com o respetivo preço, através de um CRUD simples — sem necessidade de escolher a loja (é sempre a sua).
+
+**Fluxo do utilizador.**
+1. `/loja/produtos`: tabela (pesquisa por nome, filtro por categoria/estado).
+2. "Novo produto" → nome, categoria, unidade/tamanho, preço (MT) → guardar.
+3. Editar/desativar/remover a qualquer momento.
+
+**Regras de negócio.**
+- Produto pertence a uma loja (`store_id` obrigatório, resolvido do token — nunca vindo do cliente).
+- Nome único **dentro da loja** (duas lojas podem ter produtos com o mesmo nome).
+- Preço em MT, > 0, 2 casas decimais.
+- Remover produto é permitido salvo se referenciado por uma encomenda em curso (`PENDENTE`/`ACEITE`/`EM_PREPARACAO`) — nesse caso só desativar.
+- Produto de loja suspensa (pelo admin) mantém-se mas não é visível ao cliente.
+
+**Tarefas — Frontend.**
+- Tabela + formulário simples (sem seletor de loja); badges de estado.
+
+**Tarefas — Backend.**
+- `GET/POST /api/v1/loja/products` · `GET/PUT/DELETE /api/v1/loja/products/{id}` · `PATCH /api/v1/loja/products/{id}/status` — todos escopados ao `store_id` do lojista autenticado.
+
+**Tarefas — Base de dados.**
+- Tabela `products` redesenhada (V6 — Fase 3): agora com `store_id` obrigatório e `price_mt` na própria linha (sem tabela `store_products` separada — cada produto já pertence a uma única loja). Ver `04-database-plan.md`.
+
+**Endpoints.** Ver acima.
+
+**Validações.** Nome 2–160 único (lower) dentro da loja; categoria no enum; preço decimal(10,2) > 0.
+
+**Estados possíveis.** Produto: `ACTIVE | INACTIVE`. UI: `loading | ready | empty | saving | deleting | error | conflict`.
+
+**Critérios de aceitação.**
+- [ ] CRUD completo funcional, sempre restrito à loja do lojista autenticado.
+- [ ] Lojista nunca consegue ler/editar produtos de outra loja (teste de autorização).
+- [ ] Produto em encomenda ativa não é removível, só desativável.
+
+---
+
+### F3-LOJ-02 — Import/exportação Excel do catálogo da loja
+
+| | |
+|---|---|
+| **Prioridade** | **Fase 3** — substitui o antigo F2-ADM-04, agora escopado à própria loja |
+| **Telas** | T-25 Import Excel (upload → pré-visualização → resultado) |
+
+**Descrição funcional.** Alternativa em massa ao CRUD: o lojista descarrega um template `.xlsx`, preenche produtos e preços, e importa. Igual em espírito ao antigo fluxo admin, mas sem coluna de loja (é sempre a própria).
+
+**Fluxo do utilizador.**
+1. `/loja/produtos/importar`: descarrega template ou exportação atual.
+2. Upload do `.xlsx` → pré-visualização com erros por linha.
+3. Confirma → import aplicado transacionalmente → relatório final.
+
+**Regras de negócio.**
+- Colunas do template: `produto`, `categoria`, `unidade`, `preco_mt`.
+- Upsert por nome (lower) **dentro da loja do lojista autenticado**.
+- Tudo-ou-nada por defeito; opção "importar apenas linhas válidas".
+- Limites: ≤ 2 000 linhas (catálogo de uma loja é bem menor que o catálogo global do antigo F2-ADM-04), ficheiro ≤ 5 MB, apenas `.xlsx`.
+- Cada import gera registo em `import_jobs` (loja, quem, quando, ficheiro, contagens, estado).
+
+**Tarefas — Frontend.**
+- Reaproveita o padrão do antigo T-16 (admin): drag-&-drop, pré-visualização, confirmação, resultado.
+
+**Tarefas — Backend.**
+- `POST /api/v1/loja/products/import` (multipart; modo `validate`) → pré-visualização; `POST .../import/{jobId}/confirm` → aplica.
+- `GET /api/v1/loja/products/export` e `GET /api/v1/loja/products/import-template` (`exceljs`, streaming).
+
+**Tarefas — Base de dados.**
+- Tabela `import_jobs` (V6 — Fase 3): agora com `store_id`.
+
+**Endpoints.** Ver acima.
+
+**Validações.** Extensão/MIME/tamanho; cabeçalhos do template; por linha: nome obrigatório, categoria no enum, preço > 0.
+
+**Estados possíveis.** Job: `VALIDATED → APPLIED | DISCARDED | FAILED`. UI: `idle → uploading → validating → preview(ok/erros) → confirming → done | failed`.
+
+**Critérios de aceitação.**
+- [ ] Round-trip: exportar → reimportar sem alterações produz 0 criados / 0 erros.
+- [ ] Import nunca cria/edita produtos de outra loja.
+- [ ] Ficheiro com erros mostra linha e motivo em português; nada aplicado sem confirmação.
+
+---
+
+### F3-LOJ-03 — Gestão de encomendas
+
+| | |
+|---|---|
+| **Prioridade** | **Fase 3** — núcleo da mudança de plano: a loja gere o estado dos pedidos dos clientes; **entrega e pagamento ficam fora do sistema** |
+| **Telas** | T-26 Lista de encomendas, T-27 Detalhe de encomenda |
+
+**Descrição funcional.** O lojista vê os pedidos (`orders`) feitos por clientes à sua loja (F3-CLI-07): itens pedidos, contacto do cliente, e um estado que atualiza à medida que prepara o pedido. O sistema **não** processa pagamento nem organiza entrega/levantamento — apenas comunica o estado; os detalhes combinam-se diretamente com o cliente pelo contacto apresentado.
+
+**Fluxo do utilizador.**
+1. `/loja/encomendas`: tabela (filtro por estado, mais recentes primeiro).
+2. Abre uma encomenda → vê itens (nome, quantidade, unidade, preço se aplicável), nome e contacto do cliente, nota do cliente (se houver).
+3. Avança o estado com um botão/dropdown de transição válida (`PENDENTE → ACEITE → EM_PREPARACAO → PRONTA → CONCLUIDA`) ou marca `RECUSADA` (com motivo opcional).
+
+**Regras de negócio.**
+- Transições de estado válidas apenas nesta ordem; `RECUSADA` só a partir de `PENDENTE`/`ACEITE`; `CANCELADA` é ação do cliente (F3-CLI-07), não do lojista.
+- Lojista só vê/edita encomendas da sua própria loja (ownership por `store_id`).
+- Nenhum campo de pagamento, valor cobrado, morada de entrega ou transportadora existe no sistema — **decisão de âmbito explícita**, não uma omissão.
+- Toda a mudança de estado fica em `audit_log` e é visível ao cliente (F3-CLI-07) na próxima consulta.
+
+**Tarefas — Frontend.**
+- Tabela (DataTable) com estado-badge e filtro; página de detalhe com botões de transição válidos para o estado atual (os inválidos nem aparecem).
+
+**Tarefas — Backend.**
+- `GET /api/v1/loja/orders` (paginado, filtro estado) · `GET /api/v1/loja/orders/{id}` · `PATCH /api/v1/loja/orders/{id}/status` (valida transição server-side, com código de erro próprio para transição inválida).
+
+**Tarefas — Base de dados.**
+- Tabelas `orders`, `order_items` (V6 — Fase 3). Ver `04-database-plan.md`.
+
+**Endpoints.** Ver acima.
+
+**Validações.** Ownership (loja do token); transição pertence ao conjunto de transições válidas a partir do estado atual; motivo de recusa ≤ 200 chars (opcional).
+
+**Estados possíveis.** Encomenda: `PENDENTE | ACEITE | EM_PREPARACAO | PRONTA | CONCLUIDA | RECUSADA | CANCELADA`. UI: `loading | ready | empty (sem encomendas) | acting | error`.
+
+**Critérios de aceitação.**
+- [ ] Lojista só vê encomendas da sua loja (teste de autorização).
+- [ ] Transição de estado inválida é rejeitada pelo backend (não só escondida na UI).
+- [ ] Cliente vê o novo estado assim que consulta "Minhas encomendas".
+- [ ] Nenhuma tela ou endpoint do sistema processa pagamento ou define entrega/logística.
+
+---
+
 ## Futuro — fora da cotação (todas **[Sugestão]**)
 
 | ID | Funcionalidade | Origem / racional | Dependências |
 |---|---|---|---|
-| **FUT-01** | **Entrega das compras em casa** — encomendar os ingredientes da lista com entrega ao domicílio | Passo "05" no "Como funciona" da landing; **não** está no âmbito das 2 fases cotadas | Catálogo de lojas/preços (Fase 2), operador logístico, pagamentos |
+| **FUT-01** | **Entrega/levantamento e pagamento geridos pela plataforma** — hoje o cliente já encomenda (F3-CLI-07), mas entrega e pagamento são combinados diretamente com a loja, fora do sistema; automatizar isso (entrega ao domicílio, pagamento in-app) fica para depois | Passo "05" no "Como funciona" da landing; decisão explícita de âmbito na Fase 3 (mudança de plano) | F3-CLI-07 + F3-LOJ-03 em produção; operador logístico; gateway de pagamento |
 | **FUT-02** | Notificações (email/WhatsApp): plano novo pronto, lembrete semanal | FAQ/footer da landing mencionam WhatsApp como canal | Fornecedor de mensagens; consentimento |
-| **FUT-03** | Custeio real da lista de compras com preços por loja ("onde comprar mais barato") | Ponte natural entre a lista (Fase 1) e o catálogo de preços (Fase 2) | F2-ADM-03 povoado; ligação produto↔ingrediente |
+| **FUT-03** | Custeio comparativo da lista de compras entre lojas ("onde comprar mais barato") | Ponte natural entre a lista (Fase 1) e o catálogo de preços por loja (Fase 3) | F3-LOJ-01 povoado; ligação produto↔ingrediente |
 | **FUT-04** | Landing page pública + lista de espera (implementação do design `project/Leve Sabor AI.dc.html` como página pública do Next.js) | O design existe no repo; a cotação cobre os dois portais, não a landing | Nenhuma técnica; decidir se a waitlist persiste na BD |
 | **FUT-05** | Recuperação de password (F1-VIS-03) | Higiene de conta | Serviço de email |
 | **FUT-06** | Histórico de preços por loja e histórico de planos navegável | Extensões diretas dos modelos da Fase 2 | — |
