@@ -13,8 +13,8 @@ export function MockProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!MOCKS_ENABLED) return;
     let cancelled = false;
-    import("./browser").then(({ worker }) => {
-      worker.start({ onUnhandledRequest: "bypass" }).then(() => {
+    import("./browser").then(({ startWorker }) => {
+      startWorker().then(() => {
         if (!cancelled) setReady(true);
       });
     });
