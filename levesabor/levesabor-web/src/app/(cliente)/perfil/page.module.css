@@ -1,0 +1,138 @@
+/* FE-C07 · T-08 Perfil — layout da página: aviso + cartões por secção + logout */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.35rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.headerSkeleton {
+  margin-bottom: 4px;
+}
+
+/* Aviso permanente — F1-CLI-01: editar aqui não altera planos já gerados. */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-card-sm);
+  background: var(--tan);
+  color: var(--ink-soft);
+}
+
+.noticeIcon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--clay);
+}
+
+.noticeText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Editor de alergias */
+.allergyEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.allergyEmptyHint {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--clay-soft);
+}
+
+.removableChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 5px 8px 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--cream-card-alt);
+}
+
+.removeChipButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--clay);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.removeChipButton:hover:not(:disabled) {
+  background: var(--tan);
+  color: var(--terracotta-dark);
+}
+
+.removeChipButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.removeChipButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.allergyInputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.allergyInputRow > *:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.logoutRow {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}

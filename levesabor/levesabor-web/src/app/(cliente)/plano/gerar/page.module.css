@@ -1,0 +1,61 @@
+/* FE-C04 · T-07 A gerar plano — anel de marca a rodar (CSS), mensagens rotativas, disclaimer (F1-CLI-02) */
+
+.main {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--cream);
+}
+
+.generating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Ilustração estática (SVG) — a rotação é aplicada ao contentor, nunca ao SVG em si. */
+.ringWrap {
+  display: flex;
+  animation: ls-gerar-rotate 3.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringWrap {
+    animation: none;
+  }
+}
+
+@keyframes ls-gerar-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.message {
+  margin: 0;
+  min-height: 2.6em;
+  max-width: 320px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.disclaimer {
+  margin: 0;
+  max-width: 360px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--clay-soft);
+}

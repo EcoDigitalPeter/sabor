@@ -1,0 +1,44 @@
+/* FE-C07 · T-08 Perfil — OptionGroup: pílulas de seleção única, mesmo idioma visual do Chip/Input */
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card-alt);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.option:hover:not(:disabled):not(.selected) {
+  border-color: var(--clay-soft);
+}
+
+.option:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selected {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: #ffffff;
+}
+
+.selected:hover:not(:disabled) {
+  background: var(--terracotta-dark);
+  border-color: var(--terracotta-dark);
+}
