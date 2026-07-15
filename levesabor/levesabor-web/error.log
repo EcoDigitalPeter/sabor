@@ -1,0 +1,3 @@
+[2026-07-15T11:48:10.271624700+00:00] startup: base_url=https://chatgpt.com/backend-api path_style=wham
+[2026-07-15T11:48:10.283983900+00:00] auth: mode=ChatGPT account_id=59002fd3-5b98-498a-b363-ef9203a70824
+[2026-07-15T11:48:10.284908300+00:00] auth: set ChatGPT-Account-Id header: 59002fd3-5b98-498a-b363-ef9203a70824

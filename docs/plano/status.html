@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leve Sabor AI — Estado das Tarefas</title>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --gridline: #e1e0d9;
+    --border: rgba(11,11,11,0.10);
+    --cat-1: #2a78d6; /* Fase 1 — blue */
+    --cat-2: #1baf7a; /* Fase 2 — aqua */
+    --cat-3: #eda100; /* Fase 3 — yellow */
+    --seq-fill: #2a78d6;
+    --seq-track: #cde2fb;
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --gridline: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --cat-1: #3987e5;
+      --cat-2: #199e70;
+      --cat-3: #c98500;
+      --seq-fill: #3987e5;
+      --seq-track: #0d366b;
+      --status-good: #0ca30c;
+      --status-warning: #fab219;
+      --status-critical: #d03b3b;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { padding: 24px 16px 64px; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  header.top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 13px; margin: 0; }
+
+  .refresh-box {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 14px 6px 10px; font-size: 12px; color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--status-good); flex: none; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+  button.refresh-btn {
+    border: 1px solid var(--border); background: transparent; color: var(--text-primary);
+    border-radius: 100px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  button.refresh-btn:hover { background: var(--gridline); }
+
+  .hero-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px;
+    padding: 22px 24px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  .hero-figure { font-size: 48px; font-weight: 600; line-height: 1; }
+  .hero-meta { color: var(--text-secondary); font-size: 13px; }
+  .hero-meta strong { color: var(--text-primary); font-weight: 600; }
+  .hero-track { flex: 1 1 240px; min-width: 200px; }
+  .meter-track { position: relative; height: 10px; border-radius: 6px; background: var(--seq-track); }
+  .meter-seg { position: absolute; top: 0; bottom: 0; border-radius: 6px; transition: left .4s ease, width .4s ease; }
+  .meter-seg.done { background: var(--status-good); }
+  .meter-seg.progress { background: var(--status-warning); }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-secondary); margin: 10px 0 22px; }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+
+  .progress-list {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 4px 0; margin-bottom: 24px;
+  }
+  .progress-list .empty { padding: 14px 18px; font-size: 12.5px; color: var(--text-muted); }
+  .progress-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 18px; border-bottom: 1px solid var(--gridline); font-size: 13px; }
+  .progress-row:last-child { border-bottom: none; }
+  .progress-row .id { font-weight: 600; color: var(--status-warning); flex: none; font-variant-numeric: tabular-nums; }
+  .progress-row .title { color: var(--text-secondary); }
+
+  .phase-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .phase-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+  }
+  .phase-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .phase-swatch { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .phase-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+  .phase-pct { font-size: 26px; font-weight: 600; margin: 2px 0 8px; }
+  .phase-count { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .phase-done-badge {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;
+    color: var(--status-good); margin-top: 6px;
+  }
+
+  h2.section-title { font-size: 14px; font-weight: 600; margin: 28px 0 10px; color: var(--text-primary); }
+
+  table.lanes { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.lanes th, table.lanes td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--gridline); }
+  table.lanes th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  table.lanes tr:last-child td { border-bottom: none; }
+  table.lanes td.lane-name { font-weight: 600; }
+  table.lanes td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); white-space: nowrap; }
+  table.lanes td.bar-cell { width: 40%; }
+  .lane-phase-tag {
+    display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 100px;
+    color: #fff; margin-left: 6px; vertical-align: middle;
+  }
+
+  .error-card {
+    background: var(--surface-1); border: 1px solid var(--status-critical); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .error-card .icon { color: var(--status-critical); font-size: 16px; flex: none; }
+  .error-card .body { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .error-card .body strong { color: var(--text-primary); }
+  .error-card code { background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  footer { margin-top: 32px; font-size: 11.5px; color: var(--text-muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Leve Sabor AI — Estado das tarefas</h1>
+      <p class="subtitle">Fonte: <code>tasks.md</code> (quadro de execução). Atualiza automaticamente a cada 15 segundos.</p>
+    </div>
+    <div class="refresh-box">
+      <span class="dot" id="pulse-dot"></span>
+      <span id="refresh-label">a atualizar…</span>
+      <button class="refresh-btn" id="refresh-btn">Atualizar agora</button>
+    </div>
+  </header>
+
+  <div id="error-slot"></div>
+
+  <div class="hero-card" id="hero-card" style="display:none">
+    <div>
+      <div class="hero-figure" id="hero-pct">—</div>
+      <div class="hero-meta"><strong id="hero-done">0</strong> de <strong id="hero-total">0</strong> tarefas concluídas
+        (<strong id="hero-progress">0</strong> em curso)</div>
+    </div>
+    <div class="hero-track">
+      <div class="meter-track" id="hero-track"></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--status-good)"></span>Concluída</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--status-warning)"></span>Em curso</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--seq-track)"></span>Por fazer</span>
+  </div>
+
+  <div class="phase-grid" id="phase-grid"></div>
+
+  <h2 class="section-title">Em curso agora</h2>
+  <div class="progress-list" id="progress-list"></div>
+
+  <h2 class="section-title">Por faixa de execução</h2>
+  <table class="lanes">
+    <thead>
+      <tr><th>Faixa</th><th>Progresso</th><th>Concluídas</th></tr>
+    </thead>
+    <tbody id="lanes-body"></tbody>
+  </table>
+
+  <footer id="footer-note">—</footer>
+</div>
+
+<script>
+const TASKS_URL = "./tasks.md";
+const REFRESH_MS = 15000;
+
+const PHASES = {
+  1: { name: "Fase 1 — Portal do Cliente (MVP)", color: "var(--cat-1)" },
+  2: { name: "Fase 2 — Portal Admin",            color: "var(--cat-2)" },
+  3: { name: "Fase 3 — Portal da Loja + Encomendas", color: "var(--cat-3)" },
+};
+
+const LANE_LABELS = {
+  "MOCK": "Contrato & Mocks",
+  "FE-A": "Frontend — Fundações",
+  "FE-B": "Frontend — Componentes",
+  "FE-C": "Frontend — Portal Cliente",
+  "FE-D": "Frontend — Portal Admin",
+  "FE-L": "Frontend — Portal Loja",
+  "FE-E": "Frontend — Qualidade",
+  "BE-A": "Backend — Fundações",
+  "BE-B": "Backend — Auth",
+  "BE-C": "Backend — Domínio Cliente",
+  "BE-D": "Backend — Admin (contas/lojas)",
+  "BE-E": "Backend — Admin (dados IA)",
+  "BE-F": "Backend — Métricas",
+  "BE-L": "Backend — Domínio Loja",
+  "DB":   "Base de Dados — Migrations",
+  "INT":  "Integração & Entrega",
+};
+
+const LANE_ORDER = ["MOCK","FE-A","FE-B","FE-C","FE-D","FE-L","FE-E","BE-A","DB","BE-B","BE-C","BE-D","BE-E","BE-F","BE-L","INT"];
+
+function laneOf(id) {
+  return id.replace(/-?\d+$/, "");
+}
+
+function phaseOf(id, lineText) {
+  if (/\*\*Fase 3\*\*/.test(lineText)) return 3;
+  if (/^DB-04/.test(id)) return 2;
+  if (/^DB-07/.test(id)) return 3;
+  if (/^INT-0[34]/.test(id)) return 2;
+  if (/^INT-0[56]/.test(id)) return 3;
+  if (/^(FE-D|BE-D|BE-E|BE-F)/.test(id)) return 2;
+  if (/^(FE-L|BE-L)/.test(id)) return 3;
+  return 1;
+}
+
+function parseTasks(md) {
+  const lines = md.split("\n");
+  const tasks = [];
+  const re = /^-\s\[( |x)\]\s\*\*(.+?)\*\*/;
+  for (const line of lines) {
+    const m = re.exec(line);
+    if (!m) continue;
+    const checked = m[1] === "x";
+    const bold = m[2];
+    const sepIdx = bold.indexOf(" · ");
+    const id = (sepIdx === -1 ? bold : bold.slice(0, sepIdx)).trim();
+    if (!/^[A-Z]+(-[A-Z0-9]+)*\d*$/.test(id)) continue; // skip non-task bold lines, if any
+    tasks.push({ id, checked, lane: laneOf(id), phase: phaseOf(id, line) });
+  }
+  return tasks;
+}
+
+// Extracts the "## Em curso" section — a plain reference list (no checkbox syntax,
+// so it never double-counts against the task cards parsed above).
+function parseInProgress(md) {
+  const lines = md.split("\n");
+  const start = lines.findIndex(l => /^##\s+Em curso/.test(l));
+  if (start === -1) return [];
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^##\s+/.test(lines[i])) { end = i; break; }
+  }
+  const items = [];
+  const re = /^-\s\*\*([A-Z0-9-]+)\*\*\s*(?:·\s*(.+))?$/;
+  for (let i = start + 1; i < end; i++) {
+    const m = re.exec(lines[i].trim());
+    if (m) items.push({ id: m[1], title: (m[2] || "").trim() });
+  }
+  return items;
+}
+
+function pct(done, total) {
+  return total === 0 ? 0 : Math.round((done / total) * 100);
+}
+
+// Stacked two-segment meter: done (green) + em curso (amber), remainder is the bare track.
+function meterSegsHtml(doneN, progressN, total) {
+  const doneW = total ? (doneN / total) * 100 : 0;
+  const progressW = total ? (progressN / total) * 100 : 0;
+  const gap = (doneW > 0 && progressW > 0) ? 0.8 : 0;
+  const doneWAdj = Math.max(0, doneW - gap);
+  const progLeft = doneWAdj + gap;
+  let segs = "";
+  if (doneWAdj > 0) segs += `<div class="meter-seg done" style="left:0%;width:${doneWAdj}%"></div>`;
+  if (progressW > 0) segs += `<div class="meter-seg progress" style="left:${progLeft}%;width:${progressW}%"></div>`;
+  return segs;
+}
+function meterHtml(doneN, progressN, total) {
+  return `<div class="meter-track">${meterSegsHtml(doneN, progressN, total)}</div>`;
+}
+
+function render(tasks, inProgressList) {
+  const inProgressIds = new Set(inProgressList.map(x => x.id));
+  tasks.forEach(t => { t.inProgress = !t.checked && inProgressIds.has(t.id); });
+
+  const total = tasks.length;
+  const done = tasks.filter(t => t.checked).length;
+  const progress = tasks.filter(t => t.inProgress).length;
+
+  document.getElementById("hero-card").style.display = "flex";
+  document.getElementById("hero-pct").textContent = pct(done, total) + "%";
+  document.getElementById("hero-done").textContent = done;
+  document.getElementById("hero-total").textContent = total;
+  document.getElementById("hero-progress").textContent = progress;
+  document.getElementById("hero-track").innerHTML = meterSegsHtml(done, progress, total);
+
+  // Phase cards
+  const phaseGrid = document.getElementById("phase-grid");
+  phaseGrid.innerHTML = "";
+  for (const key of [1, 2, 3]) {
+    const info = PHASES[key];
+    const subset = tasks.filter(t => t.phase === key);
+    const pDone = subset.filter(t => t.checked).length;
+    const pProgress = subset.filter(t => t.inProgress).length;
+    const pTotal = subset.length;
+    const isDone = pTotal > 0 && pDone === pTotal;
+    const card = document.createElement("div");
+    card.className = "phase-card";
+    card.innerHTML = `
+      <div class="phase-head">
+        <span class="phase-swatch" style="background:${info.color}"></span>
+        <span class="phase-name">${info.name}</span>
+      </div>
+      <div class="phase-pct">${pct(pDone, pTotal)}%</div>
+      ${meterHtml(pDone, pProgress, pTotal)}
+      <div class="phase-count">${pDone} concluídas · ${pProgress} em curso · ${pTotal} no total</div>
+      ${isDone ? `<div class="phase-done-badge">✓ Fase concluída</div>` : ""}
+    `;
+    phaseGrid.appendChild(card);
+  }
+
+  // "Em curso agora" list
+  const progressListEl = document.getElementById("progress-list");
+  const activeNow = tasks.filter(t => t.inProgress);
+  if (activeNow.length === 0) {
+    progressListEl.innerHTML = `<div class="empty">Nenhuma tarefa marcada como em curso em tasks.md neste momento.</div>`;
+  } else {
+    progressListEl.innerHTML = activeNow.map(t => {
+      const found = inProgressList.find(x => x.id === t.id);
+      const title = found && found.title ? found.title : "";
+      return `<div class="progress-row"><span class="id">${t.id}</span><span class="title">${title}</span></div>`;
+    }).join("");
+  }
+
+  // Lane table
+  const body = document.getElementById("lanes-body");
+  body.innerHTML = "";
+  for (const lane of LANE_ORDER) {
+    const subset = tasks.filter(t => t.lane === lane);
+    if (subset.length === 0) continue;
+    const lDone = subset.filter(t => t.checked).length;
+    const lProgress = subset.filter(t => t.inProgress).length;
+    const lTotal = subset.length;
+    // Dominant phase for this lane's tag (most common phase among its tasks)
+    const counts = {};
+    subset.forEach(t => counts[t.phase] = (counts[t.phase] || 0) + 1);
+    const dominant = Object.keys(counts).sort((a,b) => counts[b]-counts[a])[0];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="lane-name">${LANE_LABELS[lane] || lane}
+        <span class="lane-phase-tag" style="background:${PHASES[dominant].color}">F${dominant}</span>
+      </td>
+      <td class="bar-cell">${meterHtml(lDone, lProgress, lTotal)}</td>
+      <td class="num">${lDone}/${lTotal} · ${pct(lDone, lTotal)}%${lProgress ? ` · ${lProgress} em curso` : ""}</td>
+    `;
+    body.appendChild(tr);
+  }
+
+  document.getElementById("footer-note").textContent =
+    `${total} tarefas rastreadas em tasks.md (${progress} em curso) · Última leitura: ${new Date().toLocaleTimeString("pt-PT")}`;
+}
+
+function showError(message) {
+  document.getElementById("error-slot").innerHTML = `
+    <div class="error-card">
+      <div class="icon">⚠</div>
+      <div class="body">
+        <strong>Não foi possível carregar tasks.md automaticamente.</strong><br>
+        ${message}<br><br>
+        Se abriu este ficheiro a fazer duplo-clique (<code>file://</code>), alguns navegadores (Chrome/Edge) bloqueiam a leitura de outros ficheiros locais por segurança.
+        Sirva a pasta com um servidor local, por exemplo, a partir de <code>docs/plano</code>:<br>
+        <code>npx serve .</code> ou <code>python -m http.server 8000</code>, depois abra
+        <code>http://localhost:.../status.html</code>.
+      </div>
+    </div>`;
+}
+
+function clearError() {
+  document.getElementById("error-slot").innerHTML = "";
+}
+
+let countdown = REFRESH_MS / 1000;
+let countdownTimer = null;
+
+function tickLabel() {
+  const label = document.getElementById("refresh-label");
+  label.textContent = `próxima atualização em ${countdown}s`;
+  countdown -= 1;
+  if (countdown < 0) countdown = REFRESH_MS / 1000;
+}
+
+async function fetchAndRender() {
+  const dot = document.getElementById("pulse-dot");
+  try {
+    const res = await fetch(TASKS_URL + "?_=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    const tasks = parseTasks(text);
+    const inProgressList = parseInProgress(text);
+    if (tasks.length === 0) throw new Error("Nenhuma tarefa reconhecida no ficheiro.");
+    clearError();
+    render(tasks, inProgressList);
+    dot.style.background = "var(--status-good)";
+  } catch (e) {
+    dot.style.background = "var(--status-critical)";
+    showError(e && e.message ? e.message : String(e));
+  }
+  countdown = REFRESH_MS / 1000;
+}
+
+document.getElementById("refresh-btn").addEventListener("click", () => {
+  fetchAndRender();
+});
+
+fetchAndRender();
+setInterval(fetchAndRender, REFRESH_MS);
+setInterval(tickLabel, 1000);
+</script>
+</body>
+</html>

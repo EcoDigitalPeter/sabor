@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-15T12:03:37.881Z",
+  "projectRoot": "D:\\aps\\sabor",
+  "structure": {
+    "hasPackageJson": false,
+    "hasTsConfig": false,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1784117017882
+}
