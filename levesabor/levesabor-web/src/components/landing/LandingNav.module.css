@@ -50,6 +50,6 @@
 }
 
 .cta:focus-visible {
-  outline: var(--focus-on-light);
+  outline: var(--focus-on-dark);
   outline-offset: 2px;
 }
