@@ -1,0 +1,148 @@
+/* FE-P01 · HeroQuiz — cartão do hero (project/Leve Sabor AI.dc.html linhas 65-131) */
+.card {
+  background: var(--ink-soft);
+  border: 1px solid rgba(246, 236, 220, 0.12);
+  border-radius: 20px;
+  padding: clamp(22px, 3vw, 30px);
+  scroll-margin-top: 90px;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 18px;
+}
+
+.rise,
+.riseResult {
+  animation: ls-rise 0.4s ease both;
+}
+
+.question {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: var(--cream);
+}
+
+.subtext {
+  font-size: 13px;
+  color: var(--muted-on-dark);
+  margin: 0 0 6px;
+}
+
+.subtextAccent {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.option {
+  font-family: var(--font-body);
+  text-align: left;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--cream);
+  background: rgba(246, 236, 220, 0.06);
+  border: 1px solid rgba(246, 236, 220, 0.16);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: rgba(227, 167, 46, 0.16);
+  border-color: var(--amber);
+}
+
+.option:focus-visible {
+  outline: var(--focus-on-dark);
+  outline-offset: 1px;
+}
+
+.resultRow {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.resultText {
+  flex: 1 1 160px;
+  min-width: 160px;
+}
+
+.dish {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  color: var(--cream);
+}
+
+.note {
+  font-size: 13px;
+  color: var(--muted-on-dark);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.resultActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.resetButton {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--cream);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  cursor: pointer;
+}
+
+.resetButton:hover {
+  background: #ffffff;
+}
+
+.resetButton:focus-visible {
+  outline: var(--focus-on-dark);
+  outline-offset: 2px;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--terracotta);
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  text-decoration: none;
+}
+
+.ctaButton:hover {
+  background: var(--terracotta-dark);
+}
+
+.ctaButton:focus-visible {
+  outline: var(--focus-on-dark);
+  outline-offset: 2px;
+}
