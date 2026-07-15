@@ -1,8 +1,7 @@
 // FE-A01/FE-A04 · Layout raiz — fontes, tokens, providers (TanStack Query em FE-A03)
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Mono, Work_Sans } from "next/font/google";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/api";
+import { Providers } from "./providers";
 import "@/styles/tokens.css";
 
 // next/font carrega os ficheiros da fonte e expõe cada um como uma custom property própria
@@ -45,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${bricolage.variable} ${workSans.variable} ${ibmPlexMono.variable}`}
     >
       <body>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
