@@ -848,11 +848,11 @@ export const ADMIN_STORES: Store[] = [
   { id: 3, name: "Mercado do Povo", city: "Beira", neighborhood: "Centro", contact: null, status: "SUSPENDED", productCount: 15 },
 ];
 
-export const ADMIN_PRODUCTS: Product[] = [
-  { id: 1, name: "Farinha de milho (fuba) 1kg", category: "Cereais e Farinhas", unit: "kg", ingredientId: 9, storePriceCount: 2 },
-  { id: 2, name: "Arroz agulha 1kg", category: "Cereais e Farinhas", unit: "kg", ingredientId: 19, storePriceCount: 3 },
-  { id: 3, name: "Feijão nhemba 1kg", category: "Leguminosas", unit: "kg", ingredientId: 14, storePriceCount: 1 },
-  { id: 4, name: "Óleo de cozinha 1L", category: "Temperos e Óleos", unit: "l", ingredientId: null, storePriceCount: 2 },
+export const LOJA_PRODUCTS: Product[] = [
+  { id: 1, name: "Farinha de milho (fuba) 1kg", category: "CEREAIS", unitLabel: "1 kg", priceMt: 60, ingredientId: 9, status: "ACTIVE" },
+  { id: 2, name: "Arroz agulha 1kg", category: "CEREAIS", unitLabel: "1 kg", priceMt: 75, ingredientId: 19, status: "ACTIVE" },
+  { id: 3, name: "Feijão nhemba 1kg", category: "LEGUMINOSAS", unitLabel: "1 kg", priceMt: 90, ingredientId: 14, status: "ACTIVE" },
+  { id: 4, name: "Óleo de cozinha 1L", category: "TEMPEROS", unitLabel: "1 L", priceMt: 145, ingredientId: null, status: "ACTIVE" },
 ];
 
 export const ADMIN_INGREDIENTS: Ingredient[] = [

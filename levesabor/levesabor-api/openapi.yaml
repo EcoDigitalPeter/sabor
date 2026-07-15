@@ -380,11 +380,11 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/StoreEnvelope" }
 
-  # ── Admin: Produtos (Fase 2) ─────────────────────────────────────────
-  /admin/products:
+  # ── Loja: Produtos (Fase 3) ─────────────────────────────────────────
+  /loja/products:
     get:
       operationId: listProducts
-      summary: Listar produtos (F2-ADM-03)
+      summary: Listar produtos da loja (BE-L02/F3-LOJ-01)
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -398,7 +398,7 @@ paths:
               schema: { $ref: "#/components/schemas/ProductPageEnvelope" }
     post:
       operationId: createProduct
-      summary: Criar produto (F2-ADM-03)
+      summary: Criar produto da loja (BE-L02/F3-LOJ-01)
       requestBody:
         required: true
         content:
@@ -412,10 +412,10 @@ paths:
               schema: { $ref: "#/components/schemas/ProductEnvelope" }
         "409": { $ref: "#/components/responses/Duplicate" }
 
-  /admin/products/{id}:
+  /loja/products/{id}:
     get:
       operationId: getProduct
-      summary: Detalhe de produto (F2-ADM-03)
+      summary: Detalhe de produto da loja (BE-L02/F3-LOJ-01)
       parameters:
         - $ref: "#/components/parameters/PathId"
       responses:
@@ -426,7 +426,7 @@ paths:
               schema: { $ref: "#/components/schemas/ProductEnvelope" }
     put:
       operationId: updateProduct
-      summary: Atualizar produto (F2-ADM-03)
+      summary: Atualizar produto da loja (BE-L02/F3-LOJ-01)
       parameters:
         - $ref: "#/components/parameters/PathId"
       requestBody:
@@ -442,7 +442,7 @@ paths:
               schema: { $ref: "#/components/schemas/ProductEnvelope" }
     delete:
       operationId: deleteProduct
-      summary: Remover produto (F2-ADM-03)
+      summary: Remover produto da loja (BE-L02/F3-LOJ-01)
       parameters:
         - $ref: "#/components/parameters/PathId"
       responses:
@@ -452,47 +452,32 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ApiResponseVoid" }
 
-  /admin/products/{id}/prices/{storeId}:
-    put:
-      operationId: upsertProductPrice
-      summary: Definir preço do produto numa loja (F2-ADM-03)
+  /loja/products/{id}/status:
+    patch:
+      operationId: setProductStatus
+      summary: Ativar/inativar produto da loja (BE-L02/F3-LOJ-01)
       parameters:
         - $ref: "#/components/parameters/PathId"
-        - name: storeId
-          in: path
-          required: true
-          schema: { type: integer, format: int64 }
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PriceRequest" }
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [ACTIVE, INACTIVE] }
       responses:
         "200":
-          description: Preço gravado
+          description: Estado atualizado
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
-    delete:
-      operationId: deleteProductPrice
-      summary: Remover preço do produto numa loja (F2-ADM-03)
-      parameters:
-        - $ref: "#/components/parameters/PathId"
-        - name: storeId
-          in: path
-          required: true
-          schema: { type: integer, format: int64 }
-      responses:
-        "200":
-          description: Preço removido
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ApiResponseVoid" }
+              schema: { $ref: "#/components/schemas/ProductEnvelope" }
 
-  /admin/products/import:
+  /loja/products/import:
     post:
       operationId: importProducts
-      summary: Validar ficheiro de import Excel (F2-ADM-04)
+      summary: Validar ficheiro de import Excel da loja (BE-L03/F3-LOJ-02)
       requestBody:
         required: true
         content:
@@ -509,10 +494,10 @@ paths:
               schema: { $ref: "#/components/schemas/ImportJobEnvelope" }
         "400": { $ref: "#/components/responses/InvalidFile" }
 
-  /admin/products/import/{jobId}/confirm:
+  /loja/products/import/{jobId}/confirm:
     post:
       operationId: confirmImport
-      summary: Confirmar aplicação do import validado (F2-ADM-04)
+      summary: Confirmar aplicação do import validado da loja (BE-L03/F3-LOJ-02)
       parameters:
         - name: jobId
           in: path
@@ -530,10 +515,10 @@ paths:
               schema: { $ref: "#/components/schemas/ImportJobEnvelope" }
         "409": { description: Job já aplicado ou inválido }
 
-  /admin/products/export:
+  /loja/products/export:
     get:
       operationId: exportProducts
-      summary: Exportar catálogo atual (F2-ADM-04)
+      summary: Exportar catálogo atual da loja (BE-L03/F3-LOJ-02)
       responses:
         "200":
           description: Ficheiro .xlsx
@@ -541,10 +526,10 @@ paths:
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema: { type: string, format: binary }
 
-  /admin/products/import-template:
+  /loja/products/import-template:
     get:
       operationId: getImportTemplate
-      summary: Descarregar template de import (F2-ADM-04)
+      summary: Descarregar template de import da loja (BE-L03/F3-LOJ-02)
       responses:
         "200":
           description: Ficheiro .xlsx
@@ -1178,25 +1163,28 @@ components:
                   properties:
                     items: { type: array, items: { $ref: "#/components/schemas/Store" } }
 
-    # ── Admin: Produtos ──
+    # ── Loja: Produtos ──
     Product:
       type: object
       properties:
         id: { type: integer, format: int64 }
         name: { type: string }
-        category: { type: string }
-        unit: { type: string }
+        category: { type: string, enum: [CEREAIS, PROTEINA, VEGETAIS, LEGUMINOSAS, TEMPEROS, OUTROS] }
+        unitLabel: { type: string }
+        priceMt: { type: number }
         ingredientId: { type: integer, format: int64, nullable: true }
-        storePriceCount: { type: integer }
+        status: { type: string, enum: [ACTIVE, INACTIVE] }
 
     ProductRequest:
       type: object
-      required: [name, category, unit]
+      required: [name, category, unitLabel, priceMt]
       properties:
         name: { type: string }
-        category: { type: string }
-        unit: { type: string }
+        category: { type: string, enum: [CEREAIS, PROTEINA, VEGETAIS, LEGUMINOSAS, TEMPEROS, OUTROS] }
+        unitLabel: { type: string }
+        priceMt: { type: number }
         ingredientId: { type: integer, format: int64, nullable: true }
+        status: { type: string, enum: [ACTIVE, INACTIVE] }
 
     ProductEnvelope:
       allOf:
@@ -1217,12 +1205,6 @@ components:
                   properties:
                     items: { type: array, items: { $ref: "#/components/schemas/Product" } }
 
-    PriceRequest:
-      type: object
-      required: [priceMt]
-      properties:
-        priceMt: { type: number }
-
     ImportRowError:
       type: object
       properties:
@@ -1233,11 +1215,13 @@ components:
       type: object
       properties:
         id: { type: integer, format: int64 }
-        status: { type: string, enum: [VALIDATED, APPLIED, FAILED] }
-        validCount: { type: integer }
-        errorCount: { type: integer }
-        newCount: { type: integer }
-        updateCount: { type: integer }
+        filename: { type: string }
+        status: { type: string, enum: [VALIDATED, APPLIED, DISCARDED, FAILED] }
+        totalRows: { type: integer }
+        validRows: { type: integer }
+        errorRows: { type: integer }
+        createdCount: { type: integer }
+        updatedCount: { type: integer }
         errors: { type: array, items: { $ref: "#/components/schemas/ImportRowError" } }
 
     ImportJobEnvelope:

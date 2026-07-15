@@ -17,10 +17,10 @@ import { http, HttpResponse } from "msw";
 import type { components } from "@/types/api";
 import {
   ADMIN_INGREDIENTS,
-  ADMIN_PRODUCTS,
   ADMIN_RECIPES,
   ADMIN_STORES,
   ADMIN_USERS,
+  LOJA_PRODUCTS,
   METRICS_SUMMARY,
   applyRecipeFeedback,
   getActivePlan,
@@ -135,7 +135,7 @@ export const handlers = [
   // ── Admin (Fase 2) — listagens rasas + 1 patch para gatilho de LSA023 ─
   http.get("*/api/v1/admin/users", ({ request }) => pageOf(ADMIN_USERS, request)),
   http.get("*/api/v1/admin/stores", ({ request }) => pageOf(ADMIN_STORES, request)),
-  http.get("*/api/v1/admin/products", ({ request }) => pageOf(ADMIN_PRODUCTS, request)),
+  http.get("*/api/v1/loja/products", ({ request }) => pageOf(LOJA_PRODUCTS, request)),
   http.get("*/api/v1/admin/recipes", ({ request }) => pageOf(ADMIN_RECIPES, request)),
   http.get("*/api/v1/admin/ingredients", ({ request }) => pageOf(ADMIN_INGREDIENTS, request)),
   http.get("*/api/v1/admin/metrics/summary", () => ok(METRICS_SUMMARY)),

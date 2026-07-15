@@ -348,17 +348,17 @@ export interface paths {
         patch: operations["setStoreStatus"];
         trace?: never;
     };
-    "/admin/products": {
+    "/loja/products": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Listar produtos (F2-ADM-03) */
+        /** Listar produtos da loja (BE-L02/F3-LOJ-01) */
         get: operations["listProducts"];
         put?: never;
-        /** Criar produto (F2-ADM-03) */
+        /** Criar produto da loja (BE-L02/F3-LOJ-01) */
         post: operations["createProduct"];
         delete?: never;
         options?: never;
@@ -366,44 +366,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/products/{id}": {
+    "/loja/products/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Detalhe de produto (F2-ADM-03) */
+        /** Detalhe de produto da loja (BE-L02/F3-LOJ-01) */
         get: operations["getProduct"];
-        /** Atualizar produto (F2-ADM-03) */
+        /** Atualizar produto da loja (BE-L02/F3-LOJ-01) */
         put: operations["updateProduct"];
         post?: never;
-        /** Remover produto (F2-ADM-03) */
+        /** Remover produto da loja (BE-L02/F3-LOJ-01) */
         delete: operations["deleteProduct"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/admin/products/{id}/prices/{storeId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Definir preço do produto numa loja (F2-ADM-03) */
-        put: operations["upsertProductPrice"];
-        post?: never;
-        /** Remover preço do produto numa loja (F2-ADM-03) */
-        delete: operations["deleteProductPrice"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/products/import": {
+    "/loja/products/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -412,7 +394,24 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Validar ficheiro de import Excel (F2-ADM-04) */
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Ativar/inativar produto da loja (BE-L02/F3-LOJ-01) */
+        patch: operations["setProductStatus"];
+        trace?: never;
+    };
+    "/loja/products/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validar ficheiro de import Excel da loja (BE-L03/F3-LOJ-02) */
         post: operations["importProducts"];
         delete?: never;
         options?: never;
@@ -420,7 +419,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/products/import/{jobId}/confirm": {
+    "/loja/products/import/{jobId}/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -429,7 +428,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Confirmar aplicação do import validado (F2-ADM-04) */
+        /** Confirmar aplicação do import validado da loja (BE-L03/F3-LOJ-02) */
         post: operations["confirmImport"];
         delete?: never;
         options?: never;
@@ -437,14 +436,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/products/export": {
+    "/loja/products/export": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Exportar catálogo atual (F2-ADM-04) */
+        /** Exportar catálogo atual da loja (BE-L03/F3-LOJ-02) */
         get: operations["exportProducts"];
         put?: never;
         post?: never;
@@ -454,14 +453,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/products/import-template": {
+    "/loja/products/import-template": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Descarregar template de import (F2-ADM-04) */
+        /** Descarregar template de import da loja (BE-L03/F3-LOJ-02) */
         get: operations["getImportTemplate"];
         put?: never;
         post?: never;
@@ -825,18 +824,25 @@ export interface components {
             /** Format: int64 */
             id?: number;
             name?: string;
-            category?: string;
-            unit?: string;
+            /** @enum {string} */
+            category?: "CEREAIS" | "PROTEINA" | "VEGETAIS" | "LEGUMINOSAS" | "TEMPEROS" | "OUTROS";
+            unitLabel?: string;
+            priceMt?: number;
             /** Format: int64 */
             ingredientId?: number | null;
-            storePriceCount?: number;
+            /** @enum {string} */
+            status?: "ACTIVE" | "INACTIVE";
         };
         ProductRequest: {
             name: string;
-            category: string;
-            unit: string;
+            /** @enum {string} */
+            category: "CEREAIS" | "PROTEINA" | "VEGETAIS" | "LEGUMINOSAS" | "TEMPEROS" | "OUTROS";
+            unitLabel: string;
+            priceMt: number;
             /** Format: int64 */
             ingredientId?: number | null;
+            /** @enum {string} */
+            status?: "ACTIVE" | "INACTIVE";
         };
         ProductEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["Product"];
@@ -846,9 +852,6 @@ export interface components {
                 items?: components["schemas"]["Product"][];
             };
         };
-        PriceRequest: {
-            priceMt: number;
-        };
         ImportRowError: {
             row?: number;
             message?: string;
@@ -856,12 +859,14 @@ export interface components {
         ImportJob: {
             /** Format: int64 */
             id?: number;
+            filename?: string;
             /** @enum {string} */
-            status?: "VALIDATED" | "APPLIED" | "FAILED";
-            validCount?: number;
-            errorCount?: number;
-            newCount?: number;
-            updateCount?: number;
+            status?: "VALIDATED" | "APPLIED" | "DISCARDED" | "FAILED";
+            totalRows?: number;
+            validRows?: number;
+            errorRows?: number;
+            createdCount?: number;
+            updatedCount?: number;
             errors?: components["schemas"]["ImportRowError"][];
         };
         ImportJobEnvelope: components["schemas"]["ApiResponseVoid"] & {
@@ -1800,52 +1805,31 @@ export interface operations {
             };
         };
     };
-    upsertProductPrice: {
+    setProductStatus: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 id: components["parameters"]["PathId"];
-                storeId: number;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PriceRequest"];
+                "application/json": {
+                    /** @enum {string} */
+                    status: "ACTIVE" | "INACTIVE";
+                };
             };
         };
         responses: {
-            /** @description Preço gravado */
+            /** @description Estado atualizado */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    deleteProductPrice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: components["parameters"]["PathId"];
-                storeId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Preço removido */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiResponseVoid"];
+                    "application/json": components["schemas"]["ProductEnvelope"];
                 };
             };
         };
