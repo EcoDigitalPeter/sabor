@@ -14,9 +14,16 @@ export function MockProvider({ children }: { children: React.ReactNode }) {
     if (!MOCKS_ENABLED) return;
     let cancelled = false;
     import("./browser").then(({ startWorker }) => {
-      startWorker().then(() => {
-        if (!cancelled) setReady(true);
-      });
+      startWorker()
+        .then(() => {
+          if (!cancelled) setReady(true);
+        })
+        .catch((err) => {
+          // Don't leave the app permanently blank if the mock worker fails to start —
+          // log it and let real (unmocked) requests through instead.
+          console.error("[MockProvider] failed to start MSW worker", err);
+          if (!cancelled) setReady(true);
+        });
     });
     return () => {
       cancelled = true;

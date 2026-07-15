@@ -10,6 +10,13 @@ export const worker = setupWorker(...handlers);
 // resolved start promise makes repeated calls (StrictMode remount, HMR) idempotent.
 let starting: ReturnType<typeof worker.start> | null = null;
 export function startWorker() {
-  if (!starting) starting = worker.start({ onUnhandledRequest: "bypass" });
+  if (!starting) {
+    // If start() rejects (e.g. transient SW registration failure), clear the cache so the
+    // next call retries instead of permanently reusing a dead, rejected promise.
+    starting = worker.start({ onUnhandledRequest: "bypass" }).catch((err) => {
+      starting = null;
+      throw err;
+    });
+  }
   return starting;
 }
