@@ -27,9 +27,12 @@ const withPWA = withPWAInit({
   },
 });
 
+// "standalone" é para deploys self-hosted/Docker (bundle mínimo com servidor Node próprio).
+// A Vercel tem o seu próprio pipeline de build/serve e não usa este modo — mantê-lo ligado não é
+// fatal, mas muda como o Next traça/empacota dependências do servidor e é uma fonte conhecida de
+// problemas de resolução de assets na Vercel. Reintroduzir só se um alvo de deploy não-Vercel precisar.
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
   reactStrictMode: true,
 };
 
