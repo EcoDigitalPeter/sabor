@@ -14,6 +14,8 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { BrandIllustration } from "@/components/ui/BrandIllustration";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { DayTabs } from "@/components/plan/DayTabs";
 import { MealCard } from "@/components/plan/MealCard";
 import { DaySummary } from "@/components/plan/DaySummary";
@@ -61,6 +63,7 @@ function MealCardSkeleton() {
 
 export default function PlanoPage() {
   const router = useRouter();
+  const isOnline = useOnlineStatus();
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -132,8 +135,9 @@ export default function PlanoPage() {
 
   return (
     <main className={styles.main}>
-      {/* FE-C08 (stretch): banner "offline — a mostrar plano guardado" hooka aqui, orientado por
-          navigator.onLine + estado do service worker. Sem lógica de deteção real nesta tarefa. */}
+      {!isOnline ? (
+        <OfflineBanner message="Estás offline — a mostrar o último plano guardado." />
+      ) : null}
       <header className={styles.header}>
         <h1 className={styles.title}>O teu plano · {formatWeekRange(plan.weekStart ?? days[0]?.date ?? "")}</h1>
       </header>
