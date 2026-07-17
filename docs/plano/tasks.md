@@ -53,19 +53,19 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [x] **FE-B06 · FormField + validação** — Wrapper de campo com label/erro inline; integração react-hook-form + zod (espelha as validações do plano funcional). `[ref: 01 (validações por funcionalidade)]`
 - [ ] **FE-B07 · DataTable admin** — Tabela paginada server-side reutilizável: pesquisa, filtros, ordenação, paginação por URL, estados loading/empty. Base de TODAS as telas de lista do admin. `[ref: 02 §3 T-10..T-19]`
 - [x] **FE-B08 · Wizard / Stepper** — Contentor 1-pergunta-por-ecrã com progresso e rascunho local (usado no onboarding). `[ref: 02 §3 T-03]`
-- [ ] **FE-B09 · KpiCard + gráfico de linhas** — Cartão KPI e gráfico leve (sem lib pesada; ex. SVG próprio ou recharts se couber no orçamento de JS). `[ref: 02 §3 T-09]`
+- [x] **FE-B09 · KpiCard + gráfico de linhas** — Cartão KPI e gráfico leve (sem lib pesada; ex. SVG próprio ou recharts se couber no orçamento de JS). `[ref: 02 §3 T-09]`
 - [x] **FE-B10 · Ilustrações e ícones** — Gerar P-01..P-07 com os prompts do `02 §4`, otimizar (<60 KB), integrar logotipo SVG da landing e ícones Lucide; ícones de categoria P-06. `[deps: nenhum código — pode começar já]` `[ref: 02 §4]`
 
 ### FE-C — Telas do Portal Cliente (paralelas entre si; deps indicadas + MOCK-02)
 
 - [x] **FE-C01 · T-01 Login + T-02 Registo** — Formulários, erros por campo, 409 email duplicado, redirecionamento por role. `[deps: FE-B01, B04, B06]` `[ref: 02 T-01/T-02, 01 F1-VIS-01/02]`
 - [x] **FE-C02 · T-03 Onboarding do perfil** — Wizard 5 passos + resumo (objetivos/condições com labels exatos da landing), rascunho local, CTA final "Gerar o meu plano". `[deps: FE-B01, B06, B08]` `[ref: 02 T-03, 01 F1-CLI-01]`
-- [ ] **FE-C03 · T-04 Dashboard do plano** — Tabs de dias, cartões de refeição com MacroRing `sm`, resumo do dia, empty state com CTA, banner offline. `[deps: FE-B02, B04, B05]` `[ref: 02 T-04, 01 F1-CLI-03]`
-- [ ] **FE-C04 · T-07 Ecrã de geração** — Chamada síncrona ao endpoint de geração (sem polling — resposta única, até dezenas de segundos), mensagens rotativas por temporizador local enquanto aguarda, estados failed/limit_reached. `[deps: FE-B04]` `[ref: 02 T-07, 01 F1-CLI-02]`
+- [x] **FE-C03 · T-04 Dashboard do plano** — Tabs de dias, cartões de refeição com MacroRing `sm`, resumo do dia, empty state com CTA, banner offline. `[deps: FE-B02, B04, B05]` `[ref: 02 T-04, 01 F1-CLI-03]`
+- [x] **FE-C04 · T-07 Ecrã de geração** — Chamada síncrona ao endpoint de geração (sem polling — resposta única, até dezenas de segundos), mensagens rotativas por temporizador local enquanto aguarda, estados failed/limit_reached. `[deps: FE-B04]` `[ref: 02 T-07, 01 F1-CLI-02]`
 - [x] **FE-C05 · T-05 Detalhe de refeição/receita** — MacroRing `lg` + legenda, ingredientes, passos numerados, notas de saúde, disclaimer; feedback 👍/👎 otimista; fluxo de troca com bottom-sheet. `[deps: FE-B02, B03, B05]` `[ref: 02 T-05, 01 F1-CLI-04/05]`
 - [x] **FE-C06 · T-06 Lista de compras** — Grupos por categoria (ícones P-06), checkboxes otimistas, progresso, custo estimado com nota de parcialidade. `[deps: FE-B02, B04]` `[ref: 02 T-06, 01 F1-CLI-06]`
 - [x] **FE-C07 · T-08 Perfil** — Edição por secção, aviso "vale a partir do próximo plano", logout. `[deps: FE-B01, B06]` `[ref: 02 T-08, 01 F1-CLI-01]`
-- [ ] **FE-C08 · Offline/PWA do cliente** — Precache do shell; runtime cache do plano ativo e lista (stale-while-revalidate); fila local de toggles da lista com sync; excluir `/admin` do SW; testar com throttling 3G. `[deps: FE-C03, FE-C06]` `[ref: 02 §5, 01 F1-CLI-03/06]`
+- [x] **FE-C08 · Offline/PWA do cliente** — Precache do shell; runtime cache do plano ativo e lista (stale-while-revalidate); fila local de toggles da lista com sync; excluir `/admin` do SW; testar com throttling 3G. `[deps: FE-C03, FE-C06]` `[ref: 02 §5, 01 F1-CLI-03/06]` *(nota: teste manual com throttling 3G ainda por fazer em DevTools — não automatizável pelo agente)*
 - [ ] **FE-C09 · T-06 CTA "Encomendar" + T-20/T-21 Escolher loja / Rever encomenda** — Fluxo de encomenda a partir da lista de compras: seleção de loja ativa, revisão de itens (checkbox + quantidade), nota opcional, confirmação. `[deps: FE-B01, B03, B06]` `[ref: 02 T-20/21 (novas), 01 F3-CLI-07]` **Fase 3**
 - [ ] **FE-C10 · T-22 Minhas encomendas** — Lista de encomendas do cliente com estado-badge, detalhe simples, cancelamento quando permitido. `[deps: FE-B02, B07]` `[ref: 02 T-22 (nova), 01 F3-CLI-07]` **Fase 3**
 
@@ -167,9 +167,7 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 
 *(referência rápida — o cartão original mantém-se na sua secção acima; lista aqui só o ID enquanto está ativo)*
 
-- **FE-C03** · T-04 Dashboard do plano
-- **FE-C04** · T-07 Ecrã de geração
-- **FE-C08** · Offline/PWA do cliente
+- **FE-B07** · DataTable admin
 
 ## Concluído
 
@@ -187,9 +185,13 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - **FE-B05** · MacroRing (sm/md/lg)
 - **FE-B06** · FormField + validação
 - **FE-B08** · Wizard / Stepper
+- **FE-B09** · KpiCard + gráfico de linhas
 - **FE-B10** · Ilustrações e ícones
 - **FE-C01** · T-01 Login + T-02 Registo
 - **FE-C02** · T-03 Onboarding do perfil
+- **FE-C03** · T-04 Dashboard do plano
+- **FE-C04** · T-07 Ecrã de geração
 - **FE-C05** · T-05 Detalhe de refeição/receita
 - **FE-C06** · T-06 Lista de compras
 - **FE-C07** · T-08 Perfil
+- **FE-C08** · Offline/PWA do cliente (falta apenas QA manual com throttling 3G)
