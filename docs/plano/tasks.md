@@ -51,7 +51,7 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [x] **FE-B04 · Skeleton / EmptyState / ErrorState** — Os 4 estados transversais do `02 §2`; EmptyState recebe ilustração + título + CTA. `[ref: 02 §2]`
 - [x] **FE-B05 · MacroRing (sm/md/lg)** — SVG `stroke-dasharray` (técnica da landing), 4 segmentos na ordem/cores fixas (Proteína `#C43E1C` → Carbs `#E3A72E` → Gordura `#E7C9A0` → Fibra `#45614A`), kcal ao centro em mono; variante `lg` com legenda. Componente-assinatura — testar visualmente com valores extremos. `[ref: 02 §1]`
 - [x] **FE-B06 · FormField + validação** — Wrapper de campo com label/erro inline; integração react-hook-form + zod (espelha as validações do plano funcional). `[ref: 01 (validações por funcionalidade)]`
-- [ ] **FE-B07 · DataTable admin** — Tabela paginada server-side reutilizável: pesquisa, filtros, ordenação, paginação por URL, estados loading/empty. Base de TODAS as telas de lista do admin. `[ref: 02 §3 T-10..T-19]`
+- [x] **FE-B07 · DataTable admin** — Tabela paginada server-side reutilizável: pesquisa, filtros, ordenação, paginação por URL, estados loading/empty. Base de TODAS as telas de lista do admin. `[ref: 02 §3 T-10..T-19]`
 - [x] **FE-B08 · Wizard / Stepper** — Contentor 1-pergunta-por-ecrã com progresso e rascunho local (usado no onboarding). `[ref: 02 §3 T-03]`
 - [x] **FE-B09 · KpiCard + gráfico de linhas** — Cartão KPI e gráfico leve (sem lib pesada; ex. SVG próprio ou recharts se couber no orçamento de JS). `[ref: 02 §3 T-09]`
 - [x] **FE-B10 · Ilustrações e ícones** — Gerar P-01..P-07 com os prompts do `02 §4`, otimizar (<60 KB), integrar logotipo SVG da landing e ícones Lucide; ícones de categoria P-06. `[deps: nenhum código — pode começar já]` `[ref: 02 §4]`
@@ -167,7 +167,7 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 
 *(referência rápida — o cartão original mantém-se na sua secção acima; lista aqui só o ID enquanto está ativo)*
 
-- **FE-B07** · DataTable admin
+- **FE-D01** · T-09 Dashboard de métricas
 
 ## Concluído
 
@@ -184,6 +184,7 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - **FE-B04** · Skeleton / EmptyState / ErrorState
 - **FE-B05** · MacroRing (sm/md/lg)
 - **FE-B06** · FormField + validação
+- **FE-B07** · DataTable admin
 - **FE-B08** · Wizard / Stepper
 - **FE-B09** · KpiCard + gráfico de linhas
 - **FE-B10** · Ilustrações e ícones
