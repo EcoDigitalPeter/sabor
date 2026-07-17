@@ -1,0 +1,32 @@
+/* FE-B09 · KpiCard — cartão de métrica (label + valor mono + hint) */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clay-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: clamp(24px, 5vw, 32px);
+  line-height: 1.15;
+  color: var(--ink);
+  /* números longos (ex. custo estimado) não devem estourar o cartão em ecrãs pequenos */
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--clay-soft);
+}
