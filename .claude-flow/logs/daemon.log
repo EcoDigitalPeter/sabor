@@ -1455,3 +1455,9 @@
 [2026-07-18T14:56:17.826Z] [INFO] Worker audit completed in 6ms
 [2026-07-18T15:02:17.180Z] [INFO] Starting worker: testgaps (1/2 concurrent)
 [2026-07-18T15:02:17.184Z] [INFO] Worker testgaps completed in 7ms
+[2026-07-18T15:04:17.336Z] [INFO] Starting worker: map (1/2 concurrent)
+[2026-07-18T15:04:17.338Z] [INFO] Worker map completed in 4ms
+[2026-07-18T15:06:17.848Z] [INFO] Starting worker: audit (1/2 concurrent)
+[2026-07-18T15:06:17.851Z] [INFO] Worker audit completed in 6ms
+[2026-07-18T15:08:17.359Z] [INFO] Starting worker: optimize (1/2 concurrent)
+[2026-07-18T15:08:17.366Z] [INFO] Worker optimize completed in 13ms
