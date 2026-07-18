@@ -20,6 +20,18 @@ const FAQS = [
     q: "Preciso de saber cozinhar bem para seguir os planos?",
     a: "Não. As receitas são simples, com ingredientes comuns e passos diretos — pensadas para o dia a dia, não para uma cozinha profissional.",
   },
+  {
+    q: "Quanto custa?",
+    a: "Durante o lançamento, é grátis. Se um dia houver planos pagos, haverá sempre uma versão gratuita e avisamos com antecedência.",
+  },
+  {
+    q: "Preciso de cartão de crédito para criar conta?",
+    a: "Não. Só precisas de um email — não pedimos nenhum dado de pagamento para começar.",
+  },
+  {
+    q: "Quando posso começar a usar?",
+    a: "Já — a Leve Sabor está em acesso antecipado. Cria a tua conta e recebe o teu primeiro plano em minutos.",
+  },
 ];
 
 export function FaqAccordion() {

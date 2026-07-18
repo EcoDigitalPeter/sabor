@@ -86,6 +86,16 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [ ] **FE-L03 · T-25 Import Excel da loja** — Reaproveita o padrão do antigo T-16: drag-&-drop, pré-visualização, confirmação, resultado. `[deps: FE-B03, B07, FE-L01]` `[ref: 02 T-25 (nova), 01 F3-LOJ-02]`
 - [ ] **FE-L04 · T-26/T-27 Encomendas da loja** — Lista (DataTable, filtro por estado) + detalhe com botões de transição de estado válidos. `[deps: FE-B03, B07, FE-L01]` `[ref: 02 T-26/27 (novas), 01 F3-LOJ-03]`
 
+### FE-P — Landing v2 ("excitação") — a v1 (FE-P01) foi implementada via `docs/superpowers/specs/2026-07-14-landing-page-design.md`, fora deste quadro; esta faixa cobre a evolução seguinte, feita depois de comparar com Fotor/DishGen.
+
+- [x] **FE-P02 · Fundações de movimento** — Tokens `--motion-*`/`--ease-out` em `tokens.css`, `Reveal.tsx` (IntersectionObserver) + `motion.module.css`, transição do FAQ (`grid-template-rows: 0fr→1fr`), hover-lift nos cartões existentes, guard `prefers-reduced-motion`. `[deps: —]` `[ref: plano landing v2 §3]`
+- [x] **FE-P03 · Hero v2** — Novo headline/sub/microcopy; `HeroQuiz` v2 (plano por `goal × condition`, beat "a compor…", count-up de kcal, modo de texto livre com chips de exemplo); `LandingNav` com âncoras (`#como-funciona`, `#pratos`, `#faq`) + ênfase do CTA ao scroll. `[deps: FE-P02]` `[ref: §2.1-2.2]`
+- [x] **FE-P04 · Galeria de pratos + benefícios** — `DishGallery.tsx` (8 pratos moçambicanos, expande com `MacroRing` + CTA), `dish-gallery-data.ts`, `BenefitCards.tsx` (ícones Lucide como fallback). `[deps: FE-P02]` `[ref: §2.4-2.5]`
+- [x] **FE-P05 · Product showcase** — `ProductShowcase.tsx` + `showcase-fixtures.ts` (tipadas contra `src/types/api.d.ts`) a renderizar `MealCard`/`DayTabs`/`MacroRing`/`ShoppingGroup` reais numa moldura CSS; substitui o antigo painel estático de macros. `[deps: FE-P02]` `[ref: §2.7]`
+- [x] **FE-P06 · Prova honesta + FAQ v2 + CTA final + montagem** — `ProofStrip.tsx`, cartão "Em desenvolvimento aberto" na secção de confiança, FAQ 4→7 perguntas, CTA final v2, CTAs por secção, ordem final das secções em `LandingPage.tsx`. `[deps: FE-P03..P05]` `[ref: §2.3, 2.10-2.12]`
+- [x] **FE-P07 · Prompts de imagens da landing** — `PROMPT.md` para P-08 (prato do hero), P-09 (galeria de 8 pratos), P-10 (ícones de benefícios), P-11 (fundo do CTA) em `public/images/{hero-prato,pratos,beneficios,fundo-cta}/`; página funciona só com os fallbacks CSS/Lucide, sem depender destas imagens. `[deps: nenhum código]` `[ref: 02 §4]`
+- [x] **FE-P08 · QA da landing v2** — `e2e/landing.spec.ts` + `playwright.config.ts` (novo, o projeto ainda não tinha config Playwright) cobrindo secções/quiz/FAQ/CTAs/reduced-motion/360px — 8/8 a passar (usa o Chrome do sistema via `channel: "chrome"`, porque `cdn.playwright.dev` não é alcançável neste ambiente para descarregar o Chromium próprio do Playwright); `npm run build`+`lint`+`typecheck` também verificados. `[deps: FE-P06]` `[ref: §7]`
+
 ### FE-E — Qualidade frontend
 
 - [ ] **FE-E01 · Testes E2E (Playwright) contra mocks** — Fluxos: registo→onboarding→plano→receita→troca→lista; login admin→CRUD loja→import Excel. Correm no CI sem backend. `[deps: telas correspondentes]` `[ref: 05 checklist]`

@@ -32,6 +32,36 @@
   color: var(--terracotta);
 }
 
+.links {
+  display: flex;
+  gap: 24px;
+  margin-right: auto;
+  margin-left: 32px;
+}
+
+@media (max-width: 767px) {
+  .links {
+    display: none;
+  }
+}
+
+.link {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--clay);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+.link:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
 .cta {
   font-family: var(--font-body);
   font-weight: 600;
@@ -42,11 +72,20 @@
   border-radius: var(--radius-pill);
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
 }
 
 .cta:hover {
   background: var(--terracotta);
+}
+
+.ctaEmphasis {
+  background: var(--terracotta);
+  transform: scale(1.04);
+}
+
+.ctaEmphasis:hover {
+  background: var(--terracotta-dark);
 }
 
 .cta:focus-visible {

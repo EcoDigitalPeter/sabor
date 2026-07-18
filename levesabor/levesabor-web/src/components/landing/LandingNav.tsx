@@ -1,8 +1,23 @@
-// FE-P01 · LandingNav — nav sticky da landing pública (project/Leve Sabor AI.dc.html linhas 34-44)
+"use client";
+// FE-P03 · LandingNav v2 — nav sticky da landing pública (project/Leve Sabor AI.dc.html linhas 34-44).
+// Ganha âncoras de secção (escondidas <768px) e um estado de scroll que dá mais ênfase ao CTA
+// depois de passar o hero — pequena ilha cliente, sem custo de dados relevante.
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./LandingNav.module.css";
 
 export function LandingNav() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 400);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <nav className={styles.nav}>
       <a href="#top" className={styles.brand}>
@@ -34,7 +49,18 @@ export function LandingNav() {
           leve <span className={styles.accent}>sabor</span>
         </span>
       </a>
-      <Link href="/registo" className={styles.cta}>
+      <div className={styles.links}>
+        <a href="#como-funciona" className={styles.link}>
+          Como funciona
+        </a>
+        <a href="#pratos" className={styles.link}>
+          Pratos
+        </a>
+        <a href="#faq" className={styles.link}>
+          FAQ
+        </a>
+      </div>
+      <Link href="/registo" className={[styles.cta, scrolled ? styles.ctaEmphasis : ""].filter(Boolean).join(" ")}>
         Criar conta
       </Link>
     </nav>
