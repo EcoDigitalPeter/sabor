@@ -1,0 +1,27 @@
+/* FE-P02 · motion — primitivas de movimento partilhadas pela landing v2 (Reveal + hover-lift).
+   Estado base é sempre visível (opacity:1) — sem JS ou antes do observer montar, nada fica
+   escondido; a classe .hidden só é aplicada pelo próprio Reveal.tsx depois de montar. */
+
+.reveal {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-slow) var(--ease-out) var(--reveal-delay, 0ms),
+    transform var(--motion-slow) var(--ease-out) var(--reveal-delay, 0ms);
+}
+
+.reveal.hidden {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.hoverLift {
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+}
+
+.hoverLift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(36, 26, 20, 0.1);
+}

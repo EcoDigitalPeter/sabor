@@ -35,9 +35,26 @@
   font-size: 18px;
   color: var(--terracotta);
   flex: none;
+  display: inline-block;
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.iconOpen {
+  transform: rotate(45deg);
+}
+
+.answerWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--motion-base) var(--ease-out);
+}
+
+.answerWrapOpen {
+  grid-template-rows: 1fr;
 }
 
 .answer {
+  overflow: hidden;
   font-size: 14.5px;
   line-height: 1.65;
   color: var(--clay);

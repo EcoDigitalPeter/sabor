@@ -37,11 +37,16 @@ export function FaqAccordion() {
           <div key={item.q} className={styles.item}>
             <button type="button" className={styles.trigger} onClick={() => toggle(index)} aria-expanded={isOpen}>
               <span>{item.q}</span>
-              <span className={styles.icon} aria-hidden="true">
-                {isOpen ? "–" : "+"}
+              <span
+                className={[styles.icon, isOpen ? styles.iconOpen : ""].filter(Boolean).join(" ")}
+                aria-hidden="true"
+              >
+                +
               </span>
             </button>
-            {isOpen && <p className={styles.answer}>{item.a}</p>}
+            <div className={[styles.answerWrap, isOpen ? styles.answerWrapOpen : ""].filter(Boolean).join(" ")}>
+              <p className={styles.answer}>{item.a}</p>
+            </div>
           </div>
         );
       })}
