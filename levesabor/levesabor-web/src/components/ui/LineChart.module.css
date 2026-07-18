@@ -1,0 +1,29 @@
+/* FE-B09 · LineChart — gráfico de linhas leve (SVG hand-rolled), escala fluida ao contentor */
+.wrapper {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.area {
+  stroke: none;
+  opacity: 0.12;
+}
+
+.dot {
+  stroke: var(--cream-card);
+  stroke-width: 1.5;
+}

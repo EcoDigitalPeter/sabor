@@ -9,12 +9,14 @@ import {
   useToggleShoppingItem,
   type ShoppingListItem,
 } from "@/hooks/useShoppingList";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { ShoppingGroup } from "@/components/plan/ShoppingGroup";
 import type { ShoppingCategory } from "@/components/ui/CategoryIcon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { BrandIllustration } from "@/components/ui/BrandIllustration";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
 const PAGE_MAX_WIDTH = 640;
 
@@ -68,6 +70,7 @@ function groupByCategory(items: ShoppingListItem[]): Partial<Record<ShoppingCate
 }
 
 export default function ComprasPage() {
+  const isOnline = useOnlineStatus();
   const { data, isLoading, isError, error, refetch } = useShoppingList();
   const toggleMutation = useToggleShoppingItem();
   const { pendingCount, isSyncing } = useShoppingSync();
@@ -133,6 +136,11 @@ export default function ComprasPage() {
 
   return (
     <main style={{ maxWidth: PAGE_MAX_WIDTH, margin: "0 auto", padding: "24px 20px 40px" }}>
+      {!isOnline ? (
+        <div style={{ marginBottom: 16 }}>
+          <OfflineBanner message="Estás offline — a mostrar a última lista guardada." />
+        </div>
+      ) : null}
       <h1
         style={{
           margin: "0 0 6px",

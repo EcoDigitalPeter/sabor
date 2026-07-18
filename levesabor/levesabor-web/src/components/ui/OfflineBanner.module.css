@@ -1,0 +1,22 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-card-sm);
+  background: var(--amber-soft);
+  border: 1px solid var(--amber);
+}
+
+.icon {
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.message {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}

@@ -10,5 +10,6 @@ Um ficheiro por componente; todos consomem apenas `styles/tokens.css`. Paralelos
 | FE-B04 | `Skeleton.tsx` · `EmptyState.tsx` (ilustração+título+CTA) · `ErrorState.tsx` (retry) |
 | FE-B06 | `FormField.tsx` (react-hook-form + zod, erro inline) |
 | FE-B08 | `Wizard.tsx` (1 pergunta/ecrã, progresso, rascunho local) |
+| FE-C08 | `OfflineBanner.tsx` (aviso "sem ligação — a mostrar versão guardada", usa `useOnlineStatus`) |
 
 Foco visível obrigatório: `outline: var(--focus-on-light|--focus-on-dark)`.
