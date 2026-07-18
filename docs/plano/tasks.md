@@ -71,7 +71,7 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 
 ### FE-D — Telas do Portal Admin (paralelas entre si; deps indicadas + MOCK-02)
 
-- [ ] **FE-D01 · T-09 Dashboard de métricas** — KPIs, gráfico planos/dia, top/bottom receitas, custo IA, seletor de período. `[deps: FE-B09]` `[ref: 02 T-09, 01 F2-ADM-06]`
+- [x] **FE-D01 · T-09 Dashboard de métricas** — KPIs, gráfico planos/dia, top/bottom receitas, custo IA, seletor de período. `[deps: FE-B09]` `[ref: 02 T-09, 01 F2-ADM-06]` *(inclui o shell de navegação admin — sidebar/topbar, `AdminShell`/`AdminSidebar`/`AdminTopbar` — que FE-D02/D03/D06/D07 reutilizam)*
 - [ ] **FE-D02 · T-10/T-11 Utilizadores** — Lista (DataTable) + detalhe com suspensão (confirmação) e "Ver perfil de saúde" explícito; criação de conta lojista (`storeId`). `[deps: FE-B03, B07]` `[ref: 02 T-10/11, 01 F2-ADM-01]`
 - [ ] **FE-D03 · T-12/T-13 Lojas** — Lista + formulário de registo da loja; remoção com confirmação; opção de criar conta de lojista ao criar a loja. `[deps: FE-B03, B06, B07]` `[ref: 02 T-12/13, 01 F2-ADM-02]`
 - [ ] **FE-D06 · T-17/T-18 Receitas** — Lista com feedback agregado + formulário rico (ingredientes dinâmicos, passos ordenáveis, tags, painel de macros com MacroRing `md`, publish com checklist de bloqueios). `[deps: FE-B05, B06, B07]` `[ref: 02 T-17/18, 01 F2-ADM-05]`
@@ -167,7 +167,10 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 
 *(referência rápida — o cartão original mantém-se na sua secção acima; lista aqui só o ID enquanto está ativo)*
 
-- **FE-D01** · T-09 Dashboard de métricas
+- **FE-D02** · T-10/T-11 Utilizadores
+- **FE-D03** · T-12/T-13 Lojas
+- **FE-D06** · T-17/T-18 Receitas
+- **FE-D07** · T-19 Ingredientes
 
 ## Concluído
 
@@ -196,3 +199,4 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - **FE-C06** · T-06 Lista de compras
 - **FE-C07** · T-08 Perfil
 - **FE-C08** · Offline/PWA do cliente (falta apenas QA manual com throttling 3G)
+- **FE-D01** · T-09 Dashboard de métricas
