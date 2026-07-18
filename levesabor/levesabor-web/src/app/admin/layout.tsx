@@ -1,9 +1,11 @@
-// FE-A04 · Layout do portal admin — guarda de role ADMIN (sidebar/topbar são Fase 2 / FE-D, fora de âmbito aqui)
+// FE-A04/FE-D01 · Layout do portal admin — guarda de role ADMIN + chrome de navegação
+// (sidebar + topbar, AdminShell) à volta de {children}.
 "use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { AdminShell } from "@/components/admin/AdminShell";
 
 // Mesma limitação/decisão da guarda de (cliente)/layout.tsx: Client Component + useEffect
 // porque getSession() só reflete sessão em memória do browser (sem hidratação server-side
@@ -23,6 +25,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return null;
   }
 
-  // Sem Sidebar/Topbar aqui de propósito — layout de navegação admin é a Fase 2 (FE-D).
-  return <>{children}</>;
+  return <AdminShell>{children}</AdminShell>;
 }

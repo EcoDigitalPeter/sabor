@@ -1,0 +1,91 @@
+/* FE-D01 · AdminSidebar — coluna fixa esquerda, largura desktop-first (funciona em tablet) */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 240px;
+  flex-shrink: 0;
+  min-height: 100vh;
+  padding: 24px 16px;
+  background: var(--cream-card);
+  border-right: 1px solid var(--tan);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ink);
+  padding: 0 12px;
+  margin-bottom: 24px;
+}
+
+.brandAccent {
+  color: var(--terracotta);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-input);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--clay);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.link:hover {
+  background: var(--cream-card-alt);
+  color: var(--ink);
+}
+
+.link:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.active {
+  background: var(--cream-card-alt);
+  color: var(--terracotta);
+  font-weight: 600;
+}
+
+/* Tablet: mantém a sidebar, mas mais estreita e só com ícones (rótulos escondidos). */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 72px;
+    padding: 24px 12px;
+    align-items: center;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .link {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
