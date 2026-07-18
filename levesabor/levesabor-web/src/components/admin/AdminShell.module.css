@@ -1,0 +1,18 @@
+/* FE-D01 · AdminShell — layout de duas colunas (sidebar fixa + coluna de conteúdo com topbar) */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--cream);
+}
+
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.main {
+  flex: 1;
+  padding: 24px 32px 48px;
+}
