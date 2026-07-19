@@ -69,6 +69,44 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [ ] **FE-C09 · T-06 CTA "Encomendar" + T-20/T-21 Escolher loja / Rever encomenda** — Fluxo de encomenda a partir da lista de compras: seleção de loja ativa, revisão de itens (checkbox + quantidade), nota opcional, confirmação. `[deps: FE-B01, B03, B06]` `[ref: 02 T-20/21 (novas), 01 F3-CLI-07]` **Fase 3**
 - [ ] **FE-C10 · T-22 Minhas encomendas** — Lista de encomendas do cliente com estado-badge, detalhe simples, cancelamento quando permitido. `[deps: FE-B02, B07]` `[ref: 02 T-22 (nova), 01 F3-CLI-07]` **Fase 3**
 
+### FE-Q — Portal do cliente v2 (redesign visual, benchmark de UI de receitas externo)
+
+- [x] **FE-Q01 · Camada de fotos + prompts** — `src/data/recipe-photos.ts` (lookup `recipeId → foto`, vazio/tipado) + 18× `public/images/receitas/<slug>/PROMPT.md`, um por receita de `RECIPE_CATALOG`. `[deps: —]` `[ref: plano portal v2]`
+- [x] **FE-Q02 · MealCard v2** — Variante foto-primeiro (16:9, overlay em gradiente, `MacroRing sm` como selo) quando `getRecipePhoto` resolve; sem foto mantém o layout original inalterado. `[deps: FE-Q01]`
+- [x] **FE-Q03 · Saudação no dashboard** — `/plano` com saudação por hora do dia + primeiro nome (`getSession()?.name`, já existente). `[deps: —]`
+- [x] **FE-Q04 · RecipeStatCard + RecipeHero** — Cartão de estatística preenchido (âmbar/floresta) e hero de foto/fallback 4:3, componentes novos e independentes do `KpiCard` admin. `[deps: FE-Q01]`
+- [x] **FE-Q05 · Redesign do detalhe da receita** — `page.module.css` novo (antes só `style={{}}` inline); `RecipeHero` + par de `RecipeStatCard` (Tempo/Custo); "Trocar este prato" promovido a CTA principal sempre visível (antes só aparecia depois de 👎), sem campo de texto livre. `[deps: FE-Q04]`
+- [ ] **FE-Q06 · Motivo livre na troca** (opcional/adiada) — Só se/quando `POST .../swap` aceitar um campo `reason`; a UX do `HeroQuiz` freeform já está pronta a reaproveitar. `[deps: contrato /swap ganhar `reason`]`
+- [x] **FE-Q07 · Fotos das 18 receitas** — As 18 fotos (ChatGPT) entregues em `public/images/receitas/<slug>/`, comprimidas para `photo.webp` (~1280px, qualidade 78, ~100–200 KB cada vs. ~2.5 MB no PNG bruto) e mapeadas em `recipe-photos.ts` por `recipeId`. PNGs brutos ficam fora do git (`.gitignore`). `[deps: FE-Q01]`
+- [x] **FE-Q08 · Polimento /plano/gerar** — Fundo em gradiente radial (`--amber-soft` → `--cream`) a condizer com os novos cartões (RecipeStatCard/MealCard). `[deps: —]`
+- [x] **FE-Q09 · Limpeza de estilos inline em /compras** — `compras/page.module.css` novo; `compras/page.tsx` passa a usar classes, sem mudança de layout/comportamento. `[deps: —]`
+
+- [ ] **FE-Q10 · MealCard compacto (layout único)** — Unifica os dois modos atuais do `MealCard` (foto 16:9 + overlay / sem foto) num único layout horizontal: miniatura quadrada ~84px + texto + `MacroRing sm` no fim da linha (flex, não absolute). Inspirado no ecrã "T-04 Dashboard do Plano" gerado pelo Stitch MCP. Spec: `docs/superpowers/specs/2026-07-19-mealcard-compacto-stitch-design.md`. `[deps: FE-Q02 (substitui)]`
+
+Backlog (não agendado): **Modo Cozinhar** (temporizador circular passo-a-passo, inspirado no benchmark) — feature nova maior, precisa de modelo de dados próprio (tempo por passo não existe hoje); fica para uma sessão de planeamento dedicada.
+
+### FE-R — Lista de compras: "já tenho isto" (despensa por item)
+
+Spec: `docs/superpowers/specs/2026-07-19-lista-compras-ja-tenho-design.md`. Feature funcional (não visual) — o cliente indica quanto de cada ingrediente já tem em casa, e a lista/custo "a comprar" ajustam-se. Quantidade exata (não binário); só a partir dos itens já gerados na lista atual (sem catálogo de ingredientes pesquisável); reinicia sempre que o plano é regenerado ou uma refeição é trocada (sem persistência entre semanas).
+
+- [x] **FE-R01 · `haveQuantity` no contrato + mock** — `ShoppingListItem.haveQuantity` (`src/types/api.d.ts`); `PATCH /me/shopping-list/items/{id}` aceita `{ checked?, haveQuantity? }`; `updateShoppingListItem` (`src/mocks/fixtures.ts`) substitui `setShoppingListItemChecked`, com custo "a comprar" recalculado pro-rata quando há preço de referência. `[deps: —]`
+- [x] **FE-R02 · Hook `useUpdateShoppingItem`** — Generaliza `useToggleShoppingItem` (`src/hooks/useShoppingList.ts`); mesma mutação otimista + fila offline (`src/lib/offline.ts`, `QueuedPatch` generalizado de `QueuedToggle`) para `checked` e `haveQuantity`. `[deps: FE-R01]`
+- [x] **FE-R03 · `ShoppingItemRow` — UI "Já tenho um pouco"** — Componente novo (`src/components/plan/ShoppingItemRow.tsx`), extraído de `ShoppingGroup`; link inline → input numérico na `unit` do item; quantidade "a comprar" e estado "já tens o suficiente" (esbatido, checkbox independente). `[deps: FE-R02]`
+- [x] **FE-R04 · Totais em `/compras`** — Contador "X de Y comprados" e custo estimado no topo já derivam de `ShoppingList.estimatedCostMt`/`checkedItems`, sem mudança de fórmula — confirmado que refletem os valores "a comprar" pós-`haveQuantity`. `[deps: FE-R01]`
+
+Fora do âmbito (decisão explícita no spec): despensa persistente entre semanas, catálogo de ingredientes pesquisável fora da lista atual, conversão de unidades (desnecessária — cada item já chega numa única `unit`).
+
+### FE-S — Controlo de porções ("Pessoas em casa")
+
+Spec: `docs/superpowers/specs/2026-07-19-controlo-porcoes-design.md`. Extraído do mock "T-04 Dashboard Gamificado" do Stitch, descartando os elementos de gamificação (streaks/XP/níveis, contra o `descricao.md` §1). Campo novo no perfil; escala quantidades/custo da lista de compras e das receitas pelo número de pessoas — kcal/macros ficam inalterados (são por pessoa, não por casa).
+
+- [ ] **FE-S01 · Contrato `householdSize`** — Novo campo `Profile.householdSize?: number` (1–8, default 1) no OpenAPI (`MOCK-01`) + tipos regenerados (`MOCK-03`). `[deps: MOCK-01, MOCK-03]`
+- [ ] **FE-S02 · Onboarding — passo "Quantas pessoas moram contigo?"** — Novo passo do wizard (stepper -/N/+), depois de "refeições por dia". `[deps: FE-S01, FE-C02]`
+- [ ] **FE-S03 · Perfil — secção "Pessoas em casa"** — Nova `ProfileSectionCard` editável, mesmo padrão das restantes secções. `[deps: FE-S01, FE-C07]`
+- [ ] **FE-S04 · Mock — escalar lista de compras + ingredientes da receita** — Os handlers de `GET /me/shopping-list` e das leituras de `RecipeSnapshot` (`.../entries/{id}`, `.../active`) multiplicam `quantity`/`estimatedCostMt` pelo `householdSize` do perfil; `kcal`/`macros` inalterados. `[deps: FE-S01]`
+
+Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido no dashboard para pedir uma receita ad-hoc (mesmo mock do Stitch); implica endpoint de geração novo — fica para uma sessão de planeamento dedicada, como o Modo Cozinhar.
+
 ### FE-D — Telas do Portal Admin (paralelas entre si; deps indicadas + MOCK-02)
 
 - [x] **FE-D01 · T-09 Dashboard de métricas** — KPIs, gráfico planos/dia, top/bottom receitas, custo IA, seletor de período. `[deps: FE-B09]` `[ref: 02 T-09, 01 F2-ADM-06]` *(inclui o shell de navegação admin — sidebar/topbar, `AdminShell`/`AdminSidebar`/`AdminTopbar` — que FE-D02/D03/D06/D07 reutilizam)*
@@ -85,6 +123,17 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [ ] **FE-L02 · T-23/T-24 Produtos da loja** — Tabela (DataTable) + formulário (nome, categoria, unidade, preço); sem seletor de loja. `[deps: FE-B06, B07, FE-L01]` `[ref: 02 T-23/24 (novas), 01 F3-LOJ-01]`
 - [ ] **FE-L03 · T-25 Import Excel da loja** — Reaproveita o padrão do antigo T-16: drag-&-drop, pré-visualização, confirmação, resultado. `[deps: FE-B03, B07, FE-L01]` `[ref: 02 T-25 (nova), 01 F3-LOJ-02]`
 - [ ] **FE-L04 · T-26/T-27 Encomendas da loja** — Lista (DataTable, filtro por estado) + detalhe com botões de transição de estado válidos. `[deps: FE-B03, B07, FE-L01]` `[ref: 02 T-26/27 (novas), 01 F3-LOJ-03]`
+
+### FE-P — Landing v2 ("excitação") — a v1 (FE-P01) foi implementada via `docs/superpowers/specs/2026-07-14-landing-page-design.md`, fora deste quadro; esta faixa cobre a evolução seguinte, feita depois de comparar com Fotor/DishGen.
+
+- [x] **FE-P02 · Fundações de movimento** — Tokens `--motion-*`/`--ease-out` em `tokens.css`, `Reveal.tsx` (IntersectionObserver) + `motion.module.css`, transição do FAQ (`grid-template-rows: 0fr→1fr`), hover-lift nos cartões existentes, guard `prefers-reduced-motion`. `[deps: —]` `[ref: plano landing v2 §3]`
+- [x] **FE-P03 · Hero v2** — Novo headline/sub/microcopy; `HeroQuiz` v2 (plano por `goal × condition`, beat "a compor…", count-up de kcal, modo de texto livre com chips de exemplo); `LandingNav` com âncoras (`#como-funciona`, `#pratos`, `#faq`) + ênfase do CTA ao scroll. `[deps: FE-P02]` `[ref: §2.1-2.2]`
+- [x] **FE-P04 · Galeria de pratos + benefícios** — `DishGallery.tsx` (8 pratos moçambicanos, expande com `MacroRing` + CTA), `dish-gallery-data.ts`, `BenefitCards.tsx` (ícones Lucide como fallback). `[deps: FE-P02]` `[ref: §2.4-2.5]`
+- [x] **FE-P05 · Product showcase** — `ProductShowcase.tsx` + `showcase-fixtures.ts` (tipadas contra `src/types/api.d.ts`) a renderizar `MealCard`/`DayTabs`/`MacroRing`/`ShoppingGroup` reais numa moldura CSS; substitui o antigo painel estático de macros. `[deps: FE-P02]` `[ref: §2.7]`
+- [x] **FE-P06 · Prova honesta + FAQ v2 + CTA final + montagem** — `ProofStrip.tsx`, cartão "Em desenvolvimento aberto" na secção de confiança, FAQ 4→7 perguntas, CTA final v2, CTAs por secção, ordem final das secções em `LandingPage.tsx`. `[deps: FE-P03..P05]` `[ref: §2.3, 2.10-2.12]`
+- [x] **FE-P07 · Prompts de imagens da landing** — `PROMPT.md` para P-08 (prato do hero), P-09 (galeria de 8 pratos), P-10 (ícones de benefícios), P-11 (fundo do CTA) em `public/images/{hero-prato,pratos,beneficios,fundo-cta}/`; página funciona só com os fallbacks CSS/Lucide, sem depender destas imagens. `[deps: nenhum código]` `[ref: 02 §4]`
+- [x] **FE-P08 · QA da landing v2** — `e2e/landing.spec.ts` + `playwright.config.ts` (novo, o projeto ainda não tinha config Playwright) cobrindo secções/quiz/FAQ/CTAs/reduced-motion/360px — 8/8 a passar (usa o Chrome do sistema via `channel: "chrome"`, porque `cdn.playwright.dev` não é alcançável neste ambiente para descarregar o Chromium próprio do Playwright); `npm run build`+`lint`+`typecheck` também verificados. `[deps: FE-P06]` `[ref: §7]`
+- [ ] **FE-P09 · Polimento da landing (mock Stitch)** — Hero com `hero-prato.webp` como fundo full-bleed (≥1024px) + `HeroQuiz` sobreposto em cartão "vidro" (`backdrop-filter`) + selo estático "Sugestão do Dia"; sombra na `LandingNav` a partir de ~20px de scroll; disclaimer médico do rodapé movido para dentro de `.footerBrand`, em itálico. Mobile mantém-se inalterado (sem a foto grande). Spec: `docs/superpowers/specs/2026-07-19-landing-polimento-stitch-design.md`. `[deps: FE-P03 (HeroQuiz), FE-P06 (footer)]`
 
 ### FE-E — Qualidade frontend
 
@@ -171,6 +220,9 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - **FE-D03** · T-12/T-13 Lojas
 - **FE-D06** · T-17/T-18 Receitas
 - **FE-D07** · T-19 Ingredientes
+- **FE-P09** · Polimento da landing (mock Stitch) — próxima a executar
+- **FE-Q10** · MealCard compacto (mock Stitch) — próxima a executar
+- **FE-S01..S04** · Controlo de porções (mock Stitch) — próximas a executar
 
 ## Concluído
 

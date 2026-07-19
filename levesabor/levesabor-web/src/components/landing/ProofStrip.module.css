@@ -1,0 +1,21 @@
+/* FE-P06 · ProofStrip — faixa de afirmações honestas */
+
+.strip {
+  background: var(--tan);
+  padding: 18px clamp(20px, 6vw, 56px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px clamp(20px, 4vw, 40px);
+}
+
+.claim {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 0;
+  white-space: nowrap;
+}

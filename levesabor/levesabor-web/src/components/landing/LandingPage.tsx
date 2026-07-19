@@ -1,21 +1,28 @@
-// FE-P01 · LandingPage — secções estáticas da landing pública (project/Leve Sabor AI.dc.html)
+// FE-P01/FE-P06 · LandingPage — landing v2 (project/Leve Sabor AI.dc.html + plano "excitação")
+import Image from "next/image";
 import Link from "next/link";
+import { UserRound, Sparkles, BookOpen, ShoppingBasket, Store } from "lucide-react";
 import { LandingNav } from "./LandingNav";
 import { HeroQuiz } from "./HeroQuiz";
 import { FaqAccordion } from "./FaqAccordion";
-import { MacroRing } from "@/components/macro-ring/MacroRing";
+import { ProofStrip } from "./ProofStrip";
+import { BenefitCards } from "./BenefitCards";
+import { DishGallery } from "./DishGallery";
+import { ProductShowcase } from "./ProductShowcase";
+import { Reveal } from "./Reveal";
 import { Chip } from "@/components/ui/Chip";
 import styles from "./LandingPage.module.css";
 
 const STEPS = [
-  { num: "01", title: "Perfil", desc: "Conta-nos o teu objetivo, condições de saúde e o que gostas de comer." },
-  { num: "02", title: "A IA gera o plano", desc: "A Leve Sabor cria um plano semanal com pratos moçambicanos reais." },
-  { num: "03", title: "Receitas", desc: "Cada refeição vem com receita simples e ingredientes fáceis de encontrar." },
-  { num: "04", title: "Lista de compras", desc: "Recebes a lista da semana, organizada e sem desperdício." },
+  { num: "01", title: "Perfil", desc: "Conta-nos o teu objetivo, condições de saúde e o que gostas de comer.", icon: UserRound },
+  { num: "02", title: "A IA gera o plano", desc: "A Leve Sabor cria um plano semanal com pratos moçambicanos reais.", icon: Sparkles },
+  { num: "03", title: "Receitas", desc: "Cada refeição vem com receita simples e ingredientes fáceis de encontrar.", icon: BookOpen },
+  { num: "04", title: "Lista de compras", desc: "Recebes a lista da semana, organizada e sem desperdício.", icon: ShoppingBasket },
   {
     num: "05",
     title: "Encomenda à loja parceira",
     desc: "Passa a lista para uma encomenda e combina entrega/pagamento diretamente com a loja.",
+    icon: Store,
   },
 ];
 
@@ -65,8 +72,6 @@ const SCENARIOS = [
   },
 ];
 
-const SHOWCASE_MACROS = { proteina: 26, carbs: 48, gordura: 16, fibra: 10 };
-
 export function LandingPage() {
   return (
     <div className={styles.page}>
@@ -75,10 +80,10 @@ export function LandingPage() {
       <section id="top" className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <h1 className={styles.heroTitle}>O teu plano alimentar, feito para a tua vida.</h1>
+            <h1 className={styles.heroTitle}>Comida moçambicana de verdade. Um plano feito para ti.</h1>
             <p className={styles.heroSubtitle}>
-              A Leve Sabor cria planos alimentares à tua medida — com comida real, moçambicana, pensada para o teu
-              orçamento, os teus gostos e a tua saúde.
+              Diz-nos o teu objetivo e a tua saúde. A Leve Sabor devolve um plano semanal com matapa, xima, caril —
+              ajustado ao teu orçamento.
             </p>
             <div className={styles.heroActions}>
               <a href="#demo" className={styles.heroPrimaryCta}>
@@ -88,14 +93,42 @@ export function LandingPage() {
                 Ver como funciona ↓
               </a>
             </div>
+            <p className={styles.heroMicrocopy}>Grátis · sem cartão de crédito · 2 minutos</p>
             <p className={styles.heroDisclaimer}>
               A Leve Sabor não substitui o teu médico ou nutricionista — trabalha sempre a par de quem já cuida da
               tua saúde.
             </p>
           </div>
           <div className={styles.heroDemo}>
+            <Image
+              src="/images/hero-prato/hero-prato.webp"
+              alt=""
+              width={960}
+              height={960}
+              priority
+              className={styles.heroDish}
+              aria-hidden="true"
+            />
             <HeroQuiz />
           </div>
+        </div>
+      </section>
+
+      <ProofStrip />
+
+      <section className={styles.section}>
+        <div className={styles.sectionInner}>
+          <BenefitCards />
+        </div>
+      </section>
+
+      <section id="pratos" className={styles.section}>
+        <div className={styles.sectionInner}>
+          <h2 className={styles.sectionTitle}>Pratos que já conheces</h2>
+          <p className={styles.sectionLead}>
+            Toca num prato para ver as calorias e macros — é assim que cada refeição do teu plano vai aparecer.
+          </p>
+          <DishGallery />
         </div>
       </section>
 
@@ -104,14 +137,28 @@ export function LandingPage() {
           <h2 className={styles.sectionTitle}>Como funciona</h2>
           <p className={styles.sectionLead}>Cinco passos, do teu perfil à encomenda.</p>
           <div className={styles.stepsGrid}>
-            {STEPS.map((step) => (
-              <div key={step.num} className={styles.stepCard}>
-                <span className={styles.stepNum}>{step.num}</span>
-                <p className={styles.stepTitle}>{step.title}</p>
-                <p className={styles.stepDesc}>{step.desc}</p>
-              </div>
+            {STEPS.map((step, index) => (
+              <Reveal key={step.num} delay={index * 70}>
+                <div className={styles.stepCard}>
+                  <step.icon size={22} strokeWidth={1.6} className={styles.stepIcon} aria-hidden="true" />
+                  <span className={styles.stepNum}>{step.num}</span>
+                  <p className={styles.stepTitle}>{step.title}</p>
+                  <p className={styles.stepDesc}>{step.desc}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
+          <Link href="/registo" className={styles.stepsCta}>
+            Começa pelo passo 01 — Criar conta grátis
+          </Link>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionInner}>
+          <h2 className={styles.sectionTitle}>Vê o que vais receber</h2>
+          <p className={styles.sectionLead}>Sem fotos de stock — os componentes que já usamos no produto real.</p>
+          <ProductShowcase />
         </div>
       </section>
 
@@ -120,39 +167,31 @@ export function LandingPage() {
           <h2 className={styles.sectionTitle}>Pede. A Leve Sabor responde.</h2>
           <p className={styles.sectionLead}>Exemplos reais do tipo de pedido que podes fazer — e do que recebes de volta.</p>
           <div className={styles.orderGrid}>
-            {ORDER_CARDS.map((card) => (
-              <div key={card.dish} className={styles.orderCard}>
-                <div className={styles.orderRequest}>
-                  <p className={styles.orderLabel}>Pedido</p>
-                  <p className={styles.orderPedido}>&ldquo;{card.pedido}&rdquo;</p>
-                </div>
-                <div className={styles.orderResponse}>
-                  <p className={styles.orderLabelResponse}>Leve Sabor diz</p>
-                  <p className={styles.orderDish}>{card.dish}</p>
-                  <div className={styles.orderChips}>
-                    {card.chips.map((chip) => (
-                      <Chip key={chip} variant="tan">
-                        {chip}
-                      </Chip>
-                    ))}
+            {ORDER_CARDS.map((card, index) => (
+              <Reveal key={card.dish} delay={index * 60}>
+                <div className={styles.orderCard}>
+                  <div className={styles.orderRequest}>
+                    <p className={styles.orderLabel}>Pedido</p>
+                    <p className={styles.orderPedido}>&ldquo;{card.pedido}&rdquo;</p>
+                  </div>
+                  <div className={styles.orderResponse}>
+                    <p className={styles.orderLabelResponse}>Leve Sabor diz</p>
+                    <p className={styles.orderDish}>{card.dish}</p>
+                    <div className={styles.orderChips}>
+                      {card.chips.map((chip) => (
+                        <Chip key={chip} variant="tan">
+                          {chip}
+                        </Chip>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.macroShowcase}>
-          <div className={styles.macroRingWrap}>
-            <MacroRing macros={SHOWCASE_MACROS} kcal={640} size="lg" />
-          </div>
-          <div className={styles.macroText}>
-            <p className={styles.macroEyebrow}>Prato do dia</p>
-            <p className={styles.macroDish}>Feijão nhemba com arroz e couve refogada</p>
-            <p className={styles.macroNote}>Valores ilustrativos, por porção.</p>
-          </div>
+          <Link href="/registo" className={styles.stepsCta}>
+            Cria a tua conta e faz o teu primeiro pedido →
+          </Link>
         </div>
       </section>
 
@@ -196,10 +235,20 @@ export function LandingPage() {
               comida que já conhece e já gosta.
             </p>
           </div>
+          <div>
+            <p className={styles.trustEyebrow}>Em desenvolvimento aberto</p>
+            <p className={styles.trustVision}>
+              A Leve Sabor está em construção — ainda sem utilizadores, sem promessas infladas. Os primeiros a
+              entrar moldam o produto: cada feedback chega diretamente à equipa.
+            </p>
+            <a href="mailto:ola@levesabor.ai" className={styles.trustContact}>
+              Fala connosco: ola@levesabor.ai
+            </a>
+          </div>
         </div>
       </section>
 
-      <section className={styles.section}>
+      <section id="faq" className={styles.section}>
         <div className={styles.faqInner}>
           <h2 className={styles.sectionTitle}>Perguntas diretas</h2>
           <FaqAccordion />
@@ -208,8 +257,10 @@ export function LandingPage() {
 
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
-          <p className={styles.ctaTitle}>Sê dos primeiros a experimentar.</p>
-          <p className={styles.ctaLead}>Cria a tua conta grátis e recebe o teu primeiro plano alimentar em minutos.</p>
+          <p className={styles.ctaTitle}>A tua primeira semana de planos está à espera.</p>
+          <p className={styles.ctaLead}>
+            Conta grátis, sem cartão. O plano chega em minutos — com comida que já conheces.
+          </p>
           <Link href="/registo" className={styles.ctaButton}>
             Criar a minha conta grátis
           </Link>
