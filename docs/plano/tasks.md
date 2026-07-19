@@ -96,6 +96,17 @@ Spec: `docs/superpowers/specs/2026-07-19-lista-compras-ja-tenho-design.md`. Feat
 
 Fora do âmbito (decisão explícita no spec): despensa persistente entre semanas, catálogo de ingredientes pesquisável fora da lista atual, conversão de unidades (desnecessária — cada item já chega numa única `unit`).
 
+### FE-S — Controlo de porções ("Pessoas em casa")
+
+Spec: `docs/superpowers/specs/2026-07-19-controlo-porcoes-design.md`. Extraído do mock "T-04 Dashboard Gamificado" do Stitch, descartando os elementos de gamificação (streaks/XP/níveis, contra o `descricao.md` §1). Campo novo no perfil; escala quantidades/custo da lista de compras e das receitas pelo número de pessoas — kcal/macros ficam inalterados (são por pessoa, não por casa).
+
+- [ ] **FE-S01 · Contrato `householdSize`** — Novo campo `Profile.householdSize?: number` (1–8, default 1) no OpenAPI (`MOCK-01`) + tipos regenerados (`MOCK-03`). `[deps: MOCK-01, MOCK-03]`
+- [ ] **FE-S02 · Onboarding — passo "Quantas pessoas moram contigo?"** — Novo passo do wizard (stepper -/N/+), depois de "refeições por dia". `[deps: FE-S01, FE-C02]`
+- [ ] **FE-S03 · Perfil — secção "Pessoas em casa"** — Nova `ProfileSectionCard` editável, mesmo padrão das restantes secções. `[deps: FE-S01, FE-C07]`
+- [ ] **FE-S04 · Mock — escalar lista de compras + ingredientes da receita** — Os handlers de `GET /me/shopping-list` e das leituras de `RecipeSnapshot` (`.../entries/{id}`, `.../active`) multiplicam `quantity`/`estimatedCostMt` pelo `householdSize` do perfil; `kcal`/`macros` inalterados. `[deps: FE-S01]`
+
+Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido no dashboard para pedir uma receita ad-hoc (mesmo mock do Stitch); implica endpoint de geração novo — fica para uma sessão de planeamento dedicada, como o Modo Cozinhar.
+
 ### FE-D — Telas do Portal Admin (paralelas entre si; deps indicadas + MOCK-02)
 
 - [x] **FE-D01 · T-09 Dashboard de métricas** — KPIs, gráfico planos/dia, top/bottom receitas, custo IA, seletor de período. `[deps: FE-B09]` `[ref: 02 T-09, 01 F2-ADM-06]` *(inclui o shell de navegação admin — sidebar/topbar, `AdminShell`/`AdminSidebar`/`AdminTopbar` — que FE-D02/D03/D06/D07 reutilizam)*
@@ -211,6 +222,7 @@ Fora do âmbito (decisão explícita no spec): despensa persistente entre semana
 - **FE-D07** · T-19 Ingredientes
 - **FE-P09** · Polimento da landing (mock Stitch) — próxima a executar
 - **FE-Q10** · MealCard compacto (mock Stitch) — próxima a executar
+- **FE-S01..S04** · Controlo de porções (mock Stitch) — próximas a executar
 
 ## Concluído
 
