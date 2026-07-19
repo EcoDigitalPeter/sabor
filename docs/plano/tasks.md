@@ -133,7 +133,7 @@ Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido 
 - [x] **FE-P06 · Prova honesta + FAQ v2 + CTA final + montagem** — `ProofStrip.tsx`, cartão "Em desenvolvimento aberto" na secção de confiança, FAQ 4→7 perguntas, CTA final v2, CTAs por secção, ordem final das secções em `LandingPage.tsx`. `[deps: FE-P03..P05]` `[ref: §2.3, 2.10-2.12]`
 - [x] **FE-P07 · Prompts de imagens da landing** — `PROMPT.md` para P-08 (prato do hero), P-09 (galeria de 8 pratos), P-10 (ícones de benefícios), P-11 (fundo do CTA) em `public/images/{hero-prato,pratos,beneficios,fundo-cta}/`; página funciona só com os fallbacks CSS/Lucide, sem depender destas imagens. `[deps: nenhum código]` `[ref: 02 §4]`
 - [x] **FE-P08 · QA da landing v2** — `e2e/landing.spec.ts` + `playwright.config.ts` (novo, o projeto ainda não tinha config Playwright) cobrindo secções/quiz/FAQ/CTAs/reduced-motion/360px — 8/8 a passar (usa o Chrome do sistema via `channel: "chrome"`, porque `cdn.playwright.dev` não é alcançável neste ambiente para descarregar o Chromium próprio do Playwright); `npm run build`+`lint`+`typecheck` também verificados. `[deps: FE-P06]` `[ref: §7]`
-- [ ] **FE-P09 · Polimento da landing (mock Stitch)** — Hero com `hero-prato.webp` como fundo full-bleed (≥1024px) + `HeroQuiz` sobreposto em cartão "vidro" (`backdrop-filter`) + selo estático "Sugestão do Dia"; sombra na `LandingNav` a partir de ~20px de scroll; disclaimer médico do rodapé movido para dentro de `.footerBrand`, em itálico. Mobile mantém-se inalterado (sem a foto grande). Spec: `docs/superpowers/specs/2026-07-19-landing-polimento-stitch-design.md`. `[deps: FE-P03 (HeroQuiz), FE-P06 (footer)]`
+- [x] **FE-P09 · Polimento da landing (mock Stitch)** — Hero com `hero-prato.webp` como fundo full-bleed (≥1024px) + `HeroQuiz` sobreposto em cartão "vidro" (`backdrop-filter`) + selo estático "Sugestão do Dia"; sombra na `LandingNav` a partir de ~20px de scroll; disclaimer médico do rodapé movido para dentro de `.footerBrand`, em itálico. Mobile mantém-se inalterado (sem a foto grande). Spec: `docs/superpowers/specs/2026-07-19-landing-polimento-stitch-design.md`. `[deps: FE-P03 (HeroQuiz), FE-P06 (footer)]`
 
 ### FE-E — Qualidade frontend
 
@@ -220,7 +220,6 @@ Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido 
 - **FE-D03** · T-12/T-13 Lojas
 - **FE-D06** · T-17/T-18 Receitas
 - **FE-D07** · T-19 Ingredientes
-- **FE-P09** · Polimento da landing (mock Stitch) — próxima a executar
 - **FE-Q10** · MealCard compacto (mock Stitch) — próxima a executar
 - **FE-S01..S04** · Controlo de porções (mock Stitch) — próximas a executar
 
@@ -252,3 +251,4 @@ Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido 
 - **FE-C07** · T-08 Perfil
 - **FE-C08** · Offline/PWA do cliente (falta apenas QA manual com throttling 3G)
 - **FE-D01** · T-09 Dashboard de métricas
+- **FE-P09** · Polimento da landing (mock Stitch)

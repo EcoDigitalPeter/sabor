@@ -106,9 +106,16 @@ export function LandingPage() {
               width={960}
               height={960}
               priority
-              className={styles.heroDish}
+              className={styles.heroPhoto}
               aria-hidden="true"
             />
+            <div className={styles.heroPhotoOverlay} aria-hidden="true" />
+            <div className={styles.heroPhotoBadge} aria-hidden="true">
+              <Sparkles size={13} strokeWidth={2} className={styles.heroPhotoBadgeIcon} />
+              <span>
+                <strong>Sugestão do Dia</strong> — Matapa com Caranguejo e Xima
+              </span>
+            </div>
             <HeroQuiz />
           </div>
         </div>
@@ -278,6 +285,11 @@ export function LandingPage() {
                 A nossa visão: comida real, adaptada a cada moçambicano — sem depender de quem pode pagar um
                 nutricionista particular.
               </p>
+              <p className={styles.footerDisclaimer}>
+                A Leve Sabor AI não substitui aconselhamento médico ou nutricional profissional. Consulta sempre o
+                teu médico antes de mudanças significativas na tua alimentação, sobretudo se tiveres uma condição de
+                saúde diagnosticada.
+              </p>
             </div>
             <div className={styles.footerContact}>
               <p className={styles.footerContactLabel}>Contacto</p>
@@ -286,11 +298,6 @@ export function LandingPage() {
               </a>
             </div>
           </div>
-          <p className={styles.footerDisclaimer}>
-            A Leve Sabor AI não substitui aconselhamento médico ou nutricional profissional. Consulta sempre o teu
-            médico antes de mudanças significativas na tua alimentação, sobretudo se tiveres uma condição de saúde
-            diagnosticada.
-          </p>
           <p className={styles.footerCopyright}>© 2026 Leve Sabor AI</p>
         </div>
       </footer>

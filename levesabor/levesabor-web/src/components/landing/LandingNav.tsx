@@ -8,10 +8,12 @@ import styles from "./LandingNav.module.css";
 
 export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
+  const [hasShadow, setHasShadow] = useState(false);
 
   useEffect(() => {
     function onScroll() {
       setScrolled(window.scrollY > 400);
+      setHasShadow(window.scrollY > 20);
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -19,7 +21,7 @@ export function LandingNav() {
   }, []);
 
   return (
-    <nav className={styles.nav}>
+    <nav className={[styles.nav, hasShadow ? styles.navShadow : ""].filter(Boolean).join(" ")}>
       <a href="#top" className={styles.brand}>
         <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true" style={{ flex: "none" }}>
           <circle cx="20" cy="20" r="16" fill="none" stroke="var(--ink)" strokeWidth={3} opacity={0.12} />
