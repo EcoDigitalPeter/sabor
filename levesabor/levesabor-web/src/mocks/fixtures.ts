@@ -6,6 +6,7 @@ import type { components } from "@/types/api";
 
 type ErrorCode = components["schemas"]["ErrorCode"];
 type Profile = components["schemas"]["Profile"];
+type Goal = components["schemas"]["Goal"];
 type Macros = components["schemas"]["Macros"];
 type RecipeSnapshot = components["schemas"]["RecipeSnapshot"];
 type MealPlanEntry = components["schemas"]["MealPlanEntry"];
@@ -21,6 +22,8 @@ type Ingredient = components["schemas"]["Ingredient"];
 type Recipe = components["schemas"]["Recipe"];
 type MetricsSummary = components["schemas"]["MetricsSummary"];
 type MealSlot = NonNullable<MealPlanEntry["mealSlot"]>;
+type AdHocRecipeRequest = components["schemas"]["AdHocRecipeRequest"];
+type AdHocRecipeHandle = components["schemas"]["AdHocRecipeHandle"];
 
 // Resultado uniforme para as funções de "serviço" abaixo — handlers.ts traduz para HttpResponse.
 export type MockResult<T> =
@@ -559,6 +562,13 @@ function pickAlternative(entry: MealPlanEntry): RecipeSnapshot | null {
   return candidateId === undefined ? null : cloneRecipe(candidateId);
 }
 
+// FE-T02: mutação partilhada entre o swap (confirm=true) e "guardar num dia" (receita avulsa) —
+// ambos substituem a receita de uma entrada do plano ativo da mesma forma.
+function applyRecipeToEntry(entry: MealPlanEntry, recipe: RecipeSnapshot): void {
+  entry.recipe = recipe;
+  entry.feedback = "NONE";
+}
+
 export function proposeOrApplySwap(
   entryId: number,
   confirm: boolean,
@@ -575,8 +585,7 @@ export function proposeOrApplySwap(
     return errResult("LSA014_NO_ALTERNATIVE", "Sem alternativa disponível para as tuas restrições.", 409);
   }
   if (confirm) {
-    entry.recipe = alternative;
-    entry.feedback = "NONE";
+    applyRecipeToEntry(entry, alternative);
     return okResult({ state: "applied", alternative: { recipe: cloneRecipe(alternative.recipeId!) } });
   }
   return okResult({ state: "proposed", alternative: { recipe: alternative } });
@@ -596,6 +605,20 @@ export function applyRecipeFeedback(recipeId: number, value: "LIKE" | "DISLIKE" 
     return errResult("LSA005_NOT_FOUND", "Receita não encontrada.", 404);
   }
   return okResult(null);
+}
+
+// FE-T02: "guardar num dia" — mesma mutação do swap confirmado, mas com o recipeId escolhido
+// pelo cliente (a receita avulsa) em vez de uma alternativa escolhida pelo servidor.
+export function replaceMealPlanEntry(entryId: number, recipeId: number): MockResult<MealPlanEntry> {
+  const entry = findMealPlanEntry(entryId);
+  if (!entry) {
+    return errResult("LSA005_NOT_FOUND", "Refeição não encontrada.", 404);
+  }
+  if (!RECIPE_CATALOG[recipeId]) {
+    return errResult("LSA005_NOT_FOUND", "Receita não encontrada.", 404);
+  }
+  applyRecipeToEntry(entry, cloneRecipe(recipeId));
+  return okResult({ ...entry, recipe: scaleRecipeSnapshot(entry.recipe) });
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -691,6 +714,68 @@ export function pollMealPlanGeneration(
   }
   if (inFlightGenerationId === id) inFlightGenerationId = null;
   return okResult({ id, status: "READY", mealPlanId: ACTIVE_PLAN_ID });
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// "Pedir receita agora" (FE-T) — receita avulsa fora do plano semanal. Mesmo padrão
+// 202+polling da geração do plano, mas com contador diário próprio (não partilha o
+// dailyGenerationCount da geração semanal — pedir uma receita avulsa não deve bloquear
+// nem ser bloqueado por gerar um plano novo).
+// ─────────────────────────────────────────────────────────────────────────
+const adHocPolls = new Map<number, { polls: number; mealSlot: MealSlot; goal?: Goal; note?: string }>();
+let dailyAdHocCount = 0;
+let nextAdHocId = 9000;
+
+function dislikedRecipeIds(): Set<number> {
+  const ids = new Set<number>();
+  for (const day of activePlan.days ?? []) {
+    for (const entry of day.entries ?? []) {
+      if (entry.feedback === "DISLIKE" && entry.recipe?.recipeId !== undefined) {
+        ids.add(entry.recipe.recipeId);
+      }
+    }
+  }
+  return ids;
+}
+
+function pickAdHocRecipe(mealSlot: MealSlot): RecipeSnapshot {
+  const disliked = dislikedRecipeIds();
+  const allIds = Object.keys(RECIPE_CATALOG).map(Number);
+  // slotOf() só mapeia para PEQUENO_ALMOCO/ALMOCO/JANTAR — a semente de RECIPE_CATALOG não tem
+  // receitas dedicadas a LANCHE. Pedido de LANCHE cai no catálogo inteiro como fallback,
+  // preferindo sempre receitas que o cliente não tenha marcado 👎.
+  const bySlot = allIds.filter((id) => slotOf(id) === mealSlot);
+  const pool = bySlot.length > 0 ? bySlot : allIds;
+  const preferredId = pool.find((id) => !disliked.has(id));
+  const chosenId = preferredId ?? pool[0];
+  return cloneRecipe(chosenId);
+}
+
+export function requestAdHocRecipe(input: AdHocRecipeRequest): MockResult<{ id: number; status: "GENERATING" }> {
+  if (dailyAdHocCount >= 3) {
+    return errResult(
+      "LSA015_ADHOC_LIMIT",
+      "Atingiste o limite diário de 3 pedidos avulsos. Tenta novamente amanhã.",
+      429,
+    );
+  }
+  dailyAdHocCount += 1;
+  const id = nextAdHocId++;
+  adHocPolls.set(id, { polls: 0, mealSlot: input.mealSlot, goal: input.goal, note: input.note });
+  return okResult({ id, status: "GENERATING" }, 202);
+}
+
+export function pollAdHocRecipe(id: number): MockResult<AdHocRecipeHandle> {
+  const record = adHocPolls.get(id);
+  if (!record) {
+    return errResult("LSA005_NOT_FOUND", "Pedido não encontrado.", 404);
+  }
+  record.polls += 1;
+  if (record.polls < 2) {
+    return okResult({ id, status: "GENERATING", recipe: null });
+  }
+  const recipe = pickAdHocRecipe(record.mealSlot);
+  return okResult({ id, status: "READY", recipe: scaleRecipeSnapshot(recipe) ?? recipe });
 }
 
 // ─────────────────────────────────────────────────────────────────────────
