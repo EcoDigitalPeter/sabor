@@ -5,6 +5,17 @@
   border-radius: 20px;
   padding: clamp(22px, 3vw, 30px);
   scroll-margin-top: 90px;
+  position: relative;
+  z-index: 0;
+}
+
+@media (min-width: 1024px) {
+  .card {
+    background: rgba(47, 35, 27, 0.62);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(246, 236, 220, 0.2);
+  }
 }
 
 .eyebrow {
