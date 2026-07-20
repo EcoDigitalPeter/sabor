@@ -28,10 +28,13 @@ import {
   getProfile,
   getShoppingList,
   login,
+  pollAdHocRecipe,
   pollMealPlanGeneration,
   proposeOrApplySwap,
   refreshSession,
   registerAccount,
+  replaceMealPlanEntry,
+  requestAdHocRecipe,
   requestMealPlanGeneration,
   setAdminRecipeStatus,
   updateProfile,
@@ -46,6 +49,8 @@ type FeedbackRequest = components["schemas"]["FeedbackRequest"];
 type RegisterRequest = components["schemas"]["RegisterRequest"];
 type LoginRequest = components["schemas"]["LoginRequest"];
 type SetRecipeStatusRequest = components["schemas"]["SetRecipeStatusRequest"];
+type AdHocRecipeRequest = components["schemas"]["AdHocRecipeRequest"];
+type ReplaceMealPlanEntryRequest = components["schemas"]["ReplaceMealPlanEntryRequest"];
 
 const ok = <T,>(data: T, status = 200) => HttpResponse.json({ status: "success", data }, { status });
 
@@ -91,6 +96,16 @@ export const handlers = [
   // ── Geração do plano (F1-CLI-02) ────────────────────────────────────
   http.post("*/api/v1/me/meal-plans", () => respond(requestMealPlanGeneration())),
 
+  // ── "Pedir receita agora" (FE-T) ────────────────────────────────────
+  http.post("*/api/v1/me/recipes/adhoc", async ({ request }) => {
+    const body = (await request.json()) as AdHocRecipeRequest;
+    return respond(requestAdHocRecipe(body));
+  }),
+
+  http.get("*/api/v1/me/recipes/adhoc/:id", ({ params }) => {
+    return respond(pollAdHocRecipe(Number(params.id)));
+  }),
+
   // IMPORTANTE: "/me/meal-plans/active" (F1-CLI-03) tem de ser registado ANTES de
   // "/me/meal-plans/:id" (polling da geração) — o MSW usa a primeira correspondência
   // do array, e ":id" combinaria com o literal "active" se viesse primeiro.
@@ -114,6 +129,13 @@ export const handlers = [
     const url = new URL(request.url);
     const confirm = url.searchParams.get("confirm") === "true";
     return respond(proposeOrApplySwap(entryId, confirm));
+  }),
+
+  // ── Guardar receita avulsa num dia (FE-T) ───────────────────────────
+  http.post("*/api/v1/me/meal-plans/entries/:id/replace", async ({ params, request }) => {
+    const entryId = Number(params.id);
+    const body = (await request.json()) as ReplaceMealPlanEntryRequest;
+    return respond(replaceMealPlanEntry(entryId, body.recipeId));
   }),
 
   // ── Feedback de receita (F1-CLI-05) ──────────────────────────────────
