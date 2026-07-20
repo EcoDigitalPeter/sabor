@@ -9,7 +9,9 @@
   gap: 32px;
   padding: 40px 24px;
   text-align: center;
-  background: var(--cream);
+  /* FE-Q08: gradiente radial a condizer com os tons dos cartões novos (RecipeStatCard amber,
+     overlay do MealCard) em vez do cream plano — o ecrã de espera ganha a mesma linguagem visual. */
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, var(--amber-soft) 0%, var(--cream) 60%);
 }
 
 .generating {

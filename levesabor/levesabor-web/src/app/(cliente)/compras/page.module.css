@@ -1,0 +1,111 @@
+/* FE-Q09 · Lista de compras — extraído dos style={{}} inline originais, sem mudança de layout */
+
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.offlineBannerWrap {
+  margin-bottom: 16px;
+}
+
+.skeletonSubtitle {
+  margin-bottom: 10px;
+}
+
+.skeletonMeta {
+  margin-bottom: 28px;
+}
+
+.skeletonGroup {
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 1.15rem + 1vw, 1.75rem);
+  color: var(--ink);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.metaLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.progressText {
+  margin: 0;
+  color: var(--clay);
+  font-size: 0.95rem;
+}
+
+/* FE-C08 · badge "por sincronizar" / "syncing" (T-06) — mesma linguagem visual do StatusBadge (pílula, texto a branco). */
+.syncBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.syncBadgeSyncing {
+  background: var(--clay-soft);
+}
+
+.syncBadgePending {
+  background: var(--amber);
+}
+
+.costText {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.costPartial {
+  font-family: var(--font-body);
+  color: var(--clay-soft);
+  font-size: 0.8rem;
+}
+
+.groupList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.primaryPillLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.primaryPillLink:hover {
+  background: var(--terracotta-dark);
+}

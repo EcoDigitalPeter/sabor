@@ -24,9 +24,9 @@ import {
   METRICS_SUMMARY,
   applyRecipeFeedback,
   getActivePlan,
+  getMealPlanEntryForResponse,
   getProfile,
   getShoppingList,
-  findMealPlanEntry,
   login,
   pollMealPlanGeneration,
   proposeOrApplySwap,
@@ -34,8 +34,8 @@ import {
   registerAccount,
   requestMealPlanGeneration,
   setAdminRecipeStatus,
-  setShoppingListItemChecked,
   updateProfile,
+  updateShoppingListItem,
   type MockResult,
 } from "./fixtures";
 
@@ -103,7 +103,7 @@ export const handlers = [
 
   // ── Detalhe de refeição/receita (F1-CLI-04) ─────────────────────────
   http.get("*/api/v1/me/meal-plans/entries/:id", ({ params }) => {
-    const entry = findMealPlanEntry(Number(params.id));
+    const entry = getMealPlanEntryForResponse(Number(params.id));
     if (!entry) return fail("LSA005_NOT_FOUND", "Entrada do plano não encontrada.", 404);
     return ok(entry);
   }),
@@ -129,7 +129,7 @@ export const handlers = [
   http.patch("*/api/v1/me/shopping-list/items/:id", async ({ params, request }) => {
     const itemId = Number(params.id);
     const body = (await request.json()) as SetCheckedRequest;
-    return respond(setShoppingListItemChecked(itemId, body.checked));
+    return respond(updateShoppingListItem(itemId, { checked: body.checked, haveQuantity: body.haveQuantity }));
   }),
 
   // ── Admin (Fase 2) — listagens rasas + 1 patch para gatilho de LSA023 ─

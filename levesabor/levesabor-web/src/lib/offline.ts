@@ -8,16 +8,19 @@
 
 const STORAGE_KEY = "levesabor:offline:shopping-toggle-queue";
 
-export type QueuedToggle = {
+/** FE-R01: patch genérico de item — `checked` (comprado) e/ou `haveQuantity` (já tenho). */
+export type ShoppingItemPatch = { checked?: boolean; haveQuantity?: number };
+
+export type QueuedPatch = {
   id: number;
-  checked: boolean;
+  patch: ShoppingItemPatch;
   /** epoch ms de quando foi colocado em fila — só para depuração/ordenação, sem TTL. */
   queuedAt: number;
 };
 
 export type FlushResult = "ok" | "network-error" | "server-error";
 
-type QueueListener = (queue: QueuedToggle[]) => void;
+type QueueListener = (queue: QueuedPatch[]) => void;
 
 const listeners = new Set<QueueListener>();
 
@@ -25,20 +28,20 @@ function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
-function readQueue(): QueuedToggle[] {
+function readQueue(): QueuedPatch[] {
   if (!isBrowser()) return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as QueuedToggle[]) : [];
+    return Array.isArray(parsed) ? (parsed as QueuedPatch[]) : [];
   } catch {
     // JSON corrompido ou localStorage indisponível — trata como fila vazia.
     return [];
   }
 }
 
-function writeQueue(queue: QueuedToggle[]): void {
+function writeQueue(queue: QueuedPatch[]): void {
   if (isBrowser()) {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
@@ -51,12 +54,19 @@ function writeQueue(queue: QueuedToggle[]): void {
 }
 
 /**
- * Regista (ou substitui) uma operação de toggle pendente para um item. Se o utilizador voltar a
- * tocar no mesmo item antes de sincronizar, só a última intenção fica em fila.
+ * Regista (ou substitui) um patch pendente para um item. Se o utilizador voltar a mexer no mesmo
+ * item antes de sincronizar, os patches fundem-se (ex.: marcar "comprado" e depois ajustar
+ * "já tenho" antes de sincronizar fica como um único patch com os dois campos).
  */
-export function enqueueShoppingToggle(id: number, checked: boolean): void {
-  const queue = readQueue().filter((op) => op.id !== id);
-  queue.push({ id, checked, queuedAt: Date.now() });
+export function enqueueShoppingPatch(id: number, patch: ShoppingItemPatch): void {
+  const queue = readQueue();
+  const existing = queue.find((op) => op.id === id);
+  if (existing) {
+    existing.patch = { ...existing.patch, ...patch };
+    existing.queuedAt = Date.now();
+  } else {
+    queue.push({ id, patch, queuedAt: Date.now() });
+  }
   writeQueue(queue);
 }
 
@@ -67,7 +77,7 @@ export function dequeueShoppingToggle(id: number): void {
 }
 
 /** Lê as operações atualmente em fila (ordem de enfileiramento). */
-export function getQueuedShoppingToggles(): QueuedToggle[] {
+export function getQueuedShoppingToggles(): QueuedPatch[] {
   return readQueue();
 }
 
@@ -93,7 +103,7 @@ export function subscribeShoppingQueue(listener: QueueListener): () => void {
  * - "server-error": o pedido chegou ao servidor e foi rejeitado — não há reconciliação automática
  *   possível, por isso remove da fila e continua (evita ficar preso a repetir um pedido inválido).
  */
-export async function flushShoppingQueue(syncOne: (op: QueuedToggle) => Promise<FlushResult>): Promise<void> {
+export async function flushShoppingQueue(syncOne: (op: QueuedPatch) => Promise<FlushResult>): Promise<void> {
   const queue = readQueue();
   for (const op of queue) {
     const result = await syncOne(op);

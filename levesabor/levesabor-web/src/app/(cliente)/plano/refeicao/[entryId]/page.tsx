@@ -1,20 +1,24 @@
-// FE-C05 · T-05 Detalhe de refeição/receita — MacroRing lg, feedback 👍/👎, troca (F1-CLI-04/05)
+// FE-C05/FE-Q05 · T-05 Detalhe de refeição/receita — foto hero, cartões de estatística,
+// MacroRing lg, feedback 👍/👎, "Trocar este prato" sempre visível (F1-CLI-04/05)
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Info, ThumbsDown, ThumbsUp } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { mealPlanEntryQueryKey, useMealPlanEntry, type MealPlanEntry } from "@/hooks/useMealPlanEntry";
-import { Chip } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MacroRing } from "@/components/macro-ring/MacroRing";
 import { SwapSheet } from "@/components/plan/SwapSheet";
+import { RecipeHero } from "@/components/plan/RecipeHero";
+import { RecipeStatCard } from "@/components/plan/RecipeStatCard";
+import { getRecipePhoto } from "@/data/recipe-photos";
 import type { components } from "@/types/api";
+import styles from "./page.module.css";
 
 type RecipeSnapshot = components["schemas"]["RecipeSnapshot"];
 type FeedbackValue = NonNullable<components["schemas"]["FeedbackRequest"]["value"]>;
@@ -30,47 +34,6 @@ const MEAL_SLOT_LABELS: Record<NonNullable<MealPlanEntry["mealSlot"]>, string> =
   JANTAR: "Jantar",
   LANCHE: "Lanche",
 };
-
-const backLinkStyle: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 6,
-  color: "var(--clay)",
-  textDecoration: "none",
-  fontSize: "0.9rem",
-  fontWeight: 600,
-};
-
-const primaryPillLinkStyle: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "12px 28px",
-  borderRadius: "var(--radius-pill)",
-  background: "var(--terracotta)",
-  color: "#FFFFFF",
-  fontFamily: "var(--font-body)",
-  fontWeight: 600,
-  fontSize: "1rem",
-  textDecoration: "none",
-};
-
-function feedbackButtonStyle(active: boolean, activeColor: string): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 48,
-    height: 48,
-    borderRadius: "var(--radius-pill)",
-    border: active ? "none" : "1.5px solid var(--tan)",
-    background: active ? activeColor : "var(--cream-card)",
-    color: active ? "#FFFFFF" : "var(--clay)",
-    cursor: "pointer",
-  };
-}
-
-const PAGE_MAX_WIDTH = 640;
 
 export default function RefeicaoPage({ params }: { params: { entryId: string } }) {
   const { entryId } = params;
@@ -164,16 +127,20 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
 
   if (isLoading) {
     return (
-      <main style={{ maxWidth: PAGE_MAX_WIDTH, margin: "0 auto", padding: "24px 20px 40px" }}>
-        <Skeleton variant="text" width="140px" height="14px" style={{ marginBottom: 20 }} />
-        <Skeleton variant="text" width="80%" height="30px" style={{ marginBottom: 14 }} />
-        <Skeleton variant="rect" width="200px" height="26px" borderRadius="var(--radius-pill)" style={{ marginBottom: 28 }} />
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+      <main className={styles.main}>
+        <Skeleton variant="text" width="140px" height="14px" className={styles.skeletonBackLink} />
+        <Skeleton variant="rect" width="100%" height="240px" borderRadius="var(--radius-card)" className={styles.skeletonHero} />
+        <Skeleton variant="text" width="80%" height="30px" className={styles.skeletonTitle} />
+        <div className={styles.skeletonStatsRow}>
+          <Skeleton variant="rect" width="100%" height="66px" borderRadius="var(--radius-card)" />
+          <Skeleton variant="rect" width="100%" height="66px" borderRadius="var(--radius-card)" />
+        </div>
+        <div className={styles.skeletonRingRow}>
           <Skeleton variant="circle" width="220px" height="220px" />
         </div>
-        <Skeleton variant="text" width="35%" height="18px" style={{ marginBottom: 14 }} />
+        <Skeleton variant="text" width="35%" height="18px" className={styles.skeletonSectionTitle} />
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} variant="text" height="18px" style={{ marginBottom: 10 }} />
+          <Skeleton key={i} variant="text" height="18px" className={styles.skeletonLine} />
         ))}
       </main>
     );
@@ -182,12 +149,12 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
   if (isError) {
     if (error instanceof ApiError && error.code === "LSA005_NOT_FOUND") {
       return (
-        <main style={{ maxWidth: PAGE_MAX_WIDTH, margin: "0 auto", padding: "24px 20px 40px" }}>
+        <main className={styles.main}>
           <EmptyState
             title="Refeição não encontrada"
             description="Esta refeição pode ter sido removida ou já não existe no teu plano ativo."
             action={
-              <Link href="/plano" style={primaryPillLinkStyle}>
+              <Link href="/plano" className={styles.primaryPillLink}>
                 Voltar ao plano
               </Link>
             }
@@ -197,7 +164,7 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
     }
 
     return (
-      <main style={{ maxWidth: PAGE_MAX_WIDTH, margin: "0 auto", padding: "24px 20px 40px" }}>
+      <main className={styles.main}>
         <ErrorState
           message={error instanceof ApiError ? error.message : "Não foi possível carregar esta receita."}
           onRetry={() => refetch()}
@@ -211,54 +178,29 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
   }
 
   const recipe = entry.recipe;
-  const chipParts = recipe
-    ? [
-        `${recipe.kcal ?? 0} kcal`,
-        `${recipe.prepMinutes ?? 0} min`,
-        ...(recipe.estimatedCostMt != null ? [`${recipe.estimatedCostMt} MT`] : []),
-      ]
-    : [];
+  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
 
   return (
-    <main style={{ maxWidth: PAGE_MAX_WIDTH, margin: "0 auto", padding: "24px 20px 40px" }}>
-      <Link href="/plano" style={backLinkStyle}>
+    <main className={styles.main}>
+      <Link href="/plano" className={styles.backLink}>
         <ArrowLeft size={16} aria-hidden="true" />
         Voltar ao plano
       </Link>
 
-      <div style={{ marginTop: 20, marginBottom: 24 }}>
-        {entry.mealSlot ? (
-          <p
-            style={{
-              margin: "0 0 6px",
-              fontFamily: "var(--font-body)",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              letterSpacing: "0.02em",
-              textTransform: "uppercase",
-              color: "var(--clay-soft)",
-            }}
-          >
-            {MEAL_SLOT_LABELS[entry.mealSlot]}
-          </p>
-        ) : null}
+      <RecipeHero photoSrc={photoSrc} alt={recipe?.name ?? "Receita"} />
 
-        <h1
-          style={{
-            margin: "0 0 14px",
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: "clamp(1.5rem, 1.2rem + 1.2vw, 2rem)",
-            color: "var(--ink)",
-          }}
-        >
-          {recipe?.name ?? "Receita"}
-        </h1>
-
-        {chipParts.length > 0 ? <Chip>{chipParts.join(" · ")}</Chip> : null}
+      <div className={styles.titleBlock}>
+        {entry.mealSlot ? <p className={styles.slotLabel}>{MEAL_SLOT_LABELS[entry.mealSlot]}</p> : null}
+        <h1 className={styles.title}>{recipe?.name ?? "Receita"}</h1>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
+      <div className={styles.statsRow}>
+        <RecipeStatCard label="Tempo de preparação" value={`${recipe?.prepMinutes ?? 0} min`} tone="amber" />
+        <RecipeStatCard label="Custo estimado" value={costLabel} tone="forest" />
+      </div>
+
+      <div className={styles.ringRow}>
         <MacroRing
           size="lg"
           kcal={recipe?.kcal ?? 0}
@@ -271,15 +213,22 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
         />
       </div>
 
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+      {recipe?.healthNote ? (
+        <div className={styles.healthNote}>
+          <Info size={18} color="var(--forest)" aria-hidden="true" className={styles.healthNoteIcon} />
+          <p className={styles.healthNoteText}>{recipe.healthNote}</p>
+        </div>
+      ) : null}
+
+      <div className={styles.actionsBlock}>
+        <div className={styles.feedbackRow}>
           <button
             type="button"
             aria-pressed={entry.feedback === "LIKE"}
             aria-label="Gosto desta receita"
             onClick={() => handleFeedback("LIKE")}
             disabled={feedbackMutation.isPending}
-            style={feedbackButtonStyle(entry.feedback === "LIKE", "var(--forest)")}
+            className={[styles.feedbackButton, entry.feedback === "LIKE" ? styles.feedbackButtonLike : ""].join(" ")}
           >
             <ThumbsUp size={20} aria-hidden="true" />
           </button>
@@ -289,73 +238,42 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
             aria-label="Não gosto desta receita"
             onClick={() => handleFeedback("DISLIKE")}
             disabled={feedbackMutation.isPending}
-            style={feedbackButtonStyle(entry.feedback === "DISLIKE", "var(--terracotta)")}
+            className={[styles.feedbackButton, entry.feedback === "DISLIKE" ? styles.feedbackButtonDislike : ""].join(" ")}
           >
             <ThumbsDown size={20} aria-hidden="true" />
           </button>
-
-          {entry.feedback === "DISLIKE" ? (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleSwapPropose}
-              loading={proposeSwapMutation.isPending}
-              disabled={proposeSwapMutation.isPending}
-            >
-              Trocar este prato
-            </Button>
-          ) : null}
+          <p className={styles.swapMicrocopy}>A Leve Sabor pode sugerir outra opção.</p>
         </div>
 
+        <Button
+          type="button"
+          variant="primary"
+          onClick={handleSwapPropose}
+          loading={proposeSwapMutation.isPending}
+          disabled={proposeSwapMutation.isPending}
+          className={styles.swapCta}
+        >
+          Trocar este prato
+        </Button>
+
         {feedbackError ? (
-          <p role="alert" style={{ color: "var(--error)", fontSize: "0.85rem", margin: "10px 0 0" }}>
+          <p role="alert" className={styles.inlineError}>
             {feedbackError}
           </p>
         ) : null}
         {swapError ? (
-          <p role="alert" style={{ color: "var(--error)", fontSize: "0.85rem", margin: "10px 0 0" }}>
+          <p role="alert" className={styles.inlineError}>
             {swapError}
           </p>
         ) : null}
       </div>
 
-      {recipe?.healthNote ? (
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            alignItems: "flex-start",
-            background: "var(--cream-card-alt)",
-            border: "1px solid var(--tan)",
-            borderRadius: "var(--radius-card-sm)",
-            padding: "14px 16px",
-            marginBottom: 28,
-          }}
-        >
-          <Info size={18} color="var(--forest)" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
-          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--clay)", lineHeight: 1.5 }}>
-            {recipe.healthNote}
-          </p>
-        </div>
-      ) : null}
-
-      <section style={{ marginBottom: 28 }}>
-        <h2
-          style={{
-            margin: "0 0 14px",
-            fontFamily: "var(--font-display)",
-            fontSize: "1.15rem",
-            fontWeight: 700,
-            color: "var(--ink)",
-          }}
-        >
-          Ingredientes
-        </h2>
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Ingredientes</h2>
+        <ul className={styles.ingredientList}>
           {(recipe?.ingredients ?? []).map((line, index) => (
-            <li key={index} style={{ display: "flex", gap: 10, fontSize: "0.95rem", color: "var(--ink)" }}>
-              <span style={{ fontFamily: "var(--font-mono)", color: "var(--clay)", minWidth: 84, flexShrink: 0 }}>
+            <li key={index} className={styles.ingredientItem}>
+              <span className={styles.ingredientQty}>
                 {line.quantity} {line.unit}
               </span>
               <span>{line.name}</span>
@@ -364,49 +282,19 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
         </ul>
       </section>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2
-          style={{
-            margin: "0 0 14px",
-            fontFamily: "var(--font-display)",
-            fontSize: "1.15rem",
-            fontWeight: 700,
-            color: "var(--ink)",
-          }}
-        >
-          Modo de preparação
-        </h2>
-        <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 18 }}>
+      <section className={styles.sectionSteps}>
+        <h2 className={styles.sectionTitle}>Modo de preparação</h2>
+        <ol className={styles.stepList}>
           {(recipe?.steps ?? []).map((step, index) => (
-            <li key={index} style={{ display: "flex", gap: 14 }}>
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 700,
-                  fontSize: "1.05rem",
-                  color: "var(--terracotta)",
-                  flexShrink: 0,
-                }}
-              >
-                {String(step.order ?? index + 1).padStart(2, "0")}
-              </span>
-              <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--ink)", lineHeight: 1.5 }}>{step.text}</p>
+            <li key={index} className={styles.stepItem}>
+              <span className={styles.stepNumber}>{String(step.order ?? index + 1).padStart(2, "0")}</span>
+              <p className={styles.stepText}>{step.text}</p>
             </li>
           ))}
         </ol>
       </section>
 
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: "0.8rem",
-          color: "var(--clay-soft)",
-          borderTop: "1px solid var(--tan)",
-          paddingTop: 16,
-        }}
-      >
-        Esta receita não substitui aconselhamento médico ou nutricional.
-      </p>
+      <p className={styles.disclaimer}>Esta receita não substitui aconselhamento médico ou nutricional.</p>
 
       <SwapSheet
         open={swapOpen}

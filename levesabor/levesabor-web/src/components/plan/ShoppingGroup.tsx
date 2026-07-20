@@ -3,9 +3,9 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { CategoryIcon, type ShoppingCategory } from "@/components/ui/CategoryIcon";
 import type { ShoppingListItem } from "@/hooks/useShoppingList";
+import { ShoppingItemRow } from "./ShoppingItemRow";
 import styles from "./ShoppingGroup.module.css";
 
 export const CATEGORY_LABEL: Record<ShoppingCategory, string> = {
@@ -23,9 +23,17 @@ export type ShoppingGroupProps = {
   /** Colapsado/expandido é estado local do grupo; começa expandido por omissão. */
   defaultExpanded?: boolean;
   onToggleItem: (id: number, checked: boolean) => void;
+  /** FE-R01 · "já tenho X" — quantidade que o cliente já tem em casa, na unit do item. */
+  onChangeHaveQuantity: (id: number, haveQuantity: number) => void;
 };
 
-export function ShoppingGroup({ category, items, defaultExpanded = true, onToggleItem }: ShoppingGroupProps) {
+export function ShoppingGroup({
+  category,
+  items,
+  defaultExpanded = true,
+  onToggleItem,
+  onChangeHaveQuantity,
+}: ShoppingGroupProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const checkedCount = items.filter((item) => item.checked).length;
 
@@ -54,19 +62,18 @@ export function ShoppingGroup({ category, items, defaultExpanded = true, onToggl
       {expanded ? (
         <ul className={styles.list}>
           {items.map((item) => (
-            <li key={item.id} className={styles.item}>
-              <Checkbox
-                label={<span className={styles.itemName}>{item.ingredientName}</span>}
-                checked={item.checked ?? false}
-                onChange={(event) => {
-                  if (item.id === undefined) return;
-                  onToggleItem(item.id, event.target.checked);
-                }}
-              />
-              <span className={styles.quantity}>
-                {item.quantity} {item.unit}
-              </span>
-            </li>
+            <ShoppingItemRow
+              key={item.id}
+              item={item}
+              onToggleChecked={(checked) => {
+                if (item.id === undefined) return;
+                onToggleItem(item.id, checked);
+              }}
+              onChangeHaveQuantity={(haveQuantity) => {
+                if (item.id === undefined) return;
+                onChangeHaveQuantity(item.id, haveQuantity);
+              }}
+            />
           ))}
         </ul>
       ) : null}

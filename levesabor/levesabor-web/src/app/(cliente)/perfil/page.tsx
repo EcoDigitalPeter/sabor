@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Minus, Plus } from "lucide-react";
 import { api, ApiError, queryClient } from "@/lib/api";
 import { logout } from "@/lib/auth";
 import type { components } from "@/types/api";
@@ -25,7 +25,10 @@ type HealthCondition = components["schemas"]["HealthCondition"];
 type BudgetBand = components["schemas"]["BudgetBand"];
 
 // Secções editáveis do cartão (F1-CLI-01) — mesmo vocabulário/enums do onboarding.
-type SectionKey = "objetivo" | "condicao" | "alergias" | "orcamento" | "refeicoes";
+type SectionKey = "objetivo" | "condicao" | "alergias" | "orcamento" | "refeicoes" | "pessoas";
+
+const MIN_HOUSEHOLD = 1;
+const MAX_HOUSEHOLD = 8;
 
 const GOAL_OPTIONS: OptionGroupOption<Goal>[] = [
   { value: "PERDER_PESO", label: "Perder peso" },
@@ -83,6 +86,7 @@ export default function PerfilPage() {
   const [healthDraft, setHealthDraft] = useState<HealthCondition | undefined>(undefined);
   const [budgetDraft, setBudgetDraft] = useState<BudgetBand | undefined>(undefined);
   const [mealsDraft, setMealsDraft] = useState<number | undefined>(undefined);
+  const [householdDraft, setHouseholdDraft] = useState<number | undefined>(undefined);
   const [allergiesDraft, setAllergiesDraft] = useState<string[]>([]);
   const [allergyInput, setAllergyInput] = useState("");
   const [allergiesLocalError, setAllergiesLocalError] = useState<string | undefined>(undefined);
@@ -106,6 +110,7 @@ export default function PerfilPage() {
     if (section === "condicao") setHealthDraft(profile.healthCondition);
     if (section === "orcamento") setBudgetDraft(profile.budgetBand);
     if (section === "refeicoes") setMealsDraft(profile.mealsPerDay ?? 3);
+    if (section === "pessoas") setHouseholdDraft(profile.householdSize ?? 1);
     if (section === "alergias") {
       setAllergiesDraft(profile.allergies ?? []);
       setAllergyInput("");
@@ -166,6 +171,7 @@ export default function PerfilPage() {
       <main className={styles.main}>
         <Skeleton variant="text" width="50%" height="1.4em" className={styles.headerSkeleton} />
         <Skeleton variant="rect" height="64px" />
+        <Skeleton variant="rect" height="88px" />
         <Skeleton variant="rect" height="88px" />
         <Skeleton variant="rect" height="88px" />
         <Skeleton variant="rect" height="88px" />
@@ -361,6 +367,50 @@ export default function PerfilPage() {
             onChange={(value) => setMealsDraft(Number(value))}
             disabled={savingSection("refeicoes")}
           />
+        </ProfileSectionCard>
+
+        <ProfileSectionCard
+          title="Pessoas em casa"
+          editing={editingSection === "pessoas"}
+          saving={savingSection("pessoas")}
+          error={sectionServerError("pessoas")}
+          saveDisabled={householdDraft === undefined || savingSection("pessoas")}
+          displayValue={
+            profile.householdSize
+              ? `${profile.householdSize} ${profile.householdSize === 1 ? "pessoa" : "pessoas"}`
+              : "1 pessoa"
+          }
+          onEdit={() => startEdit("pessoas")}
+          onCancel={cancelEdit}
+          onSave={() => householdDraft !== undefined && save("pessoas", { householdSize: householdDraft })}
+        >
+          <div className={styles.householdStepper}>
+            <button
+              type="button"
+              className={styles.householdButton}
+              onClick={() => setHouseholdDraft((v) => Math.max(MIN_HOUSEHOLD, (v ?? 1) - 1))}
+              disabled={savingSection("pessoas") || (householdDraft ?? 1) <= MIN_HOUSEHOLD}
+              aria-label="Diminuir número de pessoas em casa"
+            >
+              <Minus size={16} aria-hidden="true" />
+            </button>
+            <span className={styles.householdValue} aria-live="polite">
+              {householdDraft ?? 1}
+            </span>
+            <button
+              type="button"
+              className={styles.householdButton}
+              onClick={() => setHouseholdDraft((v) => Math.min(MAX_HOUSEHOLD, (v ?? 1) + 1))}
+              disabled={savingSection("pessoas") || (householdDraft ?? 1) >= MAX_HOUSEHOLD}
+              aria-label="Aumentar número de pessoas em casa"
+            >
+              <Plus size={16} aria-hidden="true" />
+            </button>
+          </div>
+          <p className={styles.householdHint}>
+            Ao contrário das outras secções, isto ajusta já a lista de compras e as receitas do plano
+            atual — não só dos próximos planos.
+          </p>
         </ProfileSectionCard>
       </div>
 

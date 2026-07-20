@@ -1,0 +1,25 @@
+/* FE-Q04 · RecipeHero — foto de destaque 4:3 ou fallback em gradiente */
+
+.wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--cream-card-alt);
+}
+
+.photo {
+  object-fit: cover;
+}
+
+.fallback {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, var(--tan), var(--cream-card-alt));
+  color: var(--terracotta);
+}

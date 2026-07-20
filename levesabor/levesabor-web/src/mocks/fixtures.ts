@@ -520,7 +520,15 @@ function buildInitialPlan(): MealPlan {
 let activePlan: MealPlan = buildInitialPlan();
 
 export function getActivePlan(): MealPlan {
-  return activePlan;
+  const size = getHouseholdSize();
+  if (size === 1) return activePlan;
+  return {
+    ...activePlan,
+    days: activePlan.days?.map((day) => ({
+      ...day,
+      entries: day.entries?.map((entry) => ({ ...entry, recipe: scaleRecipeSnapshot(entry.recipe) })),
+    })),
+  };
 }
 
 export function findMealPlanEntry(entryId: number): MealPlanEntry | undefined {
@@ -529,6 +537,13 @@ export function findMealPlanEntry(entryId: number): MealPlanEntry | undefined {
     if (entry) return entry;
   }
   return undefined;
+}
+
+/** Variante de findMealPlanEntry para respostas ao cliente — ingredientes escalados por householdSize. */
+export function getMealPlanEntryForResponse(entryId: number): MealPlanEntry | undefined {
+  const entry = findMealPlanEntry(entryId);
+  if (!entry) return undefined;
+  return { ...entry, recipe: scaleRecipeSnapshot(entry.recipe) };
 }
 
 // Entrada 21 = Domingo/Jantar. Usa este id para acionar sempre o 409 LSA014_NO_ALTERNATIVE
@@ -593,6 +608,7 @@ let profile: Profile = {
   allergies: [],
   budgetBand: "MEDIO",
   mealsPerDay: 3,
+  householdSize: 1,
 };
 
 export function getProfile(): Profile {
@@ -606,8 +622,35 @@ export function updateProfile(patch: Profile): MockResult<Profile> {
   if (patch.allergies !== undefined && patch.allergies.length > 20) {
     return errResult("LSA001_VALIDATION", "Máximo de 20 alergias/exclusões.", 400);
   }
+  if (patch.householdSize !== undefined && (patch.householdSize < 1 || patch.householdSize > 8)) {
+    return errResult("LSA001_VALIDATION", "O número de pessoas em casa deve ser entre 1 e 8.", 400);
+  }
   profile = { ...profile, ...patch };
   return okResult(profile);
+}
+
+// FE-S04: ponto único de escala por "pessoas em casa" — as quantidades/custos a comprar e os
+// ingredientes das receitas escalam com o householdSize do perfil; kcal/macros nunca escalam
+// (ver docs/superpowers/specs/2026-07-19-controlo-porcoes-design.md §4).
+function getHouseholdSize(): number {
+  return profile.householdSize ?? 1;
+}
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function scaleRecipeSnapshot(recipe: RecipeSnapshot | undefined): RecipeSnapshot | undefined {
+  if (!recipe) return recipe;
+  const size = getHouseholdSize();
+  if (size === 1) return recipe;
+  return {
+    ...recipe,
+    ingredients: recipe.ingredients?.map((line) => ({
+      ...line,
+      quantity: line.quantity != null ? round2(line.quantity * size) : line.quantity,
+    })),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -694,34 +737,75 @@ function buildShoppingList(): ShoppingList {
     ...seed,
     id: index + 1,
     checked: false,
+    // FE-R01: reinicia sempre que a lista é reconstruída (plano novo/troca) — "já tenho" não
+    // persiste entre semanas, ver docs/superpowers/specs/2026-07-19-lista-compras-ja-tenho-design.md.
+    haveQuantity: 0,
   }));
-  const pricedTotal = items.reduce((sum, item) => sum + (item.estimatedCostMt ?? 0), 0);
-  const costIsPartial = items.some((item) => item.estimatedCostMt == null);
   return {
     id: 5001,
     totalItems: items.length,
     checkedItems: 0,
-    estimatedCostMt: pricedTotal,
-    costIsPartial,
+    estimatedCostMt: remainingTotalCost(items),
+    costIsPartial: items.some((item) => item.estimatedCostMt == null),
     items,
   };
 }
 
-// eslint-disable-next-line prefer-const -- mutado pelo PATCH de checked
-let shoppingList: ShoppingList = buildShoppingList();
-
-export function getShoppingList(): ShoppingList {
-  return shoppingList;
+// FE-R01: custo "a comprar" de um item — pro-rata pela quantidade em falta, quando há preço de
+// referência; sem preço, mantém-se null (a UI já trata isso como "estimativa parcial").
+function remainingCost(item: ShoppingListItem): number | null {
+  if (item.estimatedCostMt == null) return null;
+  const quantity = item.quantity ?? 0;
+  if (quantity <= 0) return item.estimatedCostMt;
+  const remaining = Math.max(0, quantity - (item.haveQuantity ?? 0));
+  return item.estimatedCostMt * (remaining / quantity);
 }
 
-export function setShoppingListItemChecked(itemId: number, checked: boolean): MockResult<ShoppingListItem> {
+function remainingTotalCost(items: ShoppingListItem[]): number {
+  return items.reduce((sum, item) => sum + (remainingCost(item) ?? 0), 0);
+}
+
+// eslint-disable-next-line prefer-const -- mutado pelo PATCH de checked/haveQuantity
+let shoppingList: ShoppingList = buildShoppingList();
+
+// FE-S04: base guardada representa sempre 1 pessoa; quantity/estimatedCostMt escalam só na
+// resposta (haveQuantity/checked ficam como estão — é quanto o cliente já tem fisicamente,
+// não depende de para quantas pessoas está a cozinhar).
+function scaleShoppingItem(item: ShoppingListItem): ShoppingListItem {
+  const size = getHouseholdSize();
+  if (size === 1) return item;
+  return {
+    ...item,
+    quantity: item.quantity != null ? round2(item.quantity * size) : item.quantity,
+    estimatedCostMt: item.estimatedCostMt == null ? null : round2(item.estimatedCostMt * size),
+  };
+}
+
+export function getShoppingList(): ShoppingList {
+  const items = (shoppingList.items ?? []).map(scaleShoppingItem);
+  return {
+    ...shoppingList,
+    checkedItems: items.filter((item) => item.checked).length,
+    estimatedCostMt: remainingTotalCost(items),
+    costIsPartial: items.some((item) => item.estimatedCostMt == null),
+    items,
+  };
+}
+
+export type ShoppingListItemPatch = { checked?: boolean; haveQuantity?: number };
+
+export function updateShoppingListItem(itemId: number, patch: ShoppingListItemPatch): MockResult<ShoppingListItem> {
   const item = shoppingList.items?.find((i) => i.id === itemId);
   if (!item) {
     return errResult("LSA005_NOT_FOUND", "Item não encontrado na lista de compras.", 404);
   }
-  item.checked = checked;
-  shoppingList.checkedItems = shoppingList.items?.filter((i) => i.checked).length ?? 0;
-  return okResult(item);
+  if (patch.checked !== undefined) {
+    item.checked = patch.checked;
+  }
+  if (patch.haveQuantity !== undefined) {
+    item.haveQuantity = Math.max(0, patch.haveQuantity);
+  }
+  return okResult(scaleShoppingItem(item));
 }
 
 // ─────────────────────────────────────────────────────────────────────────

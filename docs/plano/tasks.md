@@ -81,7 +81,7 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [x] **FE-Q08 · Polimento /plano/gerar** — Fundo em gradiente radial (`--amber-soft` → `--cream`) a condizer com os novos cartões (RecipeStatCard/MealCard). `[deps: —]`
 - [x] **FE-Q09 · Limpeza de estilos inline em /compras** — `compras/page.module.css` novo; `compras/page.tsx` passa a usar classes, sem mudança de layout/comportamento. `[deps: —]`
 
-- [ ] **FE-Q10 · MealCard compacto (layout único)** — Unifica os dois modos atuais do `MealCard` (foto 16:9 + overlay / sem foto) num único layout horizontal: miniatura quadrada ~84px + texto + `MacroRing sm` no fim da linha (flex, não absolute). Inspirado no ecrã "T-04 Dashboard do Plano" gerado pelo Stitch MCP. Spec: `docs/superpowers/specs/2026-07-19-mealcard-compacto-stitch-design.md`. `[deps: FE-Q02 (substitui)]`
+- [x] **FE-Q10 · MealCard compacto (layout único)** — Unifica os dois modos atuais do `MealCard` (foto 16:9 + overlay / sem foto) num único layout horizontal: miniatura quadrada ~84px + texto + `MacroRing sm` no fim da linha (flex, não absolute). Inspirado no ecrã "T-04 Dashboard do Plano" gerado pelo Stitch MCP. Spec: `docs/superpowers/specs/2026-07-19-mealcard-compacto-stitch-design.md`. `[deps: FE-Q02 (substitui)]`
 
 Backlog (não agendado): **Modo Cozinhar** (temporizador circular passo-a-passo, inspirado no benchmark) — feature nova maior, precisa de modelo de dados próprio (tempo por passo não existe hoje); fica para uma sessão de planeamento dedicada.
 
@@ -100,10 +100,10 @@ Fora do âmbito (decisão explícita no spec): despensa persistente entre semana
 
 Spec: `docs/superpowers/specs/2026-07-19-controlo-porcoes-design.md`. Extraído do mock "T-04 Dashboard Gamificado" do Stitch, descartando os elementos de gamificação (streaks/XP/níveis, contra o `descricao.md` §1). Campo novo no perfil; escala quantidades/custo da lista de compras e das receitas pelo número de pessoas — kcal/macros ficam inalterados (são por pessoa, não por casa).
 
-- [ ] **FE-S01 · Contrato `householdSize`** — Novo campo `Profile.householdSize?: number` (1–8, default 1) no OpenAPI (`MOCK-01`) + tipos regenerados (`MOCK-03`). `[deps: MOCK-01, MOCK-03]`
-- [ ] **FE-S02 · Onboarding — passo "Quantas pessoas moram contigo?"** — Novo passo do wizard (stepper -/N/+), depois de "refeições por dia". `[deps: FE-S01, FE-C02]`
-- [ ] **FE-S03 · Perfil — secção "Pessoas em casa"** — Nova `ProfileSectionCard` editável, mesmo padrão das restantes secções. `[deps: FE-S01, FE-C07]`
-- [ ] **FE-S04 · Mock — escalar lista de compras + ingredientes da receita** — Os handlers de `GET /me/shopping-list` e das leituras de `RecipeSnapshot` (`.../entries/{id}`, `.../active`) multiplicam `quantity`/`estimatedCostMt` pelo `householdSize` do perfil; `kcal`/`macros` inalterados. `[deps: FE-S01]`
+- [x] **FE-S01 · Contrato `householdSize`** — Novo campo `Profile.householdSize?: number` (1–8, default 1) no OpenAPI (`MOCK-01`) + tipos regenerados (`MOCK-03`). `[deps: MOCK-01, MOCK-03]` *(nota: `levesabor-api/openapi.yaml` não existe neste worktree — removido em `1ab41c3`, plano passou a backend dentro do Next.js — campo adicionado à mão em `src/types/api.d.ts`; recriar no OpenAPI quando `BE-A01` existir)*
+- [x] **FE-S02 · Onboarding — passo "Quantas pessoas moram contigo?"** — Novo passo do wizard (stepper -/N/+), depois de "refeições por dia". `[deps: FE-S01, FE-C02]`
+- [x] **FE-S03 · Perfil — secção "Pessoas em casa"** — Nova `ProfileSectionCard` editável, mesmo padrão das restantes secções. `[deps: FE-S01, FE-C07]`
+- [x] **FE-S04 · Mock — escalar lista de compras + ingredientes da receita** — Os handlers de `GET /me/shopping-list` e das leituras de `RecipeSnapshot` (`.../entries/{id}`, `.../active`) multiplicam `quantity`/`estimatedCostMt` pelo `householdSize` do perfil; `kcal`/`macros` inalterados. `[deps: FE-S01]`
 
 Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido no dashboard para pedir uma receita ad-hoc (mesmo mock do Stitch); implica endpoint de geração novo — fica para uma sessão de planeamento dedicada, como o Modo Cozinhar.
 
@@ -220,8 +220,6 @@ Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido 
 - **FE-D03** · T-12/T-13 Lojas
 - **FE-D06** · T-17/T-18 Receitas
 - **FE-D07** · T-19 Ingredientes
-- **FE-Q10** · MealCard compacto (mock Stitch) — próxima a executar
-- **FE-S01..S04** · Controlo de porções (mock Stitch) — próximas a executar
 
 ## Concluído
 
@@ -252,3 +250,5 @@ Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido 
 - **FE-C08** · Offline/PWA do cliente (falta apenas QA manual com throttling 3G)
 - **FE-D01** · T-09 Dashboard de métricas
 - **FE-P09** · Polimento da landing (mock Stitch)
+- **FE-Q10** · MealCard compacto (mock Stitch)
+- **FE-S01..S04** · Controlo de porções (mock Stitch)

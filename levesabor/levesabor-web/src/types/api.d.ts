@@ -637,6 +637,8 @@ export interface components {
             allergies?: string[];
             budgetBand?: components["schemas"]["BudgetBand"];
             mealsPerDay?: number;
+            /** @description Para quantas pessoas cozinhar/comprar; escala quantidades da lista de compras e das receitas (não kcal/macros). Intervalo 1-8, default 1. */
+            householdSize?: number;
         };
         UpdateProfileRequest: components["schemas"]["Profile"];
         ProfileEnvelope: components["schemas"]["ApiResponseVoid"] & {
@@ -748,6 +750,8 @@ export interface components {
             unit?: string;
             checked?: boolean;
             estimatedCostMt?: number | null;
+            /** Quantidade que o cliente já diz ter, na mesma `unit` do item; default 0 (FE-R01). */
+            haveQuantity?: number;
         };
         ShoppingList: {
             /** Format: int64 */
@@ -762,7 +766,9 @@ export interface components {
             data?: components["schemas"]["ShoppingList"];
         };
         SetCheckedRequest: {
-            checked: boolean;
+            checked?: boolean;
+            /** Quantidade que o cliente já diz ter, na mesma `unit` do item (FE-R01). */
+            haveQuantity?: number;
         };
         ShoppingListItemEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["ShoppingListItem"];

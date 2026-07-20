@@ -9,12 +9,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
 import type { components } from "@/types/api";
 import {
-  enqueueShoppingToggle,
+  enqueueShoppingPatch,
   flushShoppingQueue,
   getPendingShoppingSyncCount,
   onBackOnline,
   subscribeShoppingQueue,
   type FlushResult,
+  type ShoppingItemPatch,
 } from "@/lib/offline";
 
 export type ShoppingList = components["schemas"]["ShoppingList"];
@@ -29,16 +30,23 @@ export function useShoppingList() {
   });
 }
 
-type ToggleShoppingItemVars = {
-  id: number;
-  checked: boolean;
-};
+export type ShoppingItemUpdateVars = { id: number } & ShoppingItemPatch;
 
-function toggleShoppingItemRequest({ id, checked }: ToggleShoppingItemVars) {
+function updateShoppingItemRequest({ id, ...patch }: ShoppingItemUpdateVars) {
   return api<ShoppingListItem>(`/me/shopping-list/items/${id}`, {
     method: "PATCH",
-    body: JSON.stringify({ checked }),
+    body: JSON.stringify(patch),
   });
+}
+
+// FE-R01: custo "a comprar" de um item — mesma fórmula pro-rata do mock (src/mocks/fixtures.ts),
+// duplicada aqui para a atualização otimista refletir de imediato, sem esperar pelo round-trip.
+function remainingCost(item: ShoppingListItem): number | null {
+  if (item.estimatedCostMt == null) return null;
+  const quantity = item.quantity ?? 0;
+  if (quantity <= 0) return item.estimatedCostMt;
+  const remaining = Math.max(0, quantity - (item.haveQuantity ?? 0));
+  return item.estimatedCostMt * (remaining / quantity);
 }
 
 /**
@@ -50,32 +58,49 @@ function isNetworkFailure(err: unknown): boolean {
   return !(err instanceof ApiError);
 }
 
-export function useToggleShoppingItem() {
+/**
+ * Mutação genérica sobre um item da lista de compras — aceita `checked` e/ou `haveQuantity` no
+ * mesmo patch (FE-R01). `useToggleShoppingItem` abaixo é um wrapper fino só para `checked`, para
+ * não obrigar a mexer nas chamadas existentes.
+ */
+export function useUpdateShoppingItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: toggleShoppingItemRequest,
-    onMutate: async ({ id, checked }: ToggleShoppingItemVars) => {
+    mutationFn: updateShoppingItemRequest,
+    onMutate: async ({ id, checked, haveQuantity }: ShoppingItemUpdateVars) => {
       await queryClient.cancelQueries({ queryKey: shoppingListQueryKey });
       const previous = queryClient.getQueryData<ShoppingList>(shoppingListQueryKey);
 
       queryClient.setQueryData<ShoppingList>(shoppingListQueryKey, (current) => {
         if (!current?.items) return current;
         const wasChecked = current.items.find((item) => item.id === id)?.checked ?? false;
-        const delta = checked === wasChecked ? 0 : checked ? 1 : -1;
+        const checkedDelta = checked === undefined || checked === wasChecked ? 0 : checked ? 1 : -1;
+
+        const items = current.items.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                ...(checked !== undefined ? { checked } : {}),
+                ...(haveQuantity !== undefined ? { haveQuantity: Math.max(0, haveQuantity) } : {}),
+              }
+            : item,
+        );
+
         return {
           ...current,
-          checkedItems: (current.checkedItems ?? 0) + delta,
-          items: current.items.map((item) => (item.id === id ? { ...item, checked } : item)),
+          checkedItems: (current.checkedItems ?? 0) + checkedDelta,
+          estimatedCostMt: items.reduce((sum, item) => sum + (remainingCost(item) ?? 0), 0),
+          items,
         };
       });
 
       return { previous };
     },
-    onError: (err, { id, checked }, context) => {
+    onError: (err, { id, checked, haveQuantity }, context) => {
       if (isNetworkFailure(err)) {
-        // Offline: fica tal como o utilizador tocou ("funciona offline") e sincroniza-se depois.
-        enqueueShoppingToggle(id, checked);
+        // Offline: fica tal como o utilizador ajustou ("funciona offline") e sincroniza-se depois.
+        enqueueShoppingPatch(id, { checked, haveQuantity });
         return;
       }
       // Erro do servidor (chegou e foi rejeitado) — reverte a atualização otimista, como antes.
@@ -85,11 +110,16 @@ export function useToggleShoppingItem() {
     },
     onSettled: (_data, err) => {
       // Não invalidar em falha de rede: um refetch aqui reverteria o estado otimista antes de o
-      // toggle em fila ter oportunidade de sincronizar.
+      // patch em fila ter oportunidade de sincronizar.
       if (err && isNetworkFailure(err)) return;
       queryClient.invalidateQueries({ queryKey: shoppingListQueryKey });
     },
   });
+}
+
+/** Wrapper fino sobre {@link useUpdateShoppingItem} para o toggle "comprado" (chamadas existentes). */
+export function useToggleShoppingItem() {
+  return useUpdateShoppingItem();
 }
 
 /**
@@ -110,7 +140,7 @@ export function useShoppingSync(): { pendingCount: number; isSyncing: boolean } 
       try {
         await flushShoppingQueue(async (op): Promise<FlushResult> => {
           try {
-            await toggleShoppingItemRequest(op);
+            await updateShoppingItemRequest({ id: op.id, ...op.patch });
             return "ok";
           } catch (err) {
             return isNetworkFailure(err) ? "network-error" : "server-error";

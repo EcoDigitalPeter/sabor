@@ -54,6 +54,8 @@ const ALLERGY_SUGGESTIONS = ["Amendoim", "Marisco", "Lactose"];
 
 const MIN_MEALS = 2;
 const MAX_MEALS = 5;
+const MIN_HOUSEHOLD = 1;
+const MAX_HOUSEHOLD = 8;
 const MAX_ALLERGIES = 20;
 const MAX_ALLERGY_LENGTH = 60;
 
@@ -68,6 +70,7 @@ type OnboardingDraft = {
   allergies: string[];
   budgetBand: BudgetBand | null;
   mealsPerDay: number;
+  householdSize: number;
 };
 
 const DEFAULT_DRAFT: OnboardingDraft = {
@@ -76,6 +79,7 @@ const DEFAULT_DRAFT: OnboardingDraft = {
   allergies: [],
   budgetBand: null,
   mealsPerDay: 3,
+  householdSize: 1,
 };
 
 type StoredDraft = { draft: OnboardingDraft; stepIndex: number };
@@ -204,6 +208,10 @@ export default function OnboardingPage() {
     updateDraft({ mealsPerDay: Math.min(MAX_MEALS, Math.max(MIN_MEALS, draft.mealsPerDay + delta)) });
   }
 
+  function adjustHousehold(delta: number) {
+    updateDraft({ householdSize: Math.min(MAX_HOUSEHOLD, Math.max(MIN_HOUSEHOLD, draft.householdSize + delta)) });
+  }
+
   function handleConfirm() {
     const profile: Profile = {
       goal: draft.goal ?? undefined,
@@ -211,6 +219,7 @@ export default function OnboardingPage() {
       allergies: draft.allergies,
       budgetBand: draft.budgetBand ?? undefined,
       mealsPerDay: draft.mealsPerDay,
+      householdSize: draft.householdSize,
     };
     saveProfile.mutate(profile);
   }
@@ -380,6 +389,38 @@ export default function OnboardingPage() {
       ),
     },
     {
+      id: "pessoas",
+      content: (
+        <div className={styles.step}>
+          <h1 className={styles.question}>Quantas pessoas moram contigo?</h1>
+          <p className={styles.hint}>Usamos isto para ajustar as quantidades da lista de compras.</p>
+          <div className={styles.stepper}>
+            <button
+              type="button"
+              className={styles.stepperButton}
+              onClick={() => adjustHousehold(-1)}
+              disabled={draft.householdSize <= MIN_HOUSEHOLD}
+              aria-label="Diminuir número de pessoas em casa"
+            >
+              <Minus size={18} aria-hidden="true" />
+            </button>
+            <span className={styles.stepperValue} aria-live="polite">
+              {draft.householdSize}
+            </span>
+            <button
+              type="button"
+              className={styles.stepperButton}
+              onClick={() => adjustHousehold(1)}
+              disabled={draft.householdSize >= MAX_HOUSEHOLD}
+              aria-label="Aumentar número de pessoas em casa"
+            >
+              <Plus size={18} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      ),
+    },
+    {
       id: "resumo",
       content: (
         <div className={styles.step}>
@@ -405,6 +446,10 @@ export default function OnboardingPage() {
               <div className={styles.summaryRow}>
                 <dt>Refeições por dia</dt>
                 <dd>{draft.mealsPerDay}</dd>
+              </div>
+              <div className={styles.summaryRow}>
+                <dt>Pessoas em casa</dt>
+                <dd>{draft.householdSize}</dd>
               </div>
             </dl>
           </Card>

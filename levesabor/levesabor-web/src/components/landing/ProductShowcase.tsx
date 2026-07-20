@@ -72,6 +72,7 @@ function ShoppingFrame() {
           category={category as NonNullable<(typeof items)[number]["category"]>}
           items={groupItems}
           onToggleItem={toggle}
+          onChangeHaveQuantity={() => {}}
         />
       ))}
     </div>

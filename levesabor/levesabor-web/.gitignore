@@ -9,3 +9,6 @@ next-env.d.ts
 /public/workbox-*.js
 /playwright-report/
 /test-results/
+
+# Fontes brutas (ChatGPT) das fotos de receitas — só o photo.webp comprimido vai para o repo.
+/public/images/receitas/*/ChatGPT*.png

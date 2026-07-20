@@ -88,12 +88,13 @@
 
 .expandWrap {
   display: grid;
-  grid-template-rows: 0fr;
+  grid-template-rows: minmax(0, 0fr);
+  overflow: hidden;
   transition: grid-template-rows var(--motion-base) var(--ease-out);
 }
 
 .expandWrapOpen {
-  grid-template-rows: 1fr;
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .expandInner {

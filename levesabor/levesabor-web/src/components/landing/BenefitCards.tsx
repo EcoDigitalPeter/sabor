@@ -1,26 +1,26 @@
-// FE-P04 · BenefitCards — quarteto de benefícios (server component, dados estáticos).
-// Ícones Lucide como fallback ship-ready; FE-P07 pode trocar por ilustrações de marca (P-10).
-import { Clock, Wallet, UtensilsCrossed, HeartPulse } from "lucide-react";
+// FE-P04/FE-P07 · BenefitCards — quarteto de benefícios (server component, dados estáticos).
+// Ícones em public/images/beneficios/*.svg (gerados a partir do PROMPT.md dessa pasta); <img>
+// simples em vez de next/image, por serem SVGs decorativos pequenos e locais.
 import styles from "./BenefitCards.module.css";
 
 const BENEFITS = [
   {
-    icon: Clock,
+    icon: "/images/beneficios/poupa-tempo.svg",
     title: "Poupa tempo",
     body: "Deixa de pensar “o que faço hoje?”. O plano da semana chega pronto.",
   },
   {
-    icon: Wallet,
+    icon: "/images/beneficios/orcamento.svg",
     title: "Cabe no orçamento",
     body: "Dizes quanto podes gastar; as receitas respeitam isso.",
   },
   {
-    icon: UtensilsCrossed,
+    icon: "/images/beneficios/sabor.svg",
     title: "Come melhor sem desistir do sabor",
     body: "Menos sal, menos açúcar — sem abrir mão da xima ao domingo.",
   },
   {
-    icon: HeartPulse,
+    icon: "/images/beneficios/saude.svg",
     title: "Cuida da tua saúde",
     body: "Diabetes, hipertensão, celíaca: planos que respeitam a tua condição.",
   },
@@ -29,9 +29,10 @@ const BENEFITS = [
 export function BenefitCards() {
   return (
     <div className={styles.grid}>
-      {BENEFITS.map(({ icon: Icon, title, body }) => (
+      {BENEFITS.map(({ icon, title, body }) => (
         <div key={title} className={styles.card}>
-          <Icon size={26} strokeWidth={1.6} className={styles.icon} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={icon} alt="" aria-hidden="true" width={44} height={44} className={styles.icon} />
           <p className={styles.title}>{title}</p>
           <p className={styles.body}>{body}</p>
         </div>

@@ -20,8 +20,10 @@
 }
 
 .icon {
-  color: var(--terracotta);
-  margin-bottom: 14px;
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 16px;
 }
 
 .title {

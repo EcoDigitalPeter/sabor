@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
+import { getSession } from "@/lib/auth";
 import type { components } from "@/types/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -47,14 +48,23 @@ function formatWeekRange(weekStartIso: string): string {
     : `${start.getDate()} ${startMonth} – ${end.getDate()} ${endMonth}`;
 }
 
+/** Saudação por hora do dia (FE-Q03) — mesmo espírito do "Good Morning" das referências. */
+function timeOfDayGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Bom dia";
+  if (hour < 19) return "Boa tarde";
+  return "Boa noite";
+}
+
 /** Mesma geometria do MealCard real (regra "loading = skeleton com a geometria do conteúdo"). */
 function MealCardSkeleton() {
   return (
     <div className={mealCardStyles.card} aria-hidden="true">
+      <Skeleton variant="rect" width="84px" height="84px" borderRadius="var(--radius-card)" />
       <div className={mealCardStyles.info} style={{ width: "100%" }}>
         <Skeleton variant="text" width="35%" height="0.75em" />
         <Skeleton variant="text" width="72%" height="1.15em" />
-        <Skeleton variant="rect" width="128px" height="24px" borderRadius="var(--radius-pill)" />
+        <Skeleton variant="text" width="30%" height="0.85em" />
       </div>
       <Skeleton variant="circle" width="44px" height="44px" />
     </div>
@@ -64,6 +74,7 @@ function MealCardSkeleton() {
 export default function PlanoPage() {
   const router = useRouter();
   const isOnline = useOnlineStatus();
+  const firstName = getSession()?.name?.split(" ")[0];
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -139,6 +150,11 @@ export default function PlanoPage() {
         <OfflineBanner message="Estás offline — a mostrar o último plano guardado." />
       ) : null}
       <header className={styles.header}>
+        {firstName ? (
+          <p className={styles.greeting}>
+            {timeOfDayGreeting()}, {firstName}
+          </p>
+        ) : null}
         <h1 className={styles.title}>O teu plano · {formatWeekRange(plan.weekStart ?? days[0]?.date ?? "")}</h1>
       </header>
 

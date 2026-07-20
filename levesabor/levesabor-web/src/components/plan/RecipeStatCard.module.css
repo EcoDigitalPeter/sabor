@@ -1,0 +1,34 @@
+/* FE-Q04 · RecipeStatCard — cartão de estatística preenchido */
+
+.card {
+  flex: 1;
+  min-width: 120px;
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+}
+
+.amber {
+  background: var(--amber);
+  color: var(--ink);
+}
+
+.forest {
+  background: var(--forest);
+  color: #ffffff;
+}
+
+.value {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+}

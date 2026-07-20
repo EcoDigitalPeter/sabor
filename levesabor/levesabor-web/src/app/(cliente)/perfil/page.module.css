@@ -131,6 +131,61 @@
   min-width: 0;
 }
 
+/* Pessoas em casa (FE-S03) */
+.householdStepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.householdButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.householdButton:hover:not(:disabled) {
+  border-color: var(--terracotta);
+  color: var(--terracotta);
+}
+
+.householdButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.householdButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.householdValue {
+  min-width: 2ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.householdHint {
+  margin: 8px 0 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--clay-soft);
+}
+
 .logoutRow {
   display: flex;
   justify-content: center;

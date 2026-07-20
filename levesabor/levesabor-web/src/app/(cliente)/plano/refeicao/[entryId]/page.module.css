@@ -1,0 +1,259 @@
+/* FE-Q05 · Detalhe da receita — extraído dos style={{}} inline originais + novo layout hero/stats */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.backLink,
+.primaryPillLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--clay);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.primaryPillLink {
+  justify-content: center;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.primaryPillLink:hover {
+  background: var(--terracotta-dark);
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slotLabel {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--clay-soft);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  color: var(--ink);
+}
+
+.statsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.ringRow {
+  display: flex;
+  justify-content: center;
+}
+
+.healthNote {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--cream-card-alt);
+  border: 1px solid var(--tan);
+  border-radius: var(--radius-card-sm);
+  padding: 14px 16px;
+}
+
+.healthNoteIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.healthNoteText {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--clay);
+  line-height: 1.5;
+}
+
+.actionsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feedbackRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.feedbackButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card);
+  color: var(--clay);
+  cursor: pointer;
+}
+
+.feedbackButtonLike {
+  border: none;
+  background: var(--forest);
+  color: #ffffff;
+}
+
+.feedbackButtonDislike {
+  border: none;
+  background: var(--terracotta);
+  color: #ffffff;
+}
+
+.swapMicrocopy {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--clay-soft);
+}
+
+.swapCta {
+  width: 100%;
+}
+
+.inlineError {
+  color: var(--error);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ingredientList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ingredientItem {
+  display: flex;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.ingredientQty {
+  font-family: var(--font-mono);
+  color: var(--clay);
+  min-width: 84px;
+  flex-shrink: 0;
+}
+
+.stepList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stepItem {
+  display: flex;
+  gap: 14px;
+}
+
+.stepNumber {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--terracotta);
+  flex-shrink: 0;
+}
+
+.stepText {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--clay-soft);
+  border-top: 1px solid var(--tan);
+  padding-top: 16px;
+  margin: 0;
+}
+
+/* ---------- Skeleton (loading) ---------- */
+
+.skeletonBackLink {
+  margin-bottom: 4px;
+}
+
+.skeletonHero {
+  margin-bottom: 4px;
+}
+
+.skeletonTitle {
+  margin-bottom: 4px;
+}
+
+.skeletonStatsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.skeletonRingRow {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.skeletonSectionTitle {
+  margin-top: 8px;
+}
+
+.skeletonLine {
+  margin-bottom: 2px;
+}
