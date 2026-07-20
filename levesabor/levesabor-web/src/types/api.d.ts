@@ -583,7 +583,7 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /** @enum {string} */
-        ErrorCode: "LSA001_VALIDATION" | "LSA002_INVALID_CREDENTIALS" | "LSA003_ACCOUNT_SUSPENDED" | "LSA004_FORBIDDEN" | "LSA005_NOT_FOUND" | "LSA006_DUPLICATE" | "LSA010_PROFILE_INCOMPLETE" | "LSA011_GENERATION_IN_PROGRESS" | "LSA012_GENERATION_LIMIT" | "LSA013_AI_UNAVAILABLE" | "LSA014_NO_ALTERNATIVE" | "LSA020_IMPORT_INVALID_FILE" | "LSA021_INGREDIENT_IN_USE" | "LSA022_LAST_ADMIN" | "LSA023_RECIPE_INCOMPLETE" | "LSA099_INTERNAL";
+        ErrorCode: "LSA001_VALIDATION" | "LSA002_INVALID_CREDENTIALS" | "LSA003_ACCOUNT_SUSPENDED" | "LSA004_FORBIDDEN" | "LSA005_NOT_FOUND" | "LSA006_DUPLICATE" | "LSA010_PROFILE_INCOMPLETE" | "LSA011_GENERATION_IN_PROGRESS" | "LSA012_GENERATION_LIMIT" | "LSA013_AI_UNAVAILABLE" | "LSA014_NO_ALTERNATIVE" | "LSA015_ADHOC_LIMIT" | "LSA020_IMPORT_INVALID_FILE" | "LSA021_INGREDIENT_IN_USE" | "LSA022_LAST_ADMIN" | "LSA023_RECIPE_INCOMPLETE" | "LSA099_INTERNAL";
         ApiResponseVoid: {
             /** @enum {string} */
             status: "success" | "error";
@@ -715,6 +715,28 @@ export interface components {
         };
         GenerationHandleEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["GenerationHandle"];
+        };
+        /** @description "Pedir receita agora" (FE-T) — mini-wizard de receita avulsa fora do plano semanal. */
+        AdHocRecipeRequest: {
+            /** @enum {string} */
+            mealSlot: "PEQUENO_ALMOCO" | "ALMOCO" | "JANTAR" | "LANCHE";
+            goal?: components["schemas"]["Goal"];
+            /** @description Restrição pontual em texto livre, opcional, máx. 140 caracteres. Guardada no pedido mas não filtra a receita escolhida — o mock não tem IA real para a interpretar. */
+            note?: string;
+        };
+        AdHocRecipeHandle: {
+            /** Format: int64 */
+            id?: number;
+            /** @enum {string} */
+            status?: "GENERATING" | "READY" | "FAILED";
+            recipe?: components["schemas"]["RecipeSnapshot"] | null;
+        };
+        AdHocRecipeEnvelope: components["schemas"]["ApiResponseVoid"] & {
+            data?: components["schemas"]["AdHocRecipeHandle"];
+        };
+        ReplaceMealPlanEntryRequest: {
+            /** Format: int64 */
+            recipeId: number;
         };
         MealPlanGenerationEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: {
