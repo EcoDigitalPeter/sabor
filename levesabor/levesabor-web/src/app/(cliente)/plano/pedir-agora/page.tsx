@@ -255,13 +255,6 @@ export default function PedirAgoraPage() {
               <dd>{note.trim() ? note.trim() : "Nenhuma"}</dd>
             </div>
           </dl>
-          {requestAdHoc.isError ? (
-            <ErrorState
-              className={styles.submitError}
-              message={requestAdHoc.error instanceof ApiError ? requestAdHoc.error.message : DEFAULT_ERROR_MESSAGE}
-              onRetry={handleGenerate}
-            />
-          ) : null}
         </div>
       ),
     },
