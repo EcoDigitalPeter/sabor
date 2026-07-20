@@ -105,7 +105,17 @@ Spec: `docs/superpowers/specs/2026-07-19-controlo-porcoes-design.md`. Extraído 
 - [x] **FE-S03 · Perfil — secção "Pessoas em casa"** — Nova `ProfileSectionCard` editável, mesmo padrão das restantes secções. `[deps: FE-S01, FE-C07]`
 - [x] **FE-S04 · Mock — escalar lista de compras + ingredientes da receita** — Os handlers de `GET /me/shopping-list` e das leituras de `RecipeSnapshot` (`.../entries/{id}`, `.../active`) multiplicam `quantity`/`estimatedCostMt` pelo `householdSize` do perfil; `kcal`/`macros` inalterados. `[deps: FE-S01]`
 
-Backlog (não agendado): **"Pedir receita agora"** — botão de acesso rápido no dashboard para pedir uma receita ad-hoc (mesmo mock do Stitch); implica endpoint de geração novo — fica para uma sessão de planeamento dedicada, como o Modo Cozinhar.
+### FE-T — "Pedir receita agora" (receita avulsa fora do plano semanal)
+
+Spec: `docs/superpowers/specs/2026-07-20-pedir-receita-agora-design.md`. Extraído do mesmo mock "T-04 Dashboard Gamificado" do Stitch que originou o `FE-S`; ficou de fora do escopo do `FE-S` por implicar um endpoint de geração novo. Cliente pede uma receita avulsa a qualquer momento (mini-wizard de 4 passos), recebe um cartão de resultado descartável, e pode guardá-lo num dia/refeição do plano ativo ou descartar.
+
+- [ ] **FE-T01 · Contrato — `AdHocRecipeRequest`/`AdHocRecipeHandle`/`LSA015_ADHOC_LIMIT`** — Tipos novos em `src/types/api.d.ts` (hand-editado, como `FE-S01`). `[deps: —]`
+- [ ] **FE-T02 · Mock — geração avulsa + "guardar num dia"** — `applyRecipeToEntry` partilhada (extraída do `swap`), `requestAdHocRecipe`/`pollAdHocRecipe` (padrão 202+polling do T-07, limite próprio 3/dia), `replaceMealPlanEntry`. `[deps: FE-T01]`
+- [ ] **FE-T03 · Mock — handlers novos** — `POST /me/recipes/adhoc`, `GET /me/recipes/adhoc/{id}`, `POST /me/meal-plans/entries/{id}/replace`. `[deps: FE-T02]`
+- [ ] **FE-T04 · Página `/plano/pedir-agora`** — mini-wizard (refeição/objetivo/nota/confirmar, reaproveita `Wizard`/`OptionCard` do onboarding) + ecrã de espera (padrão T-07) + cartão de resultado (padrão T-05: `RecipeHero`/`RecipeStatCard`/`MacroRing lg`) + `BottomSheet` "guardar num dia". `[deps: FE-T03]`
+- [ ] **FE-T05 · Cartão CTA no dashboard + teste e2e** — Cartão "Pedir uma receita" no topo do `/plano`; `e2e/pedir-agora.spec.ts` cobrindo o fluxo completo. `[deps: FE-T04]`
+
+Backlog (não agendado): **Modo Cozinhar** (temporizador circular passo-a-passo, inspirado no benchmark) — feature nova maior, precisa de modelo de dados próprio (tempo por passo não existe hoje); fica para uma sessão de planeamento dedicada.
 
 ### FE-D — Telas do Portal Admin (paralelas entre si; deps indicadas + MOCK-02)
 
