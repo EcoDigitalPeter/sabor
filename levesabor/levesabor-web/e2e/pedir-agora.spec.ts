@@ -30,8 +30,9 @@ async function requestAdHocRecipeFromDashboard(page: Page) {
 }
 
 test.describe("Pedir receita agora", () => {
-  // Um único teste sequencial: o contador diário de pedidos avulsos é estado em memória
-  // partilhado no servidor `next dev` (não isolado por teste) — dividir em dois testes faria
+  // Um único teste sequencial: o contador diário de pedidos avulsos é estado em memória no
+  // módulo de mocks da própria página (MSW client-side, msw/browser) — uma navegação SPA
+  // preserva-o, mas um reload completo (page.goto) reinicia-o. Dividir em dois testes faria
   // com que o consumo de um contaminasse a contagem esperada pelo outro. Este teste cobre o
   // fluxo completo (guardar num dia) na 1ª geração e o limite diário nas seguintes.
   test("fluxo completo + limite diário de pedidos avulsos", async ({ page }) => {
