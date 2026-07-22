@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { BrandIllustration } from "@/components/ui/BrandIllustration";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
@@ -157,6 +158,13 @@ export default function PlanoPage() {
         ) : null}
         <h1 className={styles.title}>O teu plano · {formatWeekRange(plan.weekStart ?? days[0]?.date ?? "")}</h1>
       </header>
+
+      <Card className={styles.adHocCard}>
+        <p className={styles.adHocText}>Não sabes o que cozinhar agora?</p>
+        <Link href="/plano/pedir-agora" className={styles.adHocCta}>
+          Pedir uma receita
+        </Link>
+      </Card>
 
       <DayTabs
         days={days.map((day) => ({ date: day.date ?? "", weekday: day.weekday ?? "" }))}

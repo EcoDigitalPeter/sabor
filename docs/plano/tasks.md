@@ -109,11 +109,11 @@ Spec: `docs/superpowers/specs/2026-07-19-controlo-porcoes-design.md`. Extraído 
 
 Spec: `docs/superpowers/specs/2026-07-20-pedir-receita-agora-design.md`. Extraído do mesmo mock "T-04 Dashboard Gamificado" do Stitch que originou o `FE-S`; ficou de fora do escopo do `FE-S` por implicar um endpoint de geração novo. Cliente pede uma receita avulsa a qualquer momento (mini-wizard de 4 passos), recebe um cartão de resultado descartável, e pode guardá-lo num dia/refeição do plano ativo ou descartar.
 
-- [ ] **FE-T01 · Contrato — `AdHocRecipeRequest`/`AdHocRecipeHandle`/`LSA015_ADHOC_LIMIT`** — Tipos novos em `src/types/api.d.ts` (hand-editado, como `FE-S01`). `[deps: —]`
-- [ ] **FE-T02 · Mock — geração avulsa + "guardar num dia"** — `applyRecipeToEntry` partilhada (extraída do `swap`), `requestAdHocRecipe`/`pollAdHocRecipe` (padrão 202+polling do T-07, limite próprio 3/dia), `replaceMealPlanEntry`. `[deps: FE-T01]`
-- [ ] **FE-T03 · Mock — handlers novos** — `POST /me/recipes/adhoc`, `GET /me/recipes/adhoc/{id}`, `POST /me/meal-plans/entries/{id}/replace`. `[deps: FE-T02]`
-- [ ] **FE-T04 · Página `/plano/pedir-agora`** — mini-wizard (refeição/objetivo/nota/confirmar, reaproveita `Wizard`/`OptionCard` do onboarding) + ecrã de espera (padrão T-07) + cartão de resultado (padrão T-05: `RecipeHero`/`RecipeStatCard`/`MacroRing lg`) + `BottomSheet` "guardar num dia". `[deps: FE-T03]`
-- [ ] **FE-T05 · Cartão CTA no dashboard + teste e2e** — Cartão "Pedir uma receita" no topo do `/plano`; `e2e/pedir-agora.spec.ts` cobrindo o fluxo completo. `[deps: FE-T04]`
+- [x] **FE-T01 · Contrato — `AdHocRecipeRequest`/`AdHocRecipeHandle`/`LSA015_ADHOC_LIMIT`** — Tipos novos em `src/types/api.d.ts` (hand-editado, como `FE-S01`). `[deps: —]`
+- [x] **FE-T02 · Mock — geração avulsa + "guardar num dia"** — `applyRecipeToEntry` partilhada (extraída do `swap`), `requestAdHocRecipe`/`pollAdHocRecipe` (padrão 202+polling do T-07, limite próprio 3/dia), `replaceMealPlanEntry`. `[deps: FE-T01]`
+- [x] **FE-T03 · Mock — handlers novos** — `POST /me/recipes/adhoc`, `GET /me/recipes/adhoc/{id}`, `POST /me/meal-plans/entries/{id}/replace`. `[deps: FE-T02]`
+- [x] **FE-T04 · Página `/plano/pedir-agora`** — mini-wizard (refeição/objetivo/nota/confirmar, reaproveita `Wizard`/`OptionCard` do onboarding) + ecrã de espera (padrão T-07) + cartão de resultado (padrão T-05: `RecipeHero`/`RecipeStatCard`/`MacroRing lg`) + `BottomSheet` "guardar num dia". `[deps: FE-T03]`
+- [x] **FE-T05 · Cartão CTA no dashboard + teste e2e** — Cartão "Pedir uma receita" no topo do `/plano`; `e2e/pedir-agora.spec.ts` cobrindo o fluxo completo. `[deps: FE-T04]`
 
 ### FE-D — Telas do Portal Admin (paralelas entre si; deps indicadas + MOCK-02)
 
@@ -260,3 +260,4 @@ Spec: `docs/superpowers/specs/2026-07-20-pedir-receita-agora-design.md`. Extraí
 - **FE-P09** · Polimento da landing (mock Stitch)
 - **FE-Q10** · MealCard compacto (mock Stitch)
 - **FE-S01..S04** · Controlo de porções (mock Stitch)
+- **FE-T01..T05** · Pedir receita agora (receita avulsa fora do plano semanal)

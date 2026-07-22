@@ -76,3 +76,44 @@
   outline: var(--focus-on-light);
   outline-offset: 2px;
 }
+
+/* FE-T05 · Cartão "Pedir receita agora" no topo do dashboard */
+.adHocCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adHocText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay);
+}
+
+.adHocCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.adHocCta:hover {
+  background: var(--terracotta-dark);
+}
+
+.adHocCta:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
