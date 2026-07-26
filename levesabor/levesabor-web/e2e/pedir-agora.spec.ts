@@ -10,6 +10,8 @@ async function loginAsClient(page: Page) {
   // estável independentemente do texto do label.
   await page.locator("#login-password").fill("password123");
   await page.getByRole("button", { name: "Entrar" }).click();
+  await page.waitForURL("**/inicio");
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Plano" }).click();
   await page.waitForURL("**/plano");
 }
 

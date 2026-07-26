@@ -55,7 +55,7 @@ export default function LoginPage() {
       if (session?.role === "ADMIN") {
         router.push("/admin");
       } else {
-        router.push("/plano");
+        router.push("/inicio");
       }
     } catch (err) {
       // Mensagem nunca distingue "email não existe" de "password errada" (F1-VIS-02) —

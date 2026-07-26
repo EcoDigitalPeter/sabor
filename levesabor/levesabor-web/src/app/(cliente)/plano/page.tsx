@@ -5,10 +5,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { api, ApiError } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import { getSession } from "@/lib/auth";
-import type { components } from "@/types/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -18,44 +16,25 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { BrandIllustration } from "@/components/ui/BrandIllustration";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useActiveMealPlan } from "@/hooks/useActiveMealPlan";
 import { DayTabs } from "@/components/plan/DayTabs";
+import { WeekSelector } from "@/components/plan/WeekSelector";
 import { MealCard } from "@/components/plan/MealCard";
 import { DaySummary } from "@/components/plan/DaySummary";
+import { MonthProgressRing } from "@/components/plan/MonthProgressRing";
+import { useToggleMealPlanEntryCompleted } from "@/hooks/useMealPlanCompleted";
+import {
+  computeStreakDays,
+  formatMonthLabel,
+  sortEntriesBySlot,
+  streakLabel,
+  timeOfDayGreeting,
+  todayIsoDate,
+} from "@/lib/planStats";
 import mealCardStyles from "@/components/plan/MealCard.module.css";
 import styles from "./page.module.css";
 
-type MealPlan = components["schemas"]["MealPlan"];
-
-const SLOT_ORDER: Record<string, number> = { PEQUENO_ALMOCO: 0, ALMOCO: 1, JANTAR: 2, LANCHE: 3 };
-const MONTH_ABBR_PT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
-function todayIsoDate(): string {
-  const now = new Date();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${now.getFullYear()}-${mm}-${dd}`;
-}
-
-/** "12–18 Jul" (mesmo mês) ou "29 Jul – 4 Ago" (semana a cavalo de dois meses). */
-function formatWeekRange(weekStartIso: string): string {
-  const [y, m, d] = weekStartIso.split("-").map(Number);
-  if (!y || !m || !d) return weekStartIso;
-  const start = new Date(y, m - 1, d);
-  const end = new Date(y, m - 1, d + 6);
-  const startMonth = MONTH_ABBR_PT[start.getMonth()];
-  const endMonth = MONTH_ABBR_PT[end.getMonth()];
-  return start.getMonth() === end.getMonth()
-    ? `${start.getDate()}–${end.getDate()} ${startMonth}`
-    : `${start.getDate()} ${startMonth} – ${end.getDate()} ${endMonth}`;
-}
-
-/** Saudação por hora do dia (FE-Q03) — mesmo espírito do "Good Morning" das referências. */
-function timeOfDayGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Bom dia";
-  if (hour < 19) return "Boa tarde";
-  return "Boa noite";
-}
+const DAYS_PER_WEEK = 7;
 
 /** Mesma geometria do MealCard real (regra "loading = skeleton com a geometria do conteúdo"). */
 function MealCardSkeleton() {
@@ -77,19 +56,11 @@ export default function PlanoPage() {
   const isOnline = useOnlineStatus();
   const firstName = getSession()?.name?.split(" ")[0];
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState<number | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const toggleCompletedMutation = useToggleMealPlanEntryCompleted();
 
-  const {
-    data: plan,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery<MealPlan>({
-    queryKey: ["active-meal-plan"],
-    queryFn: () => api<MealPlan>("/me/meal-plans/active"),
-    retry: false,
-  });
+  const { data: plan, isLoading, isError, error, refetch } = useActiveMealPlan();
 
   if (isLoading) {
     return (
@@ -136,14 +107,30 @@ export default function PlanoPage() {
 
   const days = plan.days ?? [];
   const todayIndex = days.findIndex((day) => day.date === todayIsoDate());
-  const defaultIndex = todayIndex >= 0 ? todayIndex : 0;
-  const activeIndex = selectedDayIndex !== null && selectedDayIndex < days.length ? selectedDayIndex : defaultIndex;
+
+  // FE-C09 · 30 dias não cabem/funcionam num único DayTabs em 360px — fatiam-se em semanas de
+  // 7 dias (a última pode ter menos) e só a semana selecionada é passada ao DayTabs existente,
+  // que continua a receber a mesma forma de `days` que já recebia (T-04).
+  const weekCount = Math.max(1, Math.ceil(days.length / DAYS_PER_WEEK));
+  const defaultWeekIndex = todayIndex >= 0 ? Math.floor(todayIndex / DAYS_PER_WEEK) : 0;
+  const activeWeekIndex =
+    selectedWeekIndex !== null && selectedWeekIndex < weekCount ? selectedWeekIndex : defaultWeekIndex;
+  const weekStart = activeWeekIndex * DAYS_PER_WEEK;
+  const weekDays = days.slice(weekStart, weekStart + DAYS_PER_WEEK);
+
+  const todayIndexInWeek =
+    todayIndex >= weekStart && todayIndex < weekStart + weekDays.length ? todayIndex - weekStart : undefined;
+  const defaultLocalIndex = todayIndexInWeek ?? 0;
+  const activeLocalIndex =
+    selectedDayIndex !== null && selectedDayIndex >= weekStart && selectedDayIndex < weekStart + weekDays.length
+      ? selectedDayIndex - weekStart
+      : defaultLocalIndex;
+  const activeIndex = weekStart + activeLocalIndex;
   const selectedDay = days[activeIndex];
-  const sortedEntries = selectedDay
-    ? [...(selectedDay.entries ?? [])].sort(
-        (a, b) => (SLOT_ORDER[a.mealSlot ?? ""] ?? 99) - (SLOT_ORDER[b.mealSlot ?? ""] ?? 99),
-      )
-    : [];
+  const sortedEntries = selectedDay ? sortEntriesBySlot(selectedDay.entries ?? []) : [];
+
+  const streak = computeStreakDays(days);
+  const completedDaysCount = days.filter((day) => (day.entries ?? []).some((entry) => entry.completed)).length;
 
   return (
     <main className={styles.main}>
@@ -156,7 +143,13 @@ export default function PlanoPage() {
             {timeOfDayGreeting()}, {firstName}
           </p>
         ) : null}
-        <h1 className={styles.title}>O teu plano · {formatWeekRange(plan.weekStart ?? days[0]?.date ?? "")}</h1>
+        <h1 className={styles.title}>O teu plano · {formatMonthLabel(plan.monthStart ?? days[0]?.date ?? "")}</h1>
+        {days.length > 0 ? (
+          <div className={styles.progressRow}>
+            <MonthProgressRing completedDays={completedDaysCount} totalDays={days.length} size="sm" />
+            <p className={styles.streakText}>{streakLabel(streak)}</p>
+          </div>
+        ) : null}
       </header>
 
       <Card className={styles.adHocCard}>
@@ -166,16 +159,33 @@ export default function PlanoPage() {
         </Link>
       </Card>
 
+      <WeekSelector
+        weekCount={weekCount}
+        selectedIndex={activeWeekIndex}
+        onSelect={(weekIndex) => {
+          setSelectedWeekIndex(weekIndex);
+          setSelectedDayIndex(null);
+        }}
+      />
+
       <DayTabs
-        days={days.map((day) => ({ date: day.date ?? "", weekday: day.weekday ?? "" }))}
-        selectedIndex={activeIndex}
-        onSelect={setSelectedDayIndex}
-        todayIndex={todayIndex >= 0 ? todayIndex : undefined}
+        days={weekDays.map((day) => ({ date: day.date ?? "", weekday: day.weekday ?? "" }))}
+        selectedIndex={activeLocalIndex}
+        onSelect={(localIndex) => setSelectedDayIndex(weekStart + localIndex)}
+        todayIndex={todayIndexInWeek}
       />
 
       <div className={styles.cardList}>
         {sortedEntries.map((entry) => (
-          <MealCard key={entry.id} entry={entry} href={`/plano/refeicao/${entry.id}`} />
+          <MealCard
+            key={entry.id}
+            entry={entry}
+            href={`/plano/refeicao/${entry.id}`}
+            onToggleCompleted={(next) => {
+              if (entry.id === undefined) return;
+              toggleCompletedMutation.mutate({ id: entry.id, completed: next });
+            }}
+          />
         ))}
       </div>
 

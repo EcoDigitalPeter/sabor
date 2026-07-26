@@ -1,17 +1,18 @@
-// FE-A04 · Navegação inferior do portal cliente — Plano / Compras / Perfil
+// FE-A04 · Navegação inferior do portal cliente — Início / Plano / Compras / Perfil
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, ShoppingCart, User, type LucideIcon } from "lucide-react";
+import { CalendarDays, Home, ShoppingCart, User, type LucideIcon } from "lucide-react";
 
 type NavItem = {
-  href: "/plano" | "/compras" | "/perfil";
+  href: "/inicio" | "/plano" | "/compras" | "/perfil";
   label: string;
   Icon: LucideIcon;
 };
 
 const NAV_ITEMS: NavItem[] = [
+  { href: "/inicio", label: "Início", Icon: Home },
   { href: "/plano", label: "Plano", Icon: CalendarDays },
   { href: "/compras", label: "Compras", Icon: ShoppingCart },
   { href: "/perfil", label: "Perfil", Icon: User },

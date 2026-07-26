@@ -1,0 +1,171 @@
+/* FE-A04 · Início — hub pós-login: layout da página */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.greeting {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.05rem + 0.6vw, 1.4rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.headerSkeleton {
+  margin-bottom: 4px;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.streakText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.sectionText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay);
+}
+
+.sectionEmptyText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay-soft);
+}
+
+.sectionLink {
+  align-self: flex-start;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--terracotta);
+  text-decoration: none;
+}
+
+.sectionLink:hover {
+  color: var(--terracotta-dark);
+}
+
+.sectionLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.mealList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hiddenChip {
+  align-self: flex-start;
+}
+
+.orderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Replica .cta de EmptyState.module.css (classe privada ao módulo, não reexportada) — mesma
+   pílula terracotta, mas como <Link> real (navegação semântica) em vez de <button onClick>. */
+.emptyCta {
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.emptyCta:hover {
+  background: var(--terracotta-dark);
+}
+
+.emptyCta:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+/* Cartão "Pedir receita agora" — mesmo padrão visual do adHocCard de /plano. */
+.adHocCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adHocText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay);
+}
+
+.adHocCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.adHocCta:hover {
+  background: var(--terracotta-dark);
+}
+
+.adHocCta:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}

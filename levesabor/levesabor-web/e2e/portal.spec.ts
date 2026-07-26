@@ -10,6 +10,8 @@ async function loginAsClient(page: Page) {
   await page.getByLabel("Email").fill("amelia@levesabor.mz");
   await page.getByLabel("Password", { exact: true }).fill("password123");
   await page.getByRole("button", { name: "Entrar" }).click();
+  await page.waitForURL("**/inicio");
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Plano" }).click();
   await page.waitForURL("**/plano");
 }
 
