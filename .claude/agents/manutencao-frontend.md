@@ -13,6 +13,13 @@ precedencia:
     se_ausente:  esperar_ate(240) entao escalar
     se_falhou:   escalar
     se_expirado: escalar
+  - facto: parecer.emitido
+    chave: "especialista-ui-ux"
+    modo: bloquear
+    obrigatorio: true
+    se_ausente:  esperar_ate(240) entao escalar
+    se_falhou:   escalar
+    se_expirado: escalar
 
 # ── ORÇAMENTO ───────────────────────────────────────
 orcamento:
@@ -51,6 +58,7 @@ escalonamento:
 - Não decide contratos de API — consome o que `BE-*` expõe, não os define
 - Não escreve copy fora do guia — copy nova é sempre revista pelo Revisor de Copy e Marca
 - Não avança `FE-L*` antes de `BE-L01` estar pronto
+- **Não commita nenhuma alteração de UI/UX sem parecer prévio do Especialista de UI/UX** (regra de bloqueio, 2026-08-06)
 
 ## Ferramentas e conectores
 
