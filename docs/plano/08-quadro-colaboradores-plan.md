@@ -20,6 +20,8 @@
 | 5 | **Revisor de Copy e Marca** | Produto | Antes de cada release/UAT, e sempre que um label mudar | Aplica `06-guia-de-copy-e-marca.md`; garante que os 4 objetivos e as 4 condições de saúde ficam byte-idênticos em todo o app; grep ao repo inteiro antes de dar um label como fechado (não há i18n central) | Nº de strings divergentes encontradas por ronda de revisão (baixar para 0) |
 | 6 | **Ops de Deploy/Release** | Operações | A partir do fim da Fase 1 (`INT-02`) | Checklists de entrega por fase (`05 §4`), variáveis de ambiente por ambiente, verificação de restore de backup antes de `INT-04`, UAT | Nº de deploys sem rollback em produção (hoje: n/a) |
 
+| 7 | **Especialista de UI/UX** | Produto/Design | 2026-08-06 — gap encontrado na ronda `FE-Y` (nenhum colaborador dono dos skills `ui-ux-pro-max`/`impeccable`/`redesign-existing-projects`) | Dono dos skills de design; valida tokens/contraste/tipografia; emite parecer obrigatório sobre qualquer alteração de UI **antes** do Manutenção Frontend commitar (regra de bloqueio, ver `.claude/agents/manutencao-frontend.md` §Precedência e §Limites) | Nº de pareceres emitidos (hoje: 0) |
+
 **Não incluído agora (adiar):** vaga dedicada a IA/prompts de geração de receitas — `07-prompts-ilustracoes-gaps.md` já cobre isso como gap de conteúdo, não de processo; revisitar só se o volume de prompts a ajustar justificar um colaborador fixo.
 
 ## 2. Sequenciamento (alinhado a `05-implementation-roadmap.md`)
