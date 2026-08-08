@@ -119,6 +119,13 @@
   font-family: var(--font-mono);
 }
 
+.activityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) 1.4fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
 @media (max-width: 1024px) {
   .kpiGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -129,6 +136,10 @@
   }
 
   .feedbackGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .activityGrid {
     grid-template-columns: 1fr;
   }
 }

@@ -54,6 +54,8 @@ export default function LoginPage() {
       const session = await login(result.data.email, result.data.password);
       if (session?.role === "ADMIN") {
         router.push("/admin");
+      } else if (session?.role === "LOJISTA") {
+        router.push("/loja/produtos");
       } else {
         router.push("/inicio");
       }
@@ -92,7 +94,7 @@ export default function LoginPage() {
               color: "var(--ink)",
             }}
           >
-            Leve Sabor AI
+            Ottimizo
           </span>
         </div>
 

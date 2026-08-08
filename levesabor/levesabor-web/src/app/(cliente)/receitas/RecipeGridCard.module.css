@@ -1,0 +1,79 @@
+/* FE-W05 · RecipeGridCard — cartão de prato clicável, mesma superfície da DishGallery da landing */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid rgba(36, 26, 20, 0.08);
+  border-radius: var(--radius-card);
+  background: var(--cream-card);
+  box-shadow: 0 1px 2px rgba(36, 26, 20, 0.04);
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.card:hover {
+  border-color: var(--tan);
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+.card:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.photoWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--cream-card-alt);
+}
+
+.photo {
+  object-fit: cover;
+}
+
+.fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--terracotta);
+  background: radial-gradient(circle at 30% 30%, var(--tan), var(--cream-card-alt));
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px 14px;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

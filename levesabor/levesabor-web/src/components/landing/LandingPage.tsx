@@ -1,4 +1,4 @@
-// FE-P01/FE-P06 · LandingPage — landing v2 (project/Leve Sabor AI.dc.html + plano "excitação")
+// FE-P01/FE-P06 · LandingPage — landing v2 (project/Leve Sabor AI.dc.html, pré-rebrand + plano "excitação")
 import Image from "next/image";
 import Link from "next/link";
 import { UserRound, Sparkles, BookOpen, ShoppingBasket, Store } from "lucide-react";
@@ -14,14 +14,34 @@ import { Chip } from "@/components/ui/Chip";
 import styles from "./LandingPage.module.css";
 
 const STEPS = [
-  { num: "01", title: "Perfil", desc: "Conta-nos o teu objetivo, condições de saúde e o que gostas de comer.", icon: UserRound },
-  { num: "02", title: "A IA gera o plano", desc: "A Leve Sabor cria um plano semanal com pratos moçambicanos reais.", icon: Sparkles },
-  { num: "03", title: "Receitas", desc: "Cada refeição vem com receita simples e ingredientes fáceis de encontrar.", icon: BookOpen },
-  { num: "04", title: "Lista de compras", desc: "Recebes a lista da semana, organizada e sem desperdício.", icon: ShoppingBasket },
+  {
+    num: "01",
+    title: "Perfil",
+    desc: "Conta-nos os teus objetivos, preferências alimentares, restrições e orçamento.",
+    icon: UserRound,
+  },
+  {
+    num: "02",
+    title: "A IA gera o plano",
+    desc: "A IA cria um plano alimentar personalizado, adaptado aos teus objetivos, preferências e estilo de vida.",
+    icon: Sparkles,
+  },
+  {
+    num: "03",
+    title: "Receitas",
+    desc: "Cada refeição vem com receita clara e ingredientes simples e fáceis de encontrar.",
+    icon: BookOpen,
+  },
+  {
+    num: "04",
+    title: "Lista de compras",
+    desc: "Recebes automaticamente a lista da semana, organizada e sem desperdício.",
+    icon: ShoppingBasket,
+  },
   {
     num: "05",
     title: "Encomenda à loja parceira",
-    desc: "Passa a lista para uma encomenda e combina entrega/pagamento diretamente com a loja.",
+    desc: "Envia a tua lista para uma loja parceira ou utiliza-a nas tuas próprias compras.",
     icon: Store,
   },
 ];
@@ -47,17 +67,22 @@ const ORDER_CARDS = [
     dish: "Feijão nhemba com arroz, ovo e amendoim torrado",
     chips: ["710 kcal", "38g proteína", "45 min"],
   },
+  {
+    pedido: "Tenho 2.500 MT para alimentar uma família de 4 pessoas esta semana.",
+    dish: "Feijão nhemba com arroz e couve refogada, planeado para 4 pessoas",
+    chips: ["4 porções", "2.450 MT", "sem desperdício"],
+  },
 ];
 
 const SCENARIOS = [
   {
-    title: "Perder peso",
-    body: "Queres perder peso sem contar calorias à mão nem desistir da xima ao domingo.",
+    title: "Emagrecer",
+    body: "Queres emagrecer sem abdicar dos alimentos de que gostas.",
     color: "var(--terracotta)",
   },
   {
-    title: "Ganhar massa",
-    body: "Treinas e precisas de comer mais, com mais proteína, sem gastar uma fortuna.",
+    title: "Ganhar massa muscular",
+    body: "Treinas e precisas de comer mais — com um plano alimentar ajustado aos teus objetivos e orçamento.",
     color: "var(--amber)",
   },
   {
@@ -70,6 +95,21 @@ const SCENARIOS = [
     body: "Tens hipertensão e o médico pediu para reduzires o sal — sem saber como cozinhar diferente.",
     color: "#8A5A3A",
   },
+  {
+    title: "Alimentação vegetariana",
+    body: "Comes sem carne nem peixe e queres um plano completo em proteína e ferro, sem complicações.",
+    color: "var(--amber-soft)",
+  },
+  {
+    title: "Famílias",
+    body: "Cozinhas para a família toda e queres refeições que agradem a todos, sem gastar a tarde a decidir.",
+    color: "var(--terracotta-dark)",
+  },
+  {
+    title: "Pouco tempo para cozinhar",
+    body: "Os teus dias são cheios e precisas de refeições rápidas, sem abrir mão de comer bem.",
+    color: "var(--forest)",
+  },
 ];
 
 export function LandingPage() {
@@ -80,10 +120,10 @@ export function LandingPage() {
       <section id="top" className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <h1 className={styles.heroTitle}>Comida moçambicana de verdade. Um plano feito para ti.</h1>
+            <h1 className={styles.heroTitle}>Alimentação inteligente, pensada para ti.</h1>
             <p className={styles.heroSubtitle}>
-              Diz-nos o teu objetivo e a tua saúde. A Leve Sabor devolve um plano semanal com matapa, xima, caril —
-              ajustado ao teu orçamento.
+              Diz-nos o teu objetivo, as tuas preferências alimentares e o teu orçamento. A Ottimizo cria um plano semanal com
+              refeições reais — ajustado a ti.
             </p>
             <div className={styles.heroActions}>
               <a href="#demo" className={styles.heroPrimaryCta}>
@@ -93,9 +133,14 @@ export function LandingPage() {
                 Ver como funciona ↓
               </a>
             </div>
-            <p className={styles.heroMicrocopy}>Grátis · sem cartão de crédito · 2 minutos</p>
+            <p className={styles.heroMicrocopy}>
+              {/* TODO(P-14): selo de confiança (ícone/ilustração) antes do texto — ver
+                  docs/plano/07-prompts-ilustracoes-gaps.md. Sem imagem ainda; não inventar
+                  placeholder — o pedido do cliente foi por "algo visual", não um ícone genérico. */}
+              Grátis · sem cartão · 2 minutos
+            </p>
             <p className={styles.heroDisclaimer}>
-              A Leve Sabor não substitui o teu médico ou nutricionista — trabalha sempre a par de quem já cuida da
+              A Ottimizo não substitui o teu médico ou nutricionista — trabalha sempre a par de quem já cuida da
               tua saúde.
             </p>
           </div>
@@ -131,9 +176,10 @@ export function LandingPage() {
 
       <section id="pratos" className={styles.section}>
         <div className={styles.sectionInner}>
-          <h2 className={styles.sectionTitle}>Pratos que já conheces</h2>
+          <h2 className={styles.sectionTitle}>Receitas feitas para ti</h2>
           <p className={styles.sectionLead}>
-            Toca num prato para ver as calorias e macros — é assim que cada refeição do teu plano vai aparecer.
+            Clica numa refeição para ver as calorias e os valores nutricionais — é assim que cada refeição do teu
+            plano vai aparecer.
           </p>
           <DishGallery />
         </div>
@@ -164,14 +210,18 @@ export function LandingPage() {
       <section className={styles.section}>
         <div className={styles.sectionInner}>
           <h2 className={styles.sectionTitle}>Vê o que vais receber</h2>
-          <p className={styles.sectionLead}>Sem fotos de stock — os componentes que já usamos no produto real.</p>
+          <p className={styles.sectionLead}>
+            Uma experiência simples, clara e pensada para o teu dia-a-dia — tudo organizado para facilitar as tuas
+            decisões. Nada é escolhido ao acaso: cada receita é selecionada de acordo com o teu perfil, objetivos,
+            orçamento e preferências alimentares.
+          </p>
           <ProductShowcase />
         </div>
       </section>
 
       <section className={styles.section}>
         <div className={styles.sectionInner}>
-          <h2 className={styles.sectionTitle}>Pede. A Leve Sabor responde.</h2>
+          <h2 className={styles.sectionTitle}>Pede. A Ottimizo responde.</h2>
           <p className={styles.sectionLead}>Exemplos reais do tipo de pedido que podes fazer — e do que recebes de volta.</p>
           <div className={styles.orderGrid}>
             {ORDER_CARDS.map((card, index) => (
@@ -182,7 +232,7 @@ export function LandingPage() {
                     <p className={styles.orderPedido}>&ldquo;{card.pedido}&rdquo;</p>
                   </div>
                   <div className={styles.orderResponse}>
-                    <p className={styles.orderLabelResponse}>Leve Sabor diz</p>
+                    <p className={styles.orderLabelResponse}>Ottimizo diz</p>
                     <p className={styles.orderDish}>{card.dish}</p>
                     <div className={styles.orderChips}>
                       {card.chips.map((chip) => (
@@ -204,8 +254,10 @@ export function LandingPage() {
 
       <section className={styles.section}>
         <div className={styles.sectionInner}>
-          <h2 className={styles.sectionTitle}>Para quem é</h2>
-          <p className={styles.sectionLead}>Se te revês numa destas situações, é para ti.</p>
+          <h2 className={styles.sectionTitle}>Feita para ti, se procuras...</h2>
+          <p className={styles.sectionLead}>
+            É para qualquer pessoa que queira organizar melhor a alimentação — estas são só algumas situações.
+          </p>
           <div className={styles.scenarioGrid}>
             {SCENARIOS.map((s) => (
               <div key={s.title} className={styles.scenarioCard} style={{ borderLeftColor: s.color }}>
@@ -222,34 +274,40 @@ export function LandingPage() {
           <div>
             <p className={styles.trustEyebrow}>Porque isto importa</p>
             <p className={styles.trustHeadline}>
-              Em Moçambique, cerca de 3 milhões de pessoas vivem com diabetes — e um nutricionista particular
-              continua fora do alcance da maioria.
+              Todos os dias, milhões de pessoas enfrentam a mesma pergunta: &ldquo;O que vou cozinhar hoje?&rdquo;
             </p>
             <p className={styles.trustBody}>
-              O número de profissionais de saúde por habitante no país é reduzido, e nutricionistas especializados
-              são ainda mais raros fora de Maputo. A Leve Sabor não substitui esse acompanhamento — existe para
-              chegar a quem hoje não tem acesso a nenhum.
+              Entre a falta de tempo, o orçamento limitado, os objetivos de saúde e as diferentes preferências
+              alimentares, decidir torna-se mais difícil do que deveria.
             </p>
           </div>
           <div>
             <p className={styles.trustEyebrowGreen}>A nossa visão</p>
             <p className={styles.trustVision}>
-              Começámos a construir a Leve Sabor porque planos alimentares sérios existem — mas só para quem pode
-              pagar uma consulta particular todos os meses.
+              Criámos a Ottimizo para transformar essa decisão num processo simples — um assistente inteligente
+              que ajuda cada pessoa a planear refeições, cozinhar melhor, comprar apenas o necessário e cuidar da
+              sua alimentação de forma personalizada.
+            </p>
+          </div>
+          <div>
+            <p className={styles.trustEyebrow}>O nosso compromisso</p>
+            <p className={styles.trustVision}>
+              Acreditamos que uma alimentação equilibrada deve ser acessível a todos — independentemente do
+              orçamento, da experiência na cozinha ou do objetivo de cada pessoa.
             </p>
             <p className={styles.trustVision}>
-              Queremos que qualquer moçambicano, com qualquer orçamento, tenha um plano pensado para si — com
-              comida que já conhece e já gosta.
+              A Ottimizo não substitui médicos nem nutricionistas — complementa o seu trabalho, ajudando cada
+              pessoa a tomar melhores decisões todos os dias.
             </p>
           </div>
           <div>
             <p className={styles.trustEyebrow}>Em desenvolvimento aberto</p>
             <p className={styles.trustVision}>
-              A Leve Sabor está em construção — ainda sem utilizadores, sem promessas infladas. Os primeiros a
+              A Ottimizo está em construção — ainda sem utilizadores, sem promessas infladas. Os primeiros a
               entrar moldam o produto: cada feedback chega diretamente à equipa.
             </p>
-            <a href="mailto:ola@levesabor.ai" className={styles.trustContact}>
-              Fala connosco: ola@levesabor.ai
+            <a href="mailto:ola@ottimizo.ai" className={styles.trustContact}>
+              Fala connosco: ola@ottimizo.ai
             </a>
           </div>
         </div>
@@ -266,7 +324,7 @@ export function LandingPage() {
         <div className={styles.ctaCard}>
           <p className={styles.ctaTitle}>A tua primeira semana de planos está à espera.</p>
           <p className={styles.ctaLead}>
-            Conta grátis, sem cartão. O plano chega em minutos — com comida que já conheces.
+            Conta grátis, sem cartão. O plano chega em minutos, feito à tua medida.
           </p>
           <Link href="/registo" className={styles.ctaButton}>
             Criar a minha conta grátis
@@ -278,27 +336,25 @@ export function LandingPage() {
         <div className={styles.footerInner}>
           <div className={styles.footerTop}>
             <div className={styles.footerBrand}>
-              <span className={styles.footerWordmark}>
-                leve <span className={styles.footerAccent}>sabor</span>
-              </span>
+              <span className={styles.footerWordmark}>ottimizo</span>
               <p className={styles.footerTagline}>
-                A nossa visão: comida real, adaptada a cada moçambicano — sem depender de quem pode pagar um
+                A nossa visão: comida real, adaptada a cada pessoa — sem depender de quem pode pagar um
                 nutricionista particular.
               </p>
               <p className={styles.footerDisclaimer}>
-                A Leve Sabor AI não substitui aconselhamento médico ou nutricional profissional. Consulta sempre o
+                A Ottimizo não substitui aconselhamento médico ou nutricional profissional. Consulta sempre o
                 teu médico antes de mudanças significativas na tua alimentação, sobretudo se tiveres uma condição de
                 saúde diagnosticada.
               </p>
             </div>
             <div className={styles.footerContact}>
               <p className={styles.footerContactLabel}>Contacto</p>
-              <a href="mailto:ola@levesabor.ai" className={styles.footerLink}>
-                ola@levesabor.ai
+              <a href="mailto:ola@ottimizo.ai" className={styles.footerLink}>
+                ola@ottimizo.ai
               </a>
             </div>
           </div>
-          <p className={styles.footerCopyright}>© 2026 Leve Sabor AI</p>
+          <p className={styles.footerCopyright}>© 2026 Ottimizo</p>
         </div>
       </footer>
     </div>

@@ -162,8 +162,22 @@ Dependências críticas:
 | `AI_PRICE_PER_1K_INPUT` / `_OUTPUT` | — | usado no cálculo de custo das métricas |
 | `APP_CORS_ORIGINS` | `http://localhost:3000` | mesma origem (frontend e backend no mesmo domínio Vercel — CORS não aplicável entre si) |
 | `SEED_ADMIN_BCRYPT` | hash de dev | secret (usado no seed inicial via script, não em migration versionada) |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | `https://app.levesabor.co.mz` (ou domínio `*.vercel.app` até estar configurado) |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | `https://app.ottimizo.ai` (ou domínio `*.vercel.app` até estar configurado) |
 
-## 6. Pós-entrega (fora do âmbito atual — **[Sugestão]**)
+## 6. Roadmap — gaps do feedback do cliente
+
+Estas tarefas nascem de uma análise do feedback recebido do cliente sobre a app, cruzada com o código atual, para fechar a distância entre o que ele espera e o que está implementado (ver `docs/plano/01-functional-plan.md` e os cartões `FE-W*`/`BE-C01B`/`BE-C06B`/`BE-C08` em `docs/plano/tasks.md`).
+
+**Ordem de prioridade recomendada:**
+
+1. **`FE-W01` — agregação real da lista de compras.** Primeiro na fila porque não é feature nova: é uma promessa já escrita no plano funcional ("agregar ingredientes repetidos por `ingredient_id`") que ainda não foi cumprida — o mock atual é uma lista estática pré-somada à mão. Zero risco de âmbito ou comercial; é débito técnico a fechar.
+2. **`FE-W02`/`BE-C01B` — preferência alimentar no perfil.** Esforço pequeno, alto valor percebido pelo cliente, e desbloqueia `FE-W03` (pré-filtro de geração) e `FE-W05` (catálogo de receitas).
+3. **`FE-W05`/`BE-C08` — catálogo de receitas navegável.** Esforço médio, mas reaproveita dados já geridos pelo admin (`F2-ADM-05`); risco técnico baixo.
+4. **`FE-W04`/`BE-C06B` — adicionar item manual.** Esforço pequeno e independente dos restantes; pode encaixar em qualquer ponto livre do plano.
+5. **`FUT-07` (catálogo multi-cozinha) e `FUT-03` (comparação de preços entre lojas) — não agendar.** Ambos precisam de decisão comercial com o cliente antes de qualquer trabalho técnico: implicam âmbito novo fora da cotação original, e as fases do projeto estão ligadas a valores pagos (ver `README.md` §6). `FUT-07` é o tema mais repetido no feedback do cliente, mas depende ainda de conteúdo (receitas não-moçambicanas) validado por ele.
+
+Nenhuma das tarefas 1–4 precisa de reabrir conversa comercial — cabem no espírito já cotado da Fase 1. Só o item 5 precisa.
+
+## 7. Pós-entrega (fora do âmbito atual — **[Sugestão]**)
 
 Backlog priorizado para depois da Fase 3: FUT-05 (recuperação de password), FUT-02 (notificações WhatsApp), FUT-04 (landing pública + waitlist), FUT-06 (históricos), FUT-03 (custeio comparativo "onde é mais barato" entre lojas — agora com dados reais de F3-LOJ-01), FUT-01 (entrega ao domicílio + pagamento in-app — automatizar o que hoje, na Fase 3, é combinado diretamente entre cliente e loja). Ver detalhes no fim do `01-functional-plan.md`.

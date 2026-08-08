@@ -35,6 +35,21 @@
   margin-bottom: 4px;
 }
 
+/* FE-C09 · Anel de progresso do mês + sequência de dias (texto simples, sem troféus/confetti) */
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.streakText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+
 .cardList {
   display: flex;
   flex-direction: column;

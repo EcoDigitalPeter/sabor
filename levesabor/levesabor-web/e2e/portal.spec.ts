@@ -7,8 +7,14 @@ import { test, expect, type Page } from "@playwright/test";
 // src/mocks/fixtures.ts) entra como o cliente fixture "Amélia Cossa".
 async function loginAsClient(page: Page) {
   await page.goto("/login");
-  await page.getByLabel("Email").fill("amelia@levesabor.mz");
-  await page.getByLabel("Password", { exact: true }).fill("password123");
+  await page.getByLabel("Email").fill("amelia@ottimizo.mz");
+  // getByLabel("Password", { exact: true }) não bate certo com o campo real (ver nota igual em
+  // e2e/pedir-agora.spec.ts e e2e/plano-mensal.spec.ts): o FormField acrescenta um "(obrigatório)"
+  // invisível ao nome acessível do label, e sem exact:true "Password" também correspondia ao botão
+  // "Mostrar/Ocultar password". O id é estável independentemente do texto do label — corrigido aqui
+  // (FE-E01) porque este spec ainda usava o padrão antigo e falhava de forma consistente (mesmo
+  // isolado, sem qualquer interferência de outros specs).
+  await page.locator("#login-password").fill("password123");
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL("**/inicio");
   await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Plano" }).click();
@@ -53,7 +59,9 @@ test.describe("Portal do cliente v2", () => {
     await page.locator('a[href^="/plano/refeicao/"]').first().click();
     await expect(page).toHaveURL(/\/plano\/refeicao\/\d+/);
 
-    const like = page.getByLabel("Gosto desta receita");
+    // exact:true — sem isto, "Gosto desta receita" também corresponde por substring a
+    // "Não gosto desta receita" (violação de modo estrito do Playwright).
+    const like = page.getByLabel("Gosto desta receita", { exact: true });
     await expect(like).toHaveAttribute("aria-pressed", "false");
     await like.click();
     await expect(like).toHaveAttribute("aria-pressed", "true");

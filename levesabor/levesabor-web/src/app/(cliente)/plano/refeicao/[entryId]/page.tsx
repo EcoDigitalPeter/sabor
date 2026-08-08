@@ -96,8 +96,12 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
   });
 
   const confirmSwapMutation = useMutation({
-    mutationFn: () =>
-      api<SwapData>(`/me/meal-plans/entries/${entryId}/swap?confirm=true`, { method: "POST" }),
+    // FE-Q06: motivo livre e opcional escrito na SwapSheet — vai no corpo só quando preenchido.
+    mutationFn: (reason?: string) =>
+      api<SwapData>(`/me/meal-plans/entries/${entryId}/swap?confirm=true`, {
+        method: "POST",
+        body: JSON.stringify(reason ? { reason } : {}),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ACTIVE_PLAN_QUERY_KEY });
@@ -242,7 +246,7 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
           >
             <ThumbsDown size={20} aria-hidden="true" />
           </button>
-          <p className={styles.swapMicrocopy}>A Leve Sabor pode sugerir outra opção.</p>
+          <p className={styles.swapMicrocopy}>A Ottimizo pode sugerir outra opção.</p>
         </div>
 
         <Button
@@ -300,7 +304,7 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
         open={swapOpen}
         alternative={swapAlternative}
         confirming={confirmSwapMutation.isPending}
-        onConfirm={() => confirmSwapMutation.mutate()}
+        onConfirm={(reason) => confirmSwapMutation.mutate(reason)}
         onKeep={handleSwapKeep}
       />
     </main>

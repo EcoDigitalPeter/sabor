@@ -102,7 +102,7 @@ Toda a tela com dados remotos implementa os 4 estados:
 
 - **Objetivo:** criar conta de cliente.
 - **Componentes:** formulário em cartão, checkbox de disclaimer, CTA.
-- **Campos/ações:** nome, email, password, confirmar password, checkbox "Compreendo que a Leve Sabor não substitui o meu médico ou nutricionista", botão `Criar conta`.
+- **Campos/ações:** nome, email, password, confirmar password, checkbox "Compreendo que a Ottimizo não substitui o meu médico ou nutricionista", botão `Criar conta`.
 - **Estados:** `idle · submitting · erro por campo · email duplicado (409, inline no campo) · sucesso → redireciona T-03`.
 
 ### T-03 — Onboarding do perfil `(/onboarding)` — Fase 1

@@ -1,0 +1,19 @@
+/* FE-D03 · StoreFormFields — grelha de campos partilhada entre nova/[id], mesmo idioma de
+   admin/ingredientes/IngredientSheet.module.css */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

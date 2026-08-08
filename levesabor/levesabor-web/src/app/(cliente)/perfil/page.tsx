@@ -25,33 +25,43 @@ type HealthCondition = components["schemas"]["HealthCondition"];
 type BudgetBand = components["schemas"]["BudgetBand"];
 
 // Secções editáveis do cartão (F1-CLI-01) — mesmo vocabulário/enums do onboarding.
-type SectionKey = "objetivo" | "condicao" | "alergias" | "orcamento" | "refeicoes" | "pessoas";
+type SectionKey =
+  | "objetivo"
+  | "condicao"
+  | "alergias"
+  | "exclusoes"
+  | "preferencias"
+  | "orcamento"
+  | "refeicoes"
+  | "pessoas";
 
 const MIN_HOUSEHOLD = 1;
 const MAX_HOUSEHOLD = 8;
 
 const GOAL_OPTIONS: OptionGroupOption<Goal>[] = [
-  { value: "PERDER_PESO", label: "Perder peso" },
+  { value: "PERDER_PESO", label: "Emagrecer" },
   { value: "COMER_MELHOR", label: "Comer melhor no dia a dia" },
-  { value: "GANHAR_MASSA", label: "Ganhar massa" },
-  { value: "GERIR_CONDICAO", label: "Gerir uma condição de saúde" },
+  { value: "GANHAR_MASSA", label: "Ganhar massa muscular" },
+  { value: "GERIR_CONDICAO", label: "Controlar uma condição de saúde" },
 ];
 const GOAL_LABELS = Object.fromEntries(GOAL_OPTIONS.map((o) => [o.value, o.label])) as Record<Goal, string>;
 
+// FE-Y02 (ago/2026): seleção múltipla + "Outra" (texto livre) — ver onboarding/page.tsx.
 const HEALTH_CONDITION_OPTIONS: OptionGroupOption<HealthCondition>[] = [
   { value: "NENHUMA", label: "Nenhuma" },
   { value: "DIABETES_TIPO_2", label: "Diabetes tipo 2" },
   { value: "HIPERTENSAO", label: "Hipertensão" },
   { value: "DOENCA_CELIACA", label: "Doença celíaca" },
+  { value: "OUTRA", label: "Outra" },
 ];
 const HEALTH_CONDITION_LABELS = Object.fromEntries(
   HEALTH_CONDITION_OPTIONS.map((o) => [o.value, o.label]),
 ) as Record<HealthCondition, string>;
 
 const BUDGET_BAND_OPTIONS: OptionGroupOption<BudgetBand>[] = [
-  { value: "BAIXO", label: "Baixo" },
-  { value: "MEDIO", label: "Médio" },
-  { value: "CONFORTAVEL", label: "Confortável" },
+  { value: "BAIXO", label: "Económico" },
+  { value: "MEDIO", label: "Equilibrado" },
+  { value: "CONFORTAVEL", label: "Premium" },
 ];
 const BUDGET_BAND_LABELS = Object.fromEntries(
   BUDGET_BAND_OPTIONS.map((o) => [o.value, o.label]),
@@ -61,6 +71,18 @@ const MEALS_PER_DAY_OPTIONS: OptionGroupOption<string>[] = [2, 3, 4, 5].map((n) 
   value: String(n),
   label: `${n} refeições`,
 }));
+
+// Vocabulário fechado de F1-CLI-01 (mesmo usado no onboarding, docs/plano/01-functional-plan.md
+// linha 155/181) — mesmo vocabulário das `healthTags` já usadas nas receitas.
+const DIETARY_PREFERENCE_OPTIONS: { value: string; label: string }[] = [
+  { value: "vegetariana", label: "Vegetariana" },
+  { value: "vegan", label: "Vegana" },
+  { value: "sem_gluten", label: "Sem glúten" },
+  { value: "sem_lactose", label: "Sem lactose" },
+  { value: "alta_proteina", label: "Alta proteína" },
+  { value: "baixo_calorico", label: "Baixo em calorias" },
+  { value: "sem_preferencia", label: "Sem preferência" },
+];
 
 const MAX_ALLERGIES = 20;
 const MAX_ALLERGY_LENGTH = 60;
@@ -83,13 +105,19 @@ export default function PerfilPage() {
   // Rascunhos locais por secção — inicializados a partir do perfil ao entrar em edição
   // (ver startEdit); só uma secção está em edição de cada vez.
   const [goalDraft, setGoalDraft] = useState<Goal | undefined>(undefined);
-  const [healthDraft, setHealthDraft] = useState<HealthCondition | undefined>(undefined);
+  const [healthDraft, setHealthDraft] = useState<HealthCondition[]>([]);
+  const [healthOtherDraft, setHealthOtherDraft] = useState("");
   const [budgetDraft, setBudgetDraft] = useState<BudgetBand | undefined>(undefined);
   const [mealsDraft, setMealsDraft] = useState<number | undefined>(undefined);
   const [householdDraft, setHouseholdDraft] = useState<number | undefined>(undefined);
   const [allergiesDraft, setAllergiesDraft] = useState<string[]>([]);
   const [allergyInput, setAllergyInput] = useState("");
   const [allergiesLocalError, setAllergiesLocalError] = useState<string | undefined>(undefined);
+  // FE-Y03 (ago/2026): "Alimentos que não comes" — separado de "Alergias" (conceitos diferentes).
+  const [exclusionsDraft, setExclusionsDraft] = useState<string[]>([]);
+  const [exclusionInput, setExclusionInput] = useState("");
+  const [exclusionsLocalError, setExclusionsLocalError] = useState<string | undefined>(undefined);
+  const [dietaryPreferencesDraft, setDietaryPreferencesDraft] = useState<string[]>([]);
 
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -107,7 +135,10 @@ export default function PerfilPage() {
   function startEdit(section: SectionKey) {
     if (!profile) return;
     if (section === "objetivo") setGoalDraft(profile.goal);
-    if (section === "condicao") setHealthDraft(profile.healthCondition);
+    if (section === "condicao") {
+      setHealthDraft(profile.healthConditions ?? []);
+      setHealthOtherDraft(profile.healthConditionOther ?? "");
+    }
     if (section === "orcamento") setBudgetDraft(profile.budgetBand);
     if (section === "refeicoes") setMealsDraft(profile.mealsPerDay ?? 3);
     if (section === "pessoas") setHouseholdDraft(profile.householdSize ?? 1);
@@ -116,6 +147,15 @@ export default function PerfilPage() {
       setAllergyInput("");
       setAllergiesLocalError(undefined);
     }
+    if (section === "exclusoes") {
+      setExclusionsDraft(profile.foodExclusions ?? []);
+      setExclusionInput("");
+      setExclusionsLocalError(undefined);
+    }
+    // dietaryPreferences: campo novo do FE-W02 (F1-CLI-01) — Profile ainda não o declara em
+    // src/types/api.d.ts (outro agente em paralelo trata desse ficheiro); assume-se que vai
+    // existir como `dietaryPreferences?: string[]`.
+    if (section === "preferencias") setDietaryPreferencesDraft(profile.dietaryPreferences ?? []);
     setEditingSection(section);
   }
 
@@ -123,6 +163,8 @@ export default function PerfilPage() {
     setEditingSection(null);
     setAllergiesLocalError(undefined);
     setAllergyInput("");
+    setExclusionsLocalError(undefined);
+    setExclusionInput("");
   }
 
   // PUT substitui o recurso Profile inteiro — envia-se sempre o perfil atual com o campo da
@@ -153,6 +195,46 @@ export default function PerfilPage() {
   function removeAllergy(index: number) {
     setAllergiesDraft((prev) => prev.filter((_, i) => i !== index));
     setAllergiesLocalError(undefined);
+  }
+
+  function addExclusion() {
+    const value = exclusionInput.trim();
+    if (!value) return;
+    if (value.length > MAX_ALLERGY_LENGTH) {
+      setExclusionsLocalError(`Cada item deve ter no máximo ${MAX_ALLERGY_LENGTH} caracteres.`);
+      return;
+    }
+    if (exclusionsDraft.length >= MAX_ALLERGIES) {
+      setExclusionsLocalError(`Máximo de ${MAX_ALLERGIES} itens.`);
+      return;
+    }
+    setExclusionsDraft((prev) => [...prev, value]);
+    setExclusionInput("");
+    setExclusionsLocalError(undefined);
+  }
+
+  function removeExclusion(index: number) {
+    setExclusionsDraft((prev) => prev.filter((_, i) => i !== index));
+    setExclusionsLocalError(undefined);
+  }
+
+  // Mesma exclusividade do onboarding: "Nenhuma" limpa as restantes e vice-versa.
+  function toggleHealthCondition(value: HealthCondition) {
+    setHealthDraft((prev) => {
+      const isSelected = prev.includes(value);
+      if (isSelected) return prev.filter((v) => v !== value);
+      if (value === "NENHUMA") return ["NENHUMA"];
+      return [...prev.filter((v) => v !== "NENHUMA"), value];
+    });
+  }
+
+  function toggleDietaryPreference(value: string) {
+    setDietaryPreferencesDraft((prev) => {
+      const isSelected = prev.includes(value);
+      if (isSelected) return prev.filter((v) => v !== value);
+      if (value === "sem_preferencia") return ["sem_preferencia"];
+      return [...prev.filter((v) => v !== "sem_preferencia"), value];
+    });
   }
 
   // logout() é best-effort (limpa sempre a sessão local) mas NÃO navega — a navegação é
@@ -240,21 +322,58 @@ export default function PerfilPage() {
           editing={editingSection === "condicao"}
           saving={savingSection("condicao")}
           error={sectionServerError("condicao")}
-          saveDisabled={!healthDraft || savingSection("condicao")}
+          saveDisabled={
+            healthDraft.length === 0 ||
+            (healthDraft.includes("OUTRA") && !healthOtherDraft.trim()) ||
+            savingSection("condicao")
+          }
           displayValue={
-            profile.healthCondition ? HEALTH_CONDITION_LABELS[profile.healthCondition] : "Por definir"
+            profile.healthConditions && profile.healthConditions.length > 0
+              ? profile.healthConditions
+                  .map((value) =>
+                    value === "OUTRA" && profile.healthConditionOther
+                      ? `${HEALTH_CONDITION_LABELS[value]}: ${profile.healthConditionOther}`
+                      : HEALTH_CONDITION_LABELS[value],
+                  )
+                  .join(", ")
+              : "Por definir"
           }
           onEdit={() => startEdit("condicao")}
           onCancel={cancelEdit}
-          onSave={() => healthDraft && save("condicao", { healthCondition: healthDraft })}
+          onSave={() =>
+            healthDraft.length > 0 &&
+            save("condicao", {
+              healthConditions: healthDraft,
+              healthConditionOther: healthDraft.includes("OUTRA") ? healthOtherDraft : undefined,
+            })
+          }
         >
-          <OptionGroup
-            name="Condição de saúde"
-            options={HEALTH_CONDITION_OPTIONS}
-            value={healthDraft}
-            onChange={setHealthDraft}
-            disabled={savingSection("condicao")}
-          />
+          <div className={styles.chipRow}>
+            {HEALTH_CONDITION_OPTIONS.map((opt) => {
+              const selected = healthDraft.includes(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={styles.chipButton}
+                  onClick={() => toggleHealthCondition(opt.value)}
+                  aria-pressed={selected}
+                  disabled={savingSection("condicao")}
+                >
+                  <Chip variant={selected ? "tan" : "cream"}>{opt.label}</Chip>
+                </button>
+              );
+            })}
+          </div>
+          {healthDraft.includes("OUTRA") ? (
+            <Input
+              type="text"
+              placeholder="Descreve a tua condição"
+              value={healthOtherDraft}
+              disabled={savingSection("condicao")}
+              onChange={(e) => setHealthOtherDraft(e.target.value)}
+            />
+          ) : null}
         </ProfileSectionCard>
 
         <ProfileSectionCard
@@ -299,7 +418,7 @@ export default function PerfilPage() {
                 ))}
               </div>
             ) : (
-              <p className={styles.allergyEmptyHint}>Ainda não adicionaste nenhuma alergia ou exclusão.</p>
+              <p className={styles.allergyEmptyHint}>Ainda não adicionaste nenhuma alergia.</p>
             )}
             <div className={styles.allergyInputRow}>
               <Input
@@ -326,6 +445,120 @@ export default function PerfilPage() {
                 Adicionar
               </Button>
             </div>
+          </div>
+        </ProfileSectionCard>
+
+        <ProfileSectionCard
+          title="Alimentos que não comes"
+          editing={editingSection === "exclusoes"}
+          saving={savingSection("exclusoes")}
+          error={exclusionsLocalError ?? sectionServerError("exclusoes")}
+          saveDisabled={savingSection("exclusoes")}
+          displayValue={
+            profile.foodExclusions && profile.foodExclusions.length > 0 ? (
+              <div className={styles.chipRow}>
+                {profile.foodExclusions.map((item) => (
+                  <Chip key={item} variant="cream">
+                    {item}
+                  </Chip>
+                ))}
+              </div>
+            ) : (
+              "Nenhum alimento excluído."
+            )
+          }
+          onEdit={() => startEdit("exclusoes")}
+          onCancel={cancelEdit}
+          onSave={() => save("exclusoes", { foodExclusions: exclusionsDraft })}
+        >
+          <div className={styles.allergyEditor}>
+            {exclusionsDraft.length > 0 ? (
+              <div className={styles.chipRow}>
+                {exclusionsDraft.map((item, index) => (
+                  <span key={`${item}-${index}`} className={styles.removableChip}>
+                    {item}
+                    <button
+                      type="button"
+                      aria-label={`Remover ${item}`}
+                      className={styles.removeChipButton}
+                      onClick={() => removeExclusion(index)}
+                      disabled={savingSection("exclusoes")}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.allergyEmptyHint}>Por opção, não por alergia — ex.: carne vermelha.</p>
+            )}
+            <div className={styles.allergyInputRow}>
+              <Input
+                type="text"
+                placeholder="Ex.: carne de porco"
+                value={exclusionInput}
+                disabled={savingSection("exclusoes")}
+                maxLength={MAX_ALLERGY_LENGTH}
+                onChange={(e) => setExclusionInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addExclusion();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={addExclusion}
+                disabled={savingSection("exclusoes") || !exclusionInput.trim()}
+              >
+                Adicionar
+              </Button>
+            </div>
+          </div>
+        </ProfileSectionCard>
+
+        <ProfileSectionCard
+          title="Preferências alimentares"
+          editing={editingSection === "preferencias"}
+          saving={savingSection("preferencias")}
+          error={sectionServerError("preferencias")}
+          saveDisabled={savingSection("preferencias")}
+          displayValue={
+            profile.dietaryPreferences && profile.dietaryPreferences.length > 0 ? (
+              <div className={styles.chipRow}>
+                {profile.dietaryPreferences.map((item) => (
+                  <Chip key={item} variant="cream">
+                    {DIETARY_PREFERENCE_OPTIONS.find((o) => o.value === item)?.label ?? item}
+                  </Chip>
+                ))}
+              </div>
+            ) : (
+              "Nenhuma preferência registada."
+            )
+          }
+          onEdit={() => startEdit("preferencias")}
+          onCancel={cancelEdit}
+          onSave={() => save("preferencias", { dietaryPreferences: dietaryPreferencesDraft })}
+        >
+          <div className={styles.chipRow}>
+            {DIETARY_PREFERENCE_OPTIONS.map((opt) => {
+              const selected = dietaryPreferencesDraft.includes(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={styles.chipButton}
+                  onClick={() => toggleDietaryPreference(opt.value)}
+                  aria-pressed={selected}
+                  disabled={savingSection("preferencias")}
+                >
+                  <Chip variant={selected ? "tan" : "cream"}>{opt.label}</Chip>
+                </button>
+              );
+            })}
           </div>
         </ProfileSectionCard>
 

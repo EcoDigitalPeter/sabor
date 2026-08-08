@@ -22,7 +22,7 @@ export const DISH_GALLERY: DishGalleryItem[] = [
     sensory: "Folhas de mandioca cozinhadas devagar em amendoim torrado e leite de coco.",
     kcal: 480,
     minutes: 35,
-    tag: "clássico",
+    tag: "🌱 Vegetariana",
     macros: { proteina: 18, carbs: 40, gordura: 32, fibra: 10 },
     note: "Rico em fibra — ótimo com xima ou arroz.",
     image: "/images/pratos/matapa-de-amendoim.webp",

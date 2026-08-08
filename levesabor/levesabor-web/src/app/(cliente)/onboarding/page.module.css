@@ -29,6 +29,16 @@
   color: var(--clay-soft);
 }
 
+/* FE-Y03: cabeçalho de sub-grupo dentro de um passo (ex.: "Alergias" vs. "Alimentos que não
+   comes" no mesmo passo) — mais discreto que .question, mais forte que .hint. */
+.subQuestion {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
 /* ---------- Grelhas de opção única (objetivo / condição / orçamento) ---------- */
 
 .optionGrid {

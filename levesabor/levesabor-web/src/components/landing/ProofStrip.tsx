@@ -3,9 +3,9 @@
 import styles from "./ProofStrip.module.css";
 
 const CLAIMS = [
-  "Feito em Moçambique, para Moçambique",
-  "Pratos 100% locais — da matapa à mucapata",
-  "Pensado para pouca internet e pouco dado",
+  "Criado em Moçambique, pensado para o mundo",
+  "Pratos reconhecíveis — da matapa à mucapata",
+  "Leve, rápido e económico em dados móveis",
   "Grátis durante o lançamento",
 ];
 

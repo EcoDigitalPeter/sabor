@@ -20,6 +20,7 @@ import {
 
 export type ShoppingList = components["schemas"]["ShoppingList"];
 export type ShoppingListItem = components["schemas"]["ShoppingListItem"];
+export type CreateShoppingListItemRequest = components["schemas"]["CreateShoppingListItemRequest"];
 
 export const shoppingListQueryKey = ["shopping-list"] as const;
 
@@ -27,6 +28,27 @@ export function useShoppingList() {
   return useQuery({
     queryKey: shoppingListQueryKey,
     queryFn: () => api<ShoppingList>("/me/shopping-list"),
+  });
+}
+
+/**
+ * FE-W04/F1-CLI-06B · cria um item manual (`origin: "MANUAL"`) na lista de compras ativa —
+ * POST /me/shopping-list/items. Sem atualização otimista (ao contrário de
+ * {@link useUpdateShoppingItem}): é uma criação, não há linha local para já refletir; em sucesso
+ * invalida-se a query para o novo item aparecer com o `id` atribuído pelo servidor.
+ */
+export function useAddShoppingItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateShoppingListItemRequest) =>
+      api<ShoppingListItem>("/me/shopping-list/items", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shoppingListQueryKey });
+    },
   });
 }
 

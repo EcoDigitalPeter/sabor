@@ -6,7 +6,7 @@
 // e permite repô-las quando a rede volta. A wiring com React/TanStack Query vive em
 // src/hooks/useShoppingList.ts, que injeta a função que efetivamente chama a API.
 
-const STORAGE_KEY = "levesabor:offline:shopping-toggle-queue";
+const STORAGE_KEY = "ottimizo:offline:shopping-toggle-queue";
 
 /** FE-R01: patch genérico de item — `checked` (comprado) e/ou `haveQuantity` (já tenho). */
 export type ShoppingItemPatch = { checked?: boolean; haveQuantity?: number };

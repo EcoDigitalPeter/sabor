@@ -16,19 +16,19 @@ type Goal = "perda" | "manter" | "massa" | "condicao";
 type Condition = "nenhuma" | "diabetes" | "hipertensao" | "celiaca";
 
 const GOAL_LABELS: Record<Goal, string> = {
-  perda: "Perder peso",
+  perda: "Emagrecer",
   manter: "Comer melhor no dia a dia",
-  massa: "Ganhar massa",
-  condicao: "Gerir uma condição de saúde",
+  massa: "Ganhar massa muscular",
+  condicao: "Controlar uma condição de saúde",
 };
 
 const GOAL_ORDER: Goal[] = ["perda", "manter", "massa", "condicao"];
 
 const GOAL_INTROS: Record<Goal, string> = {
-  perda: "Para perder peso, a Leve Sabor sugere:",
-  manter: "Para o teu dia a dia, a Leve Sabor sugere:",
-  massa: "Para ganhar massa, a Leve Sabor sugere:",
-  condicao: "Para gerir a tua condição, a Leve Sabor sugere:",
+  perda: "Para emagrecer, a Ottimizo sugere:",
+  manter: "Para o teu dia a dia, a Ottimizo sugere:",
+  massa: "Para ganhar massa, a Ottimizo sugere:",
+  condicao: "Para gerir a tua condição, a Ottimizo sugere:",
 };
 
 const CONDITION_OPTIONS: { key: Condition; label: string }[] = [
@@ -314,7 +314,7 @@ function FreeformFlow() {
 
       {step === "result" && match && (
         <ResultCard
-          intro={`Para "${submittedText}", a Leve Sabor sugere:`}
+          intro={`Para "${submittedText}", a Ottimizo sugere:`}
           plan={buildPlan(match.goal, match.condition)}
           onReset={reset}
         />

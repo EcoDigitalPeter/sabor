@@ -40,10 +40,10 @@ const MEAL_SLOT_OPTIONS: { value: MealSlot; label: string }[] = [
 ];
 
 const GOAL_OPTIONS: { value: Goal; label: string }[] = [
-  { value: "PERDER_PESO", label: "Perder peso" },
+  { value: "PERDER_PESO", label: "Emagrecer" },
   { value: "COMER_MELHOR", label: "Comer melhor no dia a dia" },
-  { value: "GANHAR_MASSA", label: "Ganhar massa" },
-  { value: "GERIR_CONDICAO", label: "Gerir uma condição de saúde" },
+  { value: "GANHAR_MASSA", label: "Ganhar massa muscular" },
+  { value: "GERIR_CONDICAO", label: "Controlar uma condição de saúde" },
 ];
 
 const SLOT_ORDER: Record<string, number> = { PEQUENO_ALMOCO: 0, ALMOCO: 1, JANTAR: 2, LANCHE: 3 };

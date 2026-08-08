@@ -1,6 +1,6 @@
 # levesabor-web
 
-Next.js 14 (App Router) frontend for Leve Sabor AI. See `/docs/plano/` at the repo root for the full product/implementation plan.
+Next.js 14 (App Router) frontend for Ottimizo. See `/docs/plano/` at the repo root for the full product/implementation plan.
 
 ## Local development
 

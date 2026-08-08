@@ -1,0 +1,114 @@
+/* FE-W05 · RecipeDetailSheet — mesmas classes/geometria do detalhe de receita (plano/refeicao/[entryId]) */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.6rem);
+  color: var(--ink);
+}
+
+.description {
+  margin: -8px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--clay);
+}
+
+.statsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.ringRow {
+  display: flex;
+  justify-content: center;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ingredientList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ingredientItem {
+  display: flex;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.ingredientQty {
+  font-family: var(--font-mono);
+  color: var(--clay);
+  min-width: 84px;
+  flex-shrink: 0;
+}
+
+.stepList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepItem {
+  display: flex;
+  gap: 14px;
+}
+
+.stepNumber {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--terracotta);
+  flex-shrink: 0;
+}
+
+.stepText {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--clay-soft);
+  border-top: 1px solid var(--tan);
+  padding-top: 14px;
+  margin: 0;
+}

@@ -1,0 +1,144 @@
+/* F3-CLI-07 · "Encomendar rancho" — escolher loja + rever itens (mesmo padrão do wizard de
+   onboarding/pedir-agora: .step/.question/.hint/.optionGrid-like) */
+
+.main {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.question {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.hint {
+  margin: -10px 0 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--clay-soft);
+}
+
+/* ---------- Passo 1: escolher loja ---------- */
+
+.storeList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- Passo 2: rever itens ---------- */
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(36, 26, 20, 0.08);
+}
+
+.itemName {
+  color: var(--ink);
+}
+
+.qtyGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.qtyInput {
+  width: 68px;
+  padding: 6px 8px;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card-alt);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.qtyInput:disabled {
+  opacity: 0.5;
+}
+
+.qtyInput:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 1px;
+}
+
+.unit {
+  font-size: 0.8rem;
+  color: var(--clay-soft);
+  white-space: nowrap;
+}
+
+.submitError {
+  margin: 0;
+  color: var(--terracotta);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+/* ---------- Loading ---------- */
+
+.skeletonTitle {
+  margin-bottom: 18px;
+}
+
+.skeletonRow {
+  margin-bottom: 12px;
+}
+
+/* ---------- Confirmação (sem pagamento/entrega — combinado direto com a loja) ---------- */
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+
+.confirmPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin: auto 0;
+  padding: 24px 4px;
+}
+
+.confirmText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--clay);
+}

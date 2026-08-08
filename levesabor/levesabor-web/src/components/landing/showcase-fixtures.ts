@@ -59,7 +59,13 @@ export const SHOWCASE_RECIPE = {
   name: "Matapa de amendoim com xima",
   kcal: 610,
   macros: { proteina: 22, carbs: 48, gordura: 26, fibra: 11 },
-  ingredients: ["Folhas de mandioca", "Amendoim torrado", "Leite de coco", "Alho", "Xima de milho"],
+  ingredients: [
+    "Folhas de mandioca — 300 g",
+    "Amendoim torrado — 100 g",
+    "Leite de coco — 200 ml",
+    "Alho — 2 dentes",
+    "Xima de milho — 1 chávena",
+  ],
 };
 
 export const SHOWCASE_SHOPPING_ITEMS: ShoppingListItem[] = [

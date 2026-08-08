@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["card_id", "parecer"],
+  "properties": {
+    "card_id": { "type": "string" },
+    "parecer": { "type": "string" },
+    "notas": { "type": "string" }
+  }
+}

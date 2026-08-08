@@ -1,0 +1,72 @@
+/* FE-W05 · T-28 Catálogo de receitas — grelha responsiva + chips de filtro + pesquisa */
+
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 1.15rem + 1vw, 1.75rem);
+  color: var(--ink);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--clay-soft);
+  max-width: 52ch;
+}
+
+.searchRow {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: var(--clay-soft);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 42px;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chipButton {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+.chipButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+}

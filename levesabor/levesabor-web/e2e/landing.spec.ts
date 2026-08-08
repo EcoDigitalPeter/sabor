@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Landing v2", () => {
   test("mostra todas as secções para um visitante anónimo", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /Comida moçambicana de verdade/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Alimentação inteligente, pensada para ti/i })).toBeVisible();
     await expect(page.locator("#pratos")).toBeVisible();
     await expect(page.locator("#como-funciona")).toBeVisible();
     await expect(page.locator("#faq")).toBeVisible();
@@ -16,7 +16,7 @@ test.describe("Landing v2", () => {
   test("fluxo do quiz reage às duas respostas e leva ao registo", async ({ page }) => {
     await page.goto("/#demo");
     const demo = page.locator("#demo");
-    await demo.getByRole("button", { name: "Ganhar massa" }).click();
+    await demo.getByRole("button", { name: "Ganhar massa muscular" }).click();
     await demo.getByRole("button", { name: "Diabetes tipo 2" }).click();
 
     await expect(demo.getByText("A compor o teu prato…")).toBeVisible();
@@ -50,7 +50,7 @@ test.describe("Landing v2", () => {
     await expect(question).toHaveAttribute("aria-expanded", "false");
     await question.click();
     await expect(question).toHaveAttribute("aria-expanded", "true");
-    await expect(page.getByText(/Durante o lançamento, é grátis/)).toBeVisible();
+    await expect(page.getByText(/Podes começar gratuitamente/)).toBeVisible();
   });
 
   test("todos os CTAs principais apontam para /registo", async ({ page }) => {
@@ -70,7 +70,7 @@ test.describe("Landing v2", () => {
   test("smoke em ecrã de 360px", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 780 });
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /Comida moçambicana de verdade/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Alimentação inteligente, pensada para ti/i })).toBeVisible();
     const bodyWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(bodyWidth).toBeLessThanOrEqual(361);
   });

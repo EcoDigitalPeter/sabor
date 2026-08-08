@@ -129,6 +129,28 @@
   outline-offset: 2px;
 }
 
+/* FE-W05 · Cartão de entrada para /receitas (catálogo navegável) */
+.recipesCard {
+  padding: 14px 16px;
+}
+
+.recipesLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--terracotta);
+  text-decoration: none;
+}
+
+.recipesLink:hover {
+  color: var(--terracotta-dark);
+}
+
+.recipesLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
 /* Cartão "Pedir receita agora" — mesmo padrão visual do adHocCard de /plano. */
 .adHocCard {
   display: flex;

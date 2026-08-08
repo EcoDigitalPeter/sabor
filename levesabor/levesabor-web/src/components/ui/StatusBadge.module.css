@@ -23,3 +23,7 @@
 .claySoft {
   background: var(--clay-soft);
 }
+
+.amber {
+  background: var(--amber);
+}

@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function loginAsClient(page: Page) {
   await page.goto("/login");
-  await page.getByLabel("Email").fill("amelia@levesabor.mz");
+  await page.getByLabel("Email").fill("amelia@ottimizo.mz");
   // getByLabel("Password", { exact: true }) não bate certo com o campo real: o FormField
   // acrescenta um "(obrigatório)" invisível ao nome acessível do label ("Password (obrigatório)"),
   // e sem exact:true "Password" também correspondia ao botão "Mostrar/Ocultar password". O id é

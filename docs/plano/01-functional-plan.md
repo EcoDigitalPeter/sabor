@@ -132,9 +132,9 @@ Funcionalidades: `F1-VIS-01` Registo · `F1-VIS-02` Login · `F1-VIS-03` Recuper
 
 ## Persona 2 — Cliente
 
-**Objetivo principal:** receber um plano alimentar semanal adequado ao seu objetivo, condição de saúde, gostos e orçamento — com receitas e lista de compras — gastando pouco dado móvel; e, a partir da Fase 3, encomendar o rancho a uma loja parceira.
+**Objetivo principal:** receber um plano alimentar mensal adequado ao seu objetivo, condição de saúde, gostos e orçamento — com receitas e lista de compras — gastando pouco dado móvel; e, a partir da Fase 3, encomendar o rancho a uma loja parceira.
 
-Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano por IA · `F1-CLI-03` Consulta do plano · `F1-CLI-04` Receita da refeição · `F1-CLI-05` Feedback e troca de refeição · `F1-CLI-06` Lista de compras · `F3-CLI-07` Encomendar rancho a uma loja.
+Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano por IA · `F1-CLI-03` Consulta do plano · `F1-CLI-04` Receita da refeição · `F1-CLI-05` Feedback e troca de refeição · `F1-CLI-05B` Sequência e progresso do mês · `F1-CLI-06` Lista de compras · `F1-CLI-06B` Adicionar item manual **[Sugestão]** · `F1-CLI-08` Catálogo de receitas navegável **[Sugestão]** · `F3-CLI-07` Encomendar rancho a uma loja.
 
 ---
 
@@ -145,58 +145,64 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 | **Prioridade** | **MVP** — "Conta e perfil do cliente (objectivo, condição de saúde)" na cotação |
 | **Telas** | T-03 Onboarding (wizard), T-08 Perfil |
 
-**Descrição funcional.** Após o registo, o cliente responde a um questionário curto (no espírito do quiz de 2 perguntas da landing) que alimenta a geração de planos: objetivo, condição de saúde, alergias/exclusões, orçamento e nº de refeições por dia. Editável a qualquer momento em "Perfil".
+**Descrição funcional.** Após o registo, o cliente responde a um questionário curto (no espírito do quiz de 2 perguntas da landing) que alimenta a geração de planos: objetivo, condição de saúde, alergias/exclusões, orçamento, nº de refeições por dia e, **[Sugestão]**, preferências alimentares (`dietaryPreferences`). Editável a qualquer momento em "Perfil".
 
 **Fluxo do utilizador.**
 1. Wizard passo-a-passo (1 pergunta por ecrã, mobile-first):
-   - **Objetivo** (obrigatório, 1 de 4): `Perder peso` · `Comer melhor no dia a dia` · `Ganhar massa` · `Gerir uma condição de saúde` (labels da landing).
-   - **Condição de saúde** (obrigatório, 1 de 4): `Nenhuma` · `Diabetes tipo 2` · `Hipertensão` · `Doença celíaca` (labels da landing).
+   - **Objetivo** (obrigatório, 1 de 4): `Emagrecer` · `Comer melhor no dia a dia` · `Ganhar massa muscular` · `Controlar uma condição de saúde` (labels da landing — corrigidos em agosto/2026 a pedido do cliente; ver `docs/plano/06-guia-de-copy-e-marca.md` regra 5, grep obrigatório antes de considerar a mudança terminada).
+   - **Condição de saúde** (obrigatório, 1 ou mais, `healthConditions: string[]` — **mudança de contrato pendente**, ver nota abaixo): `Nenhuma` · `Diabetes tipo 2` · `Hipertensão` · `Doença celíaca` · `Outra` (com campo de texto livre) (labels da landing). Até essa mudança ser implementada (cartão `FE-Y02`), o campo é ainda `healthCondition` singular.
    - **Alergias / não como** (opcional, multi-seleção + texto livre): ex. amendoim, marisco, lactose.
+   - **Preferências alimentares** (opcional, multi-seleção) **[Sugestão]**: `vegetariana` · `vegan` · `sem_gluten` · `sem_lactose` · `alta_proteina` · `baixo_calorico` — mesmo vocabulário das `healthTags` já usadas nas receitas; passo novo do wizard, no mesmo padrão de chips (`OptionCard`) já usado no passo de alergias.
    - **Orçamento semanal aproximado** (opcional): faixa em MT (`baixo / médio / confortável`) — usado na otimização do rancho.
    - **Refeições por dia** (default 3): pequeno-almoço, almoço, jantar (+ lanches **[Sugestão]**).
 2. Resumo → confirmar → perfil gravado → CTA "Gerar o meu primeiro plano" (F1-CLI-02).
 
 **Regras de negócio.**
 - Sem perfil completo (objetivo + condição) não é possível gerar plano.
-- Alterar objetivo, condição ou alergias **não** altera planos já gerados; passa a valer na próxima geração (aviso na UI).
+- Alterar objetivo, condição, alergias ou preferências alimentares **não** altera planos já gerados; passa a valer na próxima geração (aviso na UI) — mesma regra já aplicada a objetivo/condição, agora estendida ao novo campo.
 - Condição de saúde e alergias são dados sensíveis: nunca partilhados com terceiros (compromisso da FAQ da landing), acesso registado em auditoria, e enviados ao fornecedor de IA apenas como parâmetros da geração.
+- **[Sugestão]** `dietaryPreferences` é opcional e tem dois usos a jusante: (a) alimenta o pré-filtro de receitas na geração do plano (F1-CLI-02), do mesmo modo que a condição de saúde já faz; (b) alimenta o filtro por defeito do catálogo de receitas navegável (F1-CLI-08).
 
 **Tarefas — Frontend.**
 - Wizard `/onboarding` (5 passos + resumo) com progresso; página `/perfil` de edição.
 - Persistir rascunho do wizard localmente (voltar atrás sem perder respostas).
+- **[Sugestão]** Novo passo `Wizard`/`OptionCard` para "Preferências alimentares", reaproveitando o padrão de chips multi-seleção já existente no passo de alergias; edição também disponível em `/perfil`.
 
 **Tarefas — Backend.**
-- `GET/PUT /api/v1/me/profile` — cria/atualiza `client_profiles` (upsert 1:1 com `users`).
+- `GET/PUT /api/v1/me/profile` — cria/atualiza `client_profiles` (upsert 1:1 com `users`); **[Sugestão]** inclui o novo campo `dietaryPreferences: string[]` no payload.
 - Enum de objetivos e condições no domínio (`Goal`, `HealthCondition`) alinhado com os valores da landing.
+- **Pendente (`FE-Y02`):** migrar `HealthCondition` de valor único para `healthConditions: string[]` (o cliente reporta ter, ela própria, mais do que uma condição — ex. diabetes + hipertensão). Regra de combinação a implementar no pré-filtro (`BE-C02`/mocks `pickAlternative`/`pickAdHocRecipe`): celíaco continua filtro duro isolado (exclui glúten sempre); as restantes condições combinam-se por união dos seus filtros/tags respetivos, sem prioridade entre si.
 
 **Tarefas — Base de dados.**
 - Tabela `client_profiles` (V2): `goal`, `health_condition`, `allergies` (jsonb), `budget_band`, `meals_per_day`.
+- **[Sugestão]** `client_profiles.dietary_preferences` (jsonb/array) novo.
 
 **Endpoints.** `GET /api/v1/me/profile` · `PUT /api/v1/me/profile`.
 
-**Validações.** `goal` e `health_condition` dentro dos enums; `meals_per_day` 2–5; alergias ≤ 20 itens, cada ≤ 60 chars; `budget_band` no enum.
+**Validações.** `goal` e `health_condition` dentro dos enums; `meals_per_day` 2–5; alergias ≤ 20 itens, cada ≤ 60 chars; `budget_band` no enum; **[Sugestão]** `dietaryPreferences` com valores dentro do vocabulário fechado (`vegetariana`, `vegan`, `sem_gluten`, `sem_lactose`, `alta_proteina`, `baixo_calorico`), ≤ 6 itens.
 
 **Estados possíveis.** Wizard: `passo 1..5 → resumo → guardado`. Perfil: `incompleto | completo`. Página: `loading | edição | saving | saved | erro`.
 
 **Critérios de aceitação.**
 - [ ] Perfil completo é pré-condição verificada (403/409 no backend) para gerar plano.
-- [ ] Os 4 objetivos e as 4 condições da landing existem exatamente com esses labels pt-PT.
+- [ ] Os 4 objetivos e as 4 condições (+ "Outra") da landing existem exatamente com esses labels pt-PT, em todos os ecrãs onde aparecem (onboarding, perfil, "pedir receita agora", landing).
 - [ ] Editar perfil não muda planos existentes e a UI comunica isso.
 - [ ] Todas as leituras/escritas de perfil ficam em `audit_log`.
+- [ ] Cliente pode selecionar 0+ preferências alimentares; ficam disponíveis para o pré-filtro de geração e para o catálogo navegável.
 
 ---
 
-### F1-CLI-02 — Geração do plano alimentar semanal por IA
+### F1-CLI-02 — Geração do plano alimentar mensal por IA
 
 | | |
 |---|---|
 | **Prioridade** | **MVP** — coração da cotação ("planos alimentares semanais gerados por IA, com pratos moçambicanos reais") |
 | **Telas** | T-04 Dashboard do plano (estado "a gerar"), T-03 fim do onboarding |
 
-**Descrição funcional.** O cliente pede um plano para a semana; o backend monta um prompt com o perfil + histórico de feedback + catálogo de receitas elegíveis e chama a OpenAI (structured outputs) para compor 7 dias × N refeições, **escolhendo apenas receitas do catálogo**. O resultado é persistido e apresentado com macros por refeição (anel de macros, como na landing).
+**Descrição funcional.** O cliente pede um plano para o mês; o backend monta um prompt com o perfil + histórico de feedback + catálogo de receitas elegíveis e chama a OpenAI (structured outputs) para compor até 30/31 dias × N refeições — um mês corrido a partir da data de geração, não necessariamente alinhado ao calendário (mesma convenção já usada pelo `weekStart` atual, que também não é o segunda-feira do mês) —, **escolhendo apenas receitas do catálogo**. O resultado é persistido e apresentado com macros por refeição (anel de macros, como na landing).
 
 **Fluxo do utilizador.**
-1. No dashboard sem plano ativo (ou via "Gerar novo plano"), clica **"Gerar o meu plano da semana"**.
+1. No dashboard sem plano ativo (ou via "Gerar novo plano"), clica **"Gerar o meu plano do mês"**.
 2. Ecrã de progresso (mensagens rotativas, ex. "A escolher pratos moçambicanos para ti…"); geração típica 10–30 s.
 3. Plano aparece no dashboard (F1-CLI-03). Em caso de falha, mensagem clara + botão "Tentar novamente".
 
@@ -204,7 +210,7 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 - **Grounding obrigatório:** a IA recebe a lista de receitas elegíveis (id, nome, tags, macros, custo estimado) já **pré-filtrada pelo backend** por condição de saúde e alergias; a resposta só pode referenciar `recipe_id` dessa lista. Resposta com id fora da lista → rejeitada e repetida (máx. 2 retries) → erro controlado.
 - Filtros de segurança por condição (aplicados no backend, não confiados à LLM): `diabetes_tipo_2` → excluir receitas com tag `alto_acucar`, priorizar `acucar_controlado`; `hipertensao` → excluir `alto_sodio`, priorizar `baixo_sodio`; `doenca_celiaca` → **excluir** tudo o que não tenha tag `sem_gluten` (filtro duro); alergias → excluir receitas cujo ingrediente conste das exclusões.
 - 1 plano ativo por cliente. Gerar novo plano arquiva o anterior (`status = ARCHIVED`), que deixa de ser editável.
-- Limite de gerações: 3/dia por cliente (controlo de custo OpenAI; configurável).
+- Limite de gerações: 1/dia por cliente (mais baixo do que antes — uma geração mensal é uma chamada única muito maior e mais cara que a antiga geração semanal: até 30/31 dias × N refeições no mesmo pedido, em vez de 7; controlo de custo OpenAI, configurável).
 - Aprendizagem contínua (entrada): receitas com feedback negativo do cliente (F1-CLI-05) são despriorizadas/excluídas do prompt; as com feedback positivo são sinalizadas como preferidas.
 - Cada geração regista em `ai_generation_log`: modelo, tokens, duração, sucesso/erro (rastreabilidade e custo).
 - O plano guarda um snapshot dos dados nutricionais no momento da geração (edições posteriores do admin às receitas não alteram planos já entregues).
@@ -225,12 +231,12 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 
 **Endpoints.** `POST /api/v1/me/meal-plans` (síncrono — devolve o plano pronto) · `GET /api/v1/me/meal-plans/{id}` (consulta pontual de um plano específico, ex. deep-link).
 
-**Validações.** Perfil completo; sem geração já em curso; limite diário não excedido; resposta da IA validada contra JSON Schema + ids do catálogo + cobertura completa (7 dias × N refeições).
+**Validações.** Perfil completo; sem geração já em curso; limite diário não excedido; resposta da IA validada contra JSON Schema + ids do catálogo + cobertura completa (até 30/31 dias × N refeições).
 
 **Estados possíveis.** Plano: `READY | FAILED`; e `ACTIVE → ARCHIVED`. UI: `idle → requesting(a aguardar resposta) → ready | failed(retry) | limit_reached`.
 
 **Critérios de aceitação.**
-- [ ] Plano gerado tem 7 dias × N refeições, todas com receita existente no catálogo.
+- [ ] Plano gerado tem até 30/31 dias × N refeições, todas com receita existente no catálogo.
 - [ ] Cliente celíaco nunca recebe receita sem tag `sem_gluten`; alergias nunca aparecem nos ingredientes do plano (testado com fixtures).
 - [ ] Falha da OpenAI produz erro controlado e o cliente consegue repetir; nada fica meio-gravado (transação).
 - [ ] Cada geração fica registada com tokens/duração/custo estimado.
@@ -238,18 +244,18 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 
 ---
 
-### F1-CLI-03 — Consulta do plano semanal
+### F1-CLI-03 — Consulta do plano mensal
 
 | | |
 |---|---|
 | **Prioridade** | **MVP** |
 | **Telas** | T-04 Dashboard do plano |
 
-**Descrição funcional.** Vista principal do portal do cliente: a semana em curso, navegável por dia, com as refeições (nome do prato, kcal, mini-anel de macros) e acesso à receita e à lista de compras. Deve funcionar offline depois de carregada (promessa da FAQ da landing).
+**Descrição funcional.** Vista principal do portal do cliente: o mês em curso, navegável por dia, com as refeições (nome do prato, kcal, mini-anel de macros) e acesso à receita e à lista de compras. Deve funcionar offline depois de carregada (promessa da FAQ da landing).
 
 **Fluxo do utilizador.**
 1. Cliente autenticado abre `/plano` → plano ativo carregado.
-2. Navega entre dias (tabs/scroll horizontal seg–dom, dia atual pré-selecionado).
+2. Como 30/31 dias não cabem numa fila de tabs, a navegação ganha um nível: o cliente escolhe primeiro a semana dentro do mês (chips "Semana 1"…"Semana 5", semana atual pré-selecionada) e só depois navega entre dias dessa semana (tabs/scroll horizontal, dia atual pré-selecionado) — a UI de dias mantém-se igual à atual, só passa a viver dentro da semana escolhida.
 3. Toca numa refeição → detalhe/receita (F1-CLI-04). Acesso permanente a "Lista de compras" e "Gerar novo plano".
 4. Sem plano ativo → empty state com CTA de geração.
 
@@ -370,6 +376,48 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 
 ---
 
+### F1-CLI-05B — Sequência e progresso do mês
+
+| | |
+|---|---|
+| **Prioridade** | **MVP** — gamificação discreta, consistente com o tom não-gamificado de `descricao.md` §1 |
+| **Telas** | T-04 Dashboard do plano, T-06 Lista de compras (check-in semanal) |
+
+**Descrição funcional.** O cliente marca uma refeição como "comi isto" (`completed`), um estado independente do feedback 👍/👎 de preferência (F1-CLI-05) — um regista se gostou, o outro se de facto a comeu. O dashboard mostra dois indicadores simples de continuidade: uma sequência ("já marcaste refeições em N dias seguidos", contando dias consecutivos com ≥ 1 refeição `completed`) e um progresso do mês ("X de 30 dias com refeição marcada"), reaproveitando a técnica SVG do Anel de Macros (`MacroRing`) com um único segmento em vez de quatro.
+
+**Fluxo do utilizador.**
+1. No cartão de refeição (dashboard ou detalhe), o cliente toca "Comi isto" → estado `completed` marcado de forma otimista.
+2. No topo do dashboard, um indicador de sequência e um anel de progresso do mês refletem o novo total assim que a marcação é aplicada.
+3. Na lista de compras, ao fechar todos os itens de uma semana, uma mensagem discreta de check-in semanal reconhece o marco (sem pontos, sem badge — só a mensagem).
+
+**Regras de negócio.**
+- `completed` é um campo por entrada do plano, independente de `like|dislike|none`; marcar/desmarcar não afeta o feedback de preferência nem a geração seguinte.
+- A sequência conta dias consecutivos (incluindo hoje) com pelo menos uma entrada `completed`; quebra num dia sem nenhuma marcação. O progresso do mês é simplesmente a contagem de dias do plano ativo com ≥ 1 entrada `completed`, sobre o total de dias do plano (até 30/31).
+- **Sem pontos, XP, níveis, badges, troféus ou confetti.** O tom visual documentado do produto (`descricao.md` §1) é deliberadamente não-gamificado nesse sentido, e o `FE-S` (ver `tasks.md`, nota "Controlo de porções") já descartou explicitamente streaks/XP/níveis extraídos de um mock Stitch pela mesma razão. Esta funcionalidade é a exceção deliberadamente contida a essa regra — progresso e continuidade simples, não um sistema de recompensas — e mantém-se consistente com ela, não a contradiz.
+
+**Tarefas — Frontend.**
+- Checkmark "Comi isto" no `MealCard` (dashboard e detalhe da refeição), update otimista com rollback em erro.
+- Cálculo de sequência/streak a partir das entradas `completed` do plano ativo (client-side, sobre o payload já carregado).
+- Componente `MonthProgressRing` (variante de um segmento do `MacroRing`) no topo do dashboard.
+- Mensagem de check-in semanal em `/compras` quando todos os itens de uma semana (agrupamento visual de F1-CLI-06) ficam marcados.
+
+**Tarefas — Backend.** N/A nesta fase (mock-only) — `completed` e o respetivo endpoint existem apenas nos mocks/MSW (ver `tasks.md`, secção `FE-V`); backend real fica para quando este fluxo for priorizado numa fase com backend.
+
+**Tarefas — Base de dados.** N/A nesta fase (mock-only) — sem tabela real; no mock, `completed` vive no mesmo registo de entrada do plano usado hoje para o feedback.
+
+**Endpoints.** Mock local apenas (MSW) — sem endpoint real ainda; contrato mockado em `tasks.md` `FE-U01`/`FE-V01`.
+
+**Validações.** `completed` booleano por entrada; só o dono do plano pode marcar as suas entradas (mesma regra de ownership das restantes rotas `me/`).
+
+**Estados possíveis.** Entrada: `completed: true | false` (+ `saving`). Indicadores: `loading | ready | empty(sem entradas marcadas)`.
+
+**Critérios de aceitação.**
+- [ ] Marcar "Comi isto" não altera o feedback 👍/👎 da mesma entrada, nem vice-versa.
+- [ ] A sequência mostrada corresponde ao número real de dias consecutivos (incluindo hoje) com ≥ 1 entrada `completed`, e quebra corretamente num dia sem marcações.
+- [ ] Em nenhum ecrã aparecem pontos, XP, níveis, badges, troféus ou confetti — apenas o texto de sequência e o anel de progresso do mês.
+
+---
+
 ### F1-CLI-06 — Lista de compras / rancho optimizado
 
 | | |
@@ -389,10 +437,13 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 - Agregação: soma por `ingredient_id` convertendo unidades compatíveis (g↔kg, ml↔l); unidades incompatíveis geram linhas separadas.
 - Estimativa de custo total usa `ingredients.reference_price` quando preenchido; sem preço, o item não contribui e a UI indica "estimativa parcial". (Preços reais por loja chegam na Fase 2 via catálogo — cruzá-los com a lista é `FUT-03` **[Sugestão]**.)
 - Lista pertence ao plano (1:1 com `meal_plans`).
+- **"Já tenho isto" (FE-R, ver `tasks.md`).** Cada item ganha `have_quantity` (quantidade que o cliente já diz ter, na mesma unit do item — sem conversão, porque a agregação acima já normaliza a unit por linha). A quantidade "a comprar" mostrada é `quantity − have_quantity` (nunca negativa); o custo total agrega o custo "a comprar" pro-rata, não o custo bruto. Só é possível indicar `have_quantity` para itens já presentes na lista gerada (sem catálogo de ingredientes pesquisável). Reinicia sempre que a lista é reconstruída (plano novo/troca) — não persiste entre semanas.
+- **Agrupamento por semana (plano agora mensal).** Como o plano passou a cobrir até 30/31 dias, a lista continua a ser uma **lista única com um total único** (sem mudança ao modelo de dados), mas a UI agrupa-a visualmente por "Semana 1", "Semana 2"… dentro desse mesmo conjunto de itens — puramente de apresentação, para o cliente poder comprar/encomendar em lotes semanais em vez de um rancho de 30 dias de uma só vez.
 
 **Tarefas — Frontend.**
 - Página `/compras`: grupos por categoria, checkboxes, contador "X de Y", custo estimado (com nota de parcialidade), botão "Partilhar/copiar lista" (texto simples) **[Sugestão]**.
 - Cache offline da lista; fila local de toggles com sync.
+- **Débito técnico confirmado (verificado em código):** o mock atual (`SHOPPING_ITEMS_SEED` em `src/mocks/fixtures.ts`) é uma lista estática pré-somada à mão — não deriva do plano ativo nem agrega ingredientes repetidos entre receitas. Substituir por uma função que percorre as entradas do plano ativo, extrai os ingredientes de cada receita e soma quantidades por ingrediente+unidade compatível, antes de a Fase 1 poder ser considerada completa (é uma regra já prometida nesta secção, não uma feature nova).
 
 **Tarefas — Backend.**
 - Serviço de agregação (`ShoppingListService.rebuildForPlan(planId)`) chamado na conclusão da geração e nas trocas.
@@ -409,9 +460,92 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 
 **Critérios de aceitação.**
 - [ ] Todos os ingredientes de todas as refeições da semana aparecem, agregados e sem duplicados por unidade compatível.
+- [ ] Testado com fixture onde 2+ receitas do plano partilham o mesmo ingrediente: a lista mostra uma única linha com a quantidade somada, não duas linhas separadas.
 - [ ] Trocar uma refeição atualiza a lista mantendo o estado dos itens não afetados.
 - [ ] Estados marcados persistem entre sessões e dispositivos.
 - [ ] Custo estimado aparece quando há preços de referência e declara-se parcial quando não há.
+
+---
+
+### F1-CLI-06B — Adicionar item manual à lista de compras
+
+| | |
+|---|---|
+| **Prioridade** | **[Sugestão]** — insight direto de feedback do cliente ("mesmo que a lista seja gerada automaticamente, permitir ao utilizador adicionar manualmente transmite maior controlo") |
+| **Telas** | T-06 Lista de compras |
+
+**Descrição funcional.** O cliente pode adicionar um item manualmente à lista de compras (nome, quantidade, unidade, categoria), independente da agregação automática vinda do plano.
+
+**Fluxo do utilizador.**
+1. Em `/compras`, botão "+ Adicionar item" → formulário curto (nome, quantidade, unidade, categoria).
+2. Item aparece na lista, agrupado pela categoria escolhida.
+
+**Regras de negócio.**
+- Cada item da lista passa a ter um campo `origin: "PLANO" | "MANUAL"`.
+- Quando o plano é regenerado ou uma refeição é trocada, só os itens `origin: "PLANO"` são recriados/recalculados — os `origin: "MANUAL"` sobrevivem intactos entre regenerações (não são tocados).
+- Não há ligação a nenhum ingrediente do catálogo — é texto livre, sem cálculo de custo automático (o cliente pode opcionalmente indicar um custo estimado, sem validação).
+
+**Tarefas — Frontend.**
+- Botão + modal/`BottomSheet` de criação em `/compras`, reaproveitando `FormField`/`Modal` já existentes.
+
+**Tarefas — Backend.**
+- `POST /api/v1/me/shopping-list/items` (cria item manual na lista ativa).
+
+**Tarefas — Base de dados.**
+- Campo `origin` novo em `shopping_list_items` (V3), default `'PLANO'`.
+
+**Endpoints.** `POST /api/v1/me/shopping-list/items`.
+
+**Validações.** Nome 2–80 chars; quantidade > 0; unidade e categoria dentro dos enums já existentes.
+
+**Estados possíveis.** `idle → adding → saved | error`.
+
+**Critérios de aceitação.**
+- [ ] Item manual aparece imediatamente na lista, na categoria certa.
+- [ ] Sobrevive a uma regeneração do plano.
+- [ ] Pode ser removido/marcado como comprado como qualquer outro item.
+
+---
+
+### F1-CLI-08 — Catálogo de receitas navegável com filtro por dieta
+
+| | |
+|---|---|
+| **Prioridade** | **[Sugestão]** — repetidamente pedido no feedback do cliente ("filtrar receitas por dieta/tipo"); esforço médio, risco técnico baixo porque reaproveita dados já geridos pelo admin (F2-ADM-05) |
+| **Telas** | T-28 Catálogo de receitas (nova) |
+
+**Descrição funcional.** Ecrã novo `/receitas`, acessível a partir da navegação do cliente, lista todas as receitas com estado `PUBLISHED` (as mesmas geridas pelo admin), com chips de filtro pelas mesmas tags de `dietaryPreferences`/`healthTags` (`vegetariana`, `sem_gluten`, `sem_lactose`, `alta_proteina`, `baixo_calorico`, `vegan`) e pesquisa por nome. É diferente do plano do cliente (que só mostra as receitas já atribuídas) — aqui o cliente explora o catálogo inteiro livremente.
+
+**Fluxo do utilizador.**
+1. Cliente abre `/receitas` → vê grelha de receitas com foto/kcal/tempo (mesmo cartão visual usado no resto da app).
+2. Aplica filtros por chip (multi-seleção) e/ou escreve na pesquisa.
+3. Toca numa receita → vê o mesmo detalhe de receita já existente (F1-CLI-04), em modo só-leitura (sem 👍/👎 nem troca, porque não pertence a um plano).
+
+**Regras de negócio.**
+- Só receitas `PUBLISHED` aparecem (mesma regra de F2-ADM-05).
+- Filtros pré-selecionados por defeito com as `dietaryPreferences` do perfil do cliente, se existirem (mas sempre ajustáveis).
+- Sem resultados → empty state dedicado (não o mesmo "ainda sem plano").
+
+**Tarefas — Frontend.**
+- Nova página `/receitas`, reaproveita `DataTable`/grelha de cartões, `Chip` para filtros, `EmptyState` novo.
+
+**Tarefas — Backend.**
+- `GET /api/v1/me/recipes?tags=...&q=...` (paginado, só `PUBLISHED`).
+
+**Tarefas — Base de dados.**
+- Nenhuma nova — reaproveita `recipes`/tags já existentes (V2).
+
+**Endpoints.** `GET /api/v1/me/recipes`.
+
+**Validações.** `tags` dentro do vocabulário fechado; `q` ≤ 80 chars.
+
+**Estados possíveis.** `loading | ready | empty(sem resultados do filtro) | error`.
+
+**Critérios de aceitação.**
+- [ ] Filtro por tag funciona e é combinável (AND entre tags selecionadas).
+- [ ] Pesquisa por nome funciona.
+- [ ] Receita `DRAFT` nunca aparece.
+- [ ] Abrir uma receita do catálogo mostra o mesmo detalhe usado no resto da app.
 
 ---
 
@@ -421,6 +555,8 @@ Funcionalidades: `F1-CLI-01` Perfil de saúde · `F1-CLI-02` Geração do plano 
 |---|---|
 | **Prioridade** | **Fase 3** — mudança de plano: o cliente passa a poder encomendar os itens da lista de compras a uma loja parceira |
 | **Telas** | T-06 Lista de compras (CTA "Encomendar"), T-20 Escolher loja, T-21 Rever e confirmar encomenda, T-22 Minhas encomendas |
+
+> **Nota de sequenciamento (não muda o âmbito).** O **frontend** deste fluxo (escolher loja → rever encomenda → confirmar → "Minhas encomendas" — cartões `FE-C09`/`FE-C10` no `tasks.md`) está a ser construído já, contra mocks, antes do backend da Fase 3 — consistente com a abordagem "frontend-first contra mocks" adotada no projeto. Isto **não** antecipa nem altera o backend/BD desta funcionalidade, que continuam Fase 3 tal como descrito abaixo, nem o âmbito prometido: **não existe ecrã nem endpoint de entrega ou pagamento** — o que é mostrado é o contacto da loja, e entrega/pagamento continuam a combinar-se diretamente entre cliente e loja, fora do sistema. Só o CTA de *pedido* (não a logística real) avançou no calendário de construção.
 
 **Descrição funcional.** A partir da lista de compras (F1-CLI-06), o cliente escolhe uma loja parceira ativa e envia os itens (todos ou uma seleção) como um pedido de encomenda. A loja recebe o pedido no seu portal (F3-LOJ-03) e atualiza o estado à medida que o prepara. **O sistema não gere entrega nem pagamento** — esses combinam-se diretamente entre cliente e loja (o contacto da loja fica visível no pedido); a plataforma só regista o pedido e o seu estado.
 
@@ -493,7 +629,7 @@ Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de loja
 **Regras de negócio.**
 - Suspender impede login imediato e revoga refresh tokens ativos; não apaga dados.
 - Admin não pode suspender-se a si próprio; tem de existir sempre ≥ 1 admin ativo.
-- Perfil de saúde do cliente só é visível mediante ação explícita "ver perfil de saúde", registada em `audit_log` (minimização de acesso a dado sensível).
+- Perfil de saúde do cliente só é visível mediante ação explícita "ver perfil de saúde", registada em `audit_log` (minimização de acesso a dado sensível) — inclui `dietaryPreferences` (F1-CLI-01) no mesmo reveal, não é um campo à parte com regra própria.
 - Remoção definitiva de conta não faz parte da Fase 2 (**[Sugestão]** Futuro, com anonimização).
 
 **Tarefas — Frontend.**
@@ -574,11 +710,11 @@ Funcionalidades: `F2-ADM-01` Gestão de utilizadores · `F2-ADM-02` CRUD de loja
 | **Prioridade** | **Fase 2** — "Carregamento e manutenção dos dados que alimentam a LLM (receitas, ingredientes, nutrição)" na cotação. **Nota de dependência:** o MVP precisa de um catálogo mínimo (seed V5, ver F1-CLI-02); esta funcionalidade é a UI de manutenção contínua. |
 | **Telas** | T-17 Lista de receitas, T-18 Formulário de receita, T-19 Ingredientes |
 
-**Descrição funcional.** O coração anti-alucinação: CRUD de **ingredientes** (nome, categoria, unidade base, nutrição por 100 g/ml, preço de referência opcional) e de **receitas** (nome, descrição, passos, tempo, porções, tags de saúde, ingredientes com quantidades). Os macros da receita são calculados a partir dos ingredientes, com possibilidade de override manual. Inclui visão do feedback agregado dos clientes por receita (lado "catálogo" da aprendizagem contínua).
+**Descrição funcional.** O coração anti-alucinação: CRUD de **ingredientes** (nome, categoria, unidade base, nutrição por 100 g/ml, preço de referência opcional) e de **receitas** (nome, descrição, passos, tempo, porções, tags de saúde, ingredientes com quantidades). Os macros da receita são calculados a partir dos ingredientes, com possibilidade de override manual. Inclui visão do feedback agregado dos clientes por receita (👍/👎 + motivos de troca mais recentes, ver F1-CLI-05 — o `reason` livre da troca é o mesmo sinal de "aprendizagem contínua do catálogo" que o 👍/👎, só que em texto).
 
 **Fluxo do utilizador.**
-1. `/admin/receitas`: tabela (pesquisa, filtro por tag/estado) com coluna de feedback (👍/👎 agregado).
-2. "Nova receita" → formulário: dados gerais, tags de saúde (`sem_gluten`, `baixo_sodio`, `acucar_controlado`, `alto_sodio`, `alto_acucar`, `vegetariana`, …), ingredientes (autocomplete + quantidade + unidade), passos ordenados.
+1. `/admin/receitas`: tabela (pesquisa, filtro por tag/estado) com coluna de feedback (👍/👎 agregado) e, no detalhe, os motivos de troca mais recentes (texto livre, sem análise automática — é só leitura do que o cliente escreveu).
+2. "Nova receita" → formulário: dados gerais, tags de saúde — **vocabulário fechado de 10**: as 6 ligadas a condições médicas (`sem_gluten`, `baixo_sodio`, `acucar_controlado`, `alto_sodio`, `alto_acucar`, `vegetariana`) + as 4 de preferência alimentar do cliente (`vegan`, `sem_lactose`, `alta_proteina`, `baixo_calorico` — mesmo vocabulário de `Profile.dietaryPreferences`, F1-CLI-01; **gap fechado aqui**: sem estas 4 no formulário, o admin não consegue etiquetar receitas novas de forma a alimentar o filtro do catálogo navegável, F1-CLI-08, nem o pré-filtro por preferência), ingredientes (autocomplete + quantidade + unidade), passos ordenados.
 3. Guardar como `DRAFT` ou **Publicar** (`PUBLISHED` = elegível para a IA). Despublicar volta a `DRAFT`.
 4. `/admin/ingredientes`: CRUD tabular equivalente.
 
@@ -804,3 +940,4 @@ Funcionalidades: `F3-LOJ-01` Catálogo de produtos da loja · `F3-LOJ-02` Import
 | **FUT-04** | Landing page pública + lista de espera (implementação do design `project/Leve Sabor AI.dc.html` como página pública do Next.js) | O design existe no repo; a cotação cobre os dois portais, não a landing | Nenhuma técnica; decidir se a waitlist persiste na BD |
 | **FUT-05** | Recuperação de password (F1-VIS-03) | Higiene de conta | Serviço de email |
 | **FUT-06** | Histórico de preços por loja e histórico de planos navegável | Extensões diretas dos modelos da Fase 2 | — |
+| **FUT-07** | **Catálogo multi-cozinha** — receitas de outras cozinhas/países além da moçambicana | Tema mais repetido em todo o feedback do cliente (6+ rondas distintas pedem para não limitar a app à gastronomia moçambicana; uma FAQ chegou a ser escrita e depois suavizada por não ser verdade hoje) — mas implica conteúdo novo, não é decisão só técnica | Receitas validadas pelo cliente (mesmo padrão de dependência que `DB-05`); campo `cuisine` novo no schema de `recipes`; possível impacto comercial — as fases do projeto estão ligadas a valores pagos (ver `README.md` §6), por isso não deve ser agendado sem conversa comercial explícita |

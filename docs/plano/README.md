@@ -1,4 +1,4 @@
-# Leve Sabor AI — Plano Técnico de Implementação
+# Ottimizo — Plano Técnico de Implementação
 
 > Documentação de desenvolvimento derivada da **cotação aprovada pelo cliente** (Julho 2026) e da **landing page de design** (`project/Leve Sabor AI.dc.html`). Destina-se a três equipas independentes: frontend, backend e base de dados.
 
@@ -6,7 +6,7 @@
 
 ## 1. Visão geral da aplicação
 
-A **Leve Sabor AI** é uma plataforma web de planeamento alimentar para Moçambique. Gera planos alimentares semanais personalizados por IA, com **pratos moçambicanos reais** (xima, matapa, feijão nhemba, caril de peixe…), adaptados ao objetivo, condição de saúde, gostos e orçamento de cada utilizador. Cada refeição vem com receita e o plano converte-se numa **lista de compras / rancho optimizado**.
+A **Ottimizo** é uma plataforma web de planeamento alimentar para Moçambique. Gera planos alimentares semanais personalizados por IA, com **pratos moçambicanos reais** (xima, matapa, feijão nhemba, caril de peixe…), adaptados ao objetivo, condição de saúde, gostos e orçamento de cada utilizador. Cada refeição vem com receita e o plano converte-se numa **lista de compras / rancho optimizado**.
 
 Princípios de produto (comunicados na landing page e na cotação — são restrições, não sugestões):
 
@@ -24,7 +24,7 @@ Tornar acessível a qualquer moçambicano, com qualquer orçamento, um plano ali
 |---|---|---|---|
 | **Visitante** | Pessoa não autenticada que chega à plataforma | Perceber o produto e criar conta | Fase 1 |
 | **Cliente** | Utilizador registado do portal do cliente | Receber e seguir um plano alimentar semanal adequado ao seu objetivo, saúde e orçamento; encomendar o rancho a uma loja parceira | Fase 1 (MVP) · encomendas na Fase 3 |
-| **Administrador** | Operador interno da Leve Sabor | Manter os dados que alimentam a IA (receitas, ingredientes, nutrição), gerir utilizadores e o registo de lojas parceiras, e acompanhar métricas | Fase 2 |
+| **Administrador** | Operador interno da Ottimizo | Manter os dados que alimentam a IA (receitas, ingredientes, nutrição), gerir utilizadores e o registo de lojas parceiras, e acompanhar métricas | Fase 2 |
 | **Lojista** | Operador de uma loja parceira, com acesso apenas à sua própria loja | Manter o seu catálogo de produtos/preços (manual ou Excel) e gerir o estado das encomendas recebidas dos clientes | Fase 3 |
 
 Detalhe completo por persona e funcionalidade: [`01-functional-plan.md`](01-functional-plan.md).
@@ -101,6 +101,9 @@ Tudo o que não consta das Fases 1–3 está marcado nos documentos como **Futur
 | [`04-database-plan.md`](04-database-plan.md) | Modelo PostgreSQL, entidades, relacionamentos, migrations Prisma, índices, constraints | Base de dados |
 | [`05-implementation-roadmap.md`](05-implementation-roadmap.md) | Sprints, ordem de implementação, dependências, riscos, checklist de entrega, deploy e variáveis de ambiente | Gestão + Todas |
 | [`tasks.md`](tasks.md) | Quadro de execução (estilo Trello): todas as tarefas por componente, com dependências e faixas de paralelismo — **frontend primeiro, backend depois** | Todas |
+| [`06-guia-de-copy-e-marca.md`](06-guia-de-copy-e-marca.md) | Regras de linguagem e posicionamento destiladas do feedback do cliente sobre a landing — checklist para copy nova em qualquer ecrã | Frontend + Design |
+| [`07-prompts-ilustracoes-gaps.md`](07-prompts-ilustracoes-gaps.md) | Prompts de ilustração para as novas funcionalidades identificadas no feedback do cliente (P-12, P-13) | Frontend + Design |
+| [`08-quadro-colaboradores-plan.md`](08-quadro-colaboradores-plan.md) | Quadro de colaboradores digitais (QUADRO OS) proposto para o backlog `BE-*`/`DB-*`/`INT-*`, e plano de contratação/configuração | Todas |
 
 ### Convenção de identificadores de funcionalidades
 

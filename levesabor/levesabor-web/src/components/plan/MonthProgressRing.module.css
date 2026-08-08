@@ -1,0 +1,27 @@
+/* FE-C09 · MonthProgressRing — mesma técnica/tokens de macro-ring/MacroRing.module.css */
+.track {
+  stroke: rgba(36, 26, 20, 0.08);
+}
+
+.ringGroup {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ls-ring-in 0.5s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringGroup {
+    animation-duration: 0.001ms;
+  }
+}
+
+.segment {
+  stroke: var(--terracotta);
+}
+
+.countText {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  fill: var(--ink);
+  user-select: none;
+}

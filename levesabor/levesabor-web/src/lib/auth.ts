@@ -1,9 +1,10 @@
-// FE-A03/FE-A04 · Sessão e guards — roles CLIENTE | ADMIN (docs/plano/03-backend-plan.md §4)
+// FE-A03/FE-A04/FE-L01 · Sessão e guards — roles CLIENTE | ADMIN | LOJISTA (docs/plano/03-backend-plan.md §4)
 import { api, ApiError, setAccessToken } from "./api";
 import type { components } from "@/types/api";
 
-export type Role = "CLIENTE" | "ADMIN";
-export type Session = { userId: number; role: Role; name: string } | null;
+export type Role = "CLIENTE" | "ADMIN" | "LOJISTA";
+// storeId só vem preenchido quando role === "LOJISTA" (FE-L01).
+export type Session = { userId: number; role: Role; name: string; storeId?: number | null } | null;
 
 type AuthResult = components["schemas"]["AuthResult"];
 
@@ -28,7 +29,7 @@ function applyAuthResult(result: AuthResult): Session {
   if (!user || user.id === undefined || user.role === undefined || user.name === undefined) {
     throw new ApiError("Resposta de autenticação incompleta.");
   }
-  const next: Session = { userId: user.id, role: user.role, name: user.name };
+  const next: Session = { userId: user.id, role: user.role, name: user.name, storeId: user.storeId };
   setSession(next);
   return next;
 }

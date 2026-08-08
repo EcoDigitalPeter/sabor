@@ -3,6 +3,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookOpen } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { getSession } from "@/lib/auth";
 import { useActiveMealPlan } from "@/hooks/useActiveMealPlan";
@@ -121,6 +122,19 @@ export default function InicioPage() {
         )}
         <Link href="/plano" className={styles.sectionLink}>
           Ver plano completo
+        </Link>
+      </Card>
+
+      {/* FE-W05/F1-CLI-08 · ponto de entrada para o catálogo de receitas navegável — BottomNav já
+          tem 4 itens (Início/Plano/Compras/Perfil), acrescentar um 5º ficaria apertado num layout
+          mobile-first, por isso o acesso vive aqui no dashboard. */}
+      <Card className={styles.recipesCard}>
+        <Link href="/receitas" className={styles.recipesLink}>
+          <BookOpen size={20} aria-hidden="true" />
+          <div>
+            <h2 className={styles.sectionTitle}>Receitas</h2>
+            <p className={styles.sectionText}>Explora o catálogo todo, com filtro por dieta</p>
+          </div>
         </Link>
       </Card>
 

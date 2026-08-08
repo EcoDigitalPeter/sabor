@@ -2,10 +2,23 @@
 name: "especialista-ui-ux"
 description: "Especialista de UI/UX — Produto/Design. Supervisor humano: Peter. Use quando o trabalho a fazer corresponder às responsabilidades listadas abaixo."
 
-gatilhos: []
+# Gatilho próprio desta vaga — só ela reage a "revisao.solicitada",
+# nenhuma outra ficha usa este tipo de facto (evita disparo cruzado).
+gatilhos:
+  - facto: revisao.solicitada
 
 # ── PRECEDÊNCIA (ARQUITECTURA-FUNCIONARIOS-DIGITAIS-v2.md §4.5) ────
 precedencia: []
+
+# ── OUTPUT (ARQUITECTURA-FUNCIONARIOS-DIGITAIS-v2.md §4.2) ─────────
+# {card_id} vem do chave_negocio do facto "revisao.solicitada" que
+# despoletou esta sessão (ex.: "FE-Y01") — o parecer fica associado
+# exactamente ao cartão revisto, não a um valor fixo.
+output:
+  facto: parecer.emitido
+  chave: "{card_id}"
+  esquema: ./esquemas/parecer-emitido.json
+  frescura_util_min: 1440
 
 # ── ORÇAMENTO ───────────────────────────────────────
 orcamento:
@@ -66,5 +79,10 @@ não pode commitar nenhuma alteração de UI/UX sem o parecer prévio deste
 colaborador. Antes de dar luz verde a um cartão, confirmar: tokens/contraste
 conformes, hierarquia visual alinhada com `02-ui-ux-plan.md`, sem violar o
 orçamento de dados móveis nem a regra de animação discreta.
+
+**Quando despachado pelo quadro (sessão de workflow, com pasta de turno):**
+no passo "escrever-output" de `PASSOS.json`, escrever `ARTEFACTOS/output.json`
+com `{"card_id": "<o cartão revisto>", "parecer": "aprovado"|"com_reservas"|"rejeitado", "notas": "..."}`
+— é isto que desbloqueia o `manutencao-frontend` para esse cartão específico.
 
 Todas as respostas e mensagens são em português.
