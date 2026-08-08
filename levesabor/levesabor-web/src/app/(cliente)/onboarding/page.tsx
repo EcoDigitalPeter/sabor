@@ -28,29 +28,46 @@ type Profile = components["schemas"]["Profile"];
 // Labels exatas da landing / F1-CLI-01 (docs/plano/01-functional-plan.md linhas 152-156 e
 // project/Leve Sabor AI.dc.html linhas 71, 83, 416-420 — mesmo texto do mini-quiz da hero).
 const GOAL_OPTIONS: { value: Goal; label: string }[] = [
-  { value: "PERDER_PESO", label: "Perder peso" },
+  { value: "PERDER_PESO", label: "Emagrecer" },
   { value: "COMER_MELHOR", label: "Comer melhor no dia a dia" },
-  { value: "GANHAR_MASSA", label: "Ganhar massa" },
-  { value: "GERIR_CONDICAO", label: "Gerir uma condição de saúde" },
+  { value: "GANHAR_MASSA", label: "Ganhar massa muscular" },
+  { value: "GERIR_CONDICAO", label: "Controlar uma condição de saúde" },
 ];
 
+// FE-Y02 (ago/2026): passou de seleção única a múltipla — o cliente pode ter mais do que uma
+// condição em simultâneo (ex.: diabetes + hipertensão). "Outra" revela um campo de texto livre.
 const HEALTH_OPTIONS: { value: HealthCondition; label: string }[] = [
   { value: "NENHUMA", label: "Nenhuma" },
   { value: "DIABETES_TIPO_2", label: "Diabetes tipo 2" },
   { value: "HIPERTENSAO", label: "Hipertensão" },
   { value: "DOENCA_CELIACA", label: "Doença celíaca" },
+  { value: "OUTRA", label: "Outra" },
 ];
 
 // O plano funcional não define faixas em MT nem descrições — as frases de apoio abaixo são uma
 // escolha editorial local (não inventam valores/factos, só clarificam a intenção de cada faixa).
+// Relabeladas em ago/2026 a pedido do cliente ("Confortável" era vago); intervalos indicativos
+// alinhados com o exemplo já usado na landing (LandingPage.tsx: "2.500 MT para uma família de 4").
 const BUDGET_OPTIONS: { value: BudgetBand; label: string; description: string }[] = [
-  { value: "BAIXO", label: "Baixo", description: "O mais económico possível" },
-  { value: "MEDIO", label: "Médio", description: "Equilíbrio entre custo e variedade" },
-  { value: "CONFORTAVEL", label: "Confortável", description: "Mais variedade, menos restrições" },
+  { value: "BAIXO", label: "Económico", description: "Até 1.500 MT/semana" },
+  { value: "MEDIO", label: "Equilibrado", description: "1.500–3.000 MT/semana" },
+  { value: "CONFORTAVEL", label: "Premium", description: "A partir de 3.000 MT/semana" },
 ];
 
 // Exemplos citados literalmente no plano funcional (linha 154): "ex.: amendoim, marisco, lactose".
 const ALLERGY_SUGGESTIONS = ["Amendoim", "Marisco", "Lactose"];
+
+// FE-Y03 (ago/2026): "sem_preferencia" é mutuamente exclusiva com as restantes (mesma lógica de
+// "Nenhuma" nas condições de saúde) — evita dúvida a quem não segue nenhum padrão alimentar.
+const DIETARY_PREFERENCE_OPTIONS: { value: string; label: string }[] = [
+  { value: "vegetariana", label: "Vegetariana" },
+  { value: "vegan", label: "Vegana" },
+  { value: "sem_gluten", label: "Sem glúten" },
+  { value: "sem_lactose", label: "Sem lactose" },
+  { value: "alta_proteina", label: "Alta proteína" },
+  { value: "baixo_calorico", label: "Baixo em calorias" },
+  { value: "sem_preferencia", label: "Sem preferência" },
+];
 
 const MIN_MEALS = 2;
 const MAX_MEALS = 5;
@@ -62,12 +79,15 @@ const MAX_ALLERGY_LENGTH = 60;
 const GENERIC_ERROR_MESSAGE = "Não foi possível guardar o teu perfil. Tenta novamente.";
 
 // ── Rascunho local (F1-CLI-01: "Persistir rascunho do wizard localmente") ──────────────────────
-const DRAFT_STORAGE_KEY = "leve-sabor:onboarding-draft";
+const DRAFT_STORAGE_KEY = "ottimizo:onboarding-draft";
 
 type OnboardingDraft = {
   goal: Goal | null;
-  healthCondition: HealthCondition | null;
+  healthConditions: HealthCondition[];
+  healthConditionOther: string;
   allergies: string[];
+  foodExclusions: string[];
+  dietaryPreferences: string[];
   budgetBand: BudgetBand | null;
   mealsPerDay: number;
   householdSize: number;
@@ -75,8 +95,11 @@ type OnboardingDraft = {
 
 const DEFAULT_DRAFT: OnboardingDraft = {
   goal: null,
-  healthCondition: null,
+  healthConditions: [],
+  healthConditionOther: "",
   allergies: [],
+  foodExclusions: [],
+  dietaryPreferences: [],
   budgetBand: null,
   mealsPerDay: 3,
   householdSize: 1,
@@ -129,6 +152,8 @@ export default function OnboardingPage() {
   const [phase, setPhase] = useState<Phase>("wizard");
   const [allergyInput, setAllergyInput] = useState("");
   const [allergyError, setAllergyError] = useState<string | null>(null);
+  const [exclusionInput, setExclusionInput] = useState("");
+  const [exclusionError, setExclusionError] = useState<string | null>(null);
 
   // Evita que o efeito de persistência (abaixo) reescreva o rascunho guardado com o estado por
   // defeito antes de o efeito de restauro (também abaixo, mas montado depois) ter corrido.
@@ -204,6 +229,73 @@ export default function OnboardingPage() {
     }
   }
 
+  // "Alimentos que não comes" — separado de "Alergias" a pedido do cliente: são conceitos
+  // diferentes (uma exclusão pode ser por opção, não por reação médica).
+  function addFoodExclusion(raw: string) {
+    const value = raw.trim();
+    if (!value) return;
+    if (value.length > MAX_ALLERGY_LENGTH) {
+      setExclusionError(`Cada item deve ter no máximo ${MAX_ALLERGY_LENGTH} carateres.`);
+      return;
+    }
+    if (draft.foodExclusions.some((a) => a.toLowerCase() === value.toLowerCase())) {
+      setExclusionInput("");
+      return;
+    }
+    if (draft.foodExclusions.length >= MAX_ALLERGIES) {
+      setExclusionError(`Máximo de ${MAX_ALLERGIES} itens.`);
+      return;
+    }
+    setExclusionError(null);
+    updateDraft({ foodExclusions: [...draft.foodExclusions, value] });
+    setExclusionInput("");
+  }
+
+  function removeFoodExclusion(value: string) {
+    updateDraft({ foodExclusions: draft.foodExclusions.filter((a) => a !== value) });
+    setExclusionError(null);
+  }
+
+  function handleExclusionInputKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addFoodExclusion(exclusionInput);
+    }
+  }
+
+  // "Nenhuma" é mutuamente exclusiva com as restantes condições (não faz sentido combinar "Nenhuma"
+  // com "Diabetes", por exemplo) — selecionar uma limpa a outra.
+  function toggleHealthCondition(value: HealthCondition) {
+    setDraft((d) => {
+      const isSelected = d.healthConditions.includes(value);
+      if (isSelected) {
+        return { ...d, healthConditions: d.healthConditions.filter((v) => v !== value) };
+      }
+      if (value === "NENHUMA") {
+        return { ...d, healthConditions: ["NENHUMA"] };
+      }
+      const withoutNenhuma = d.healthConditions.filter((v) => v !== "NENHUMA");
+      return { ...d, healthConditions: [...withoutNenhuma, value] };
+    });
+  }
+
+  // "Sem preferência" é mutuamente exclusiva com as restantes — mesma lógica de "Nenhuma" nas
+  // condições de saúde.
+  function toggleDietaryPreference(value: string) {
+    const isSelected = draft.dietaryPreferences.includes(value);
+    if (isSelected) {
+      updateDraft({ dietaryPreferences: draft.dietaryPreferences.filter((v) => v !== value) });
+      return;
+    }
+    if (value === "sem_preferencia") {
+      updateDraft({ dietaryPreferences: ["sem_preferencia"] });
+      return;
+    }
+    updateDraft({
+      dietaryPreferences: [...draft.dietaryPreferences.filter((v) => v !== "sem_preferencia"), value],
+    });
+  }
+
   function adjustMeals(delta: number) {
     updateDraft({ mealsPerDay: Math.min(MAX_MEALS, Math.max(MIN_MEALS, draft.mealsPerDay + delta)) });
   }
@@ -215,8 +307,14 @@ export default function OnboardingPage() {
   function handleConfirm() {
     const profile: Profile = {
       goal: draft.goal ?? undefined,
-      healthCondition: draft.healthCondition ?? undefined,
+      healthConditions: draft.healthConditions,
+      healthConditionOther: draft.healthConditions.includes("OUTRA") ? draft.healthConditionOther : undefined,
       allergies: draft.allergies,
+      foodExclusions: draft.foodExclusions,
+      // dietaryPreferences: campo novo do FE-W02 (F1-CLI-01) — Profile ainda não o declara em
+      // src/types/api.d.ts (outro agente em paralelo trata desse ficheiro); assume-se que vai
+      // existir como `dietaryPreferences?: string[]`.
+      dietaryPreferences: draft.dietaryPreferences,
       budgetBand: draft.budgetBand ?? undefined,
       mealsPerDay: draft.mealsPerDay,
       householdSize: draft.householdSize,
@@ -251,26 +349,42 @@ export default function OnboardingPage() {
       content: (
         <div className={styles.step}>
           <h1 className={styles.question}>Alguma condição de saúde a considerar?</h1>
+          <p className={styles.hint}>Podes escolher mais do que uma — por exemplo, diabetes e hipertensão.</p>
           <div className={styles.optionGrid}>
             {HEALTH_OPTIONS.map((opt) => (
               <OptionCard
                 key={opt.value}
                 label={opt.label}
-                selected={draft.healthCondition === opt.value}
-                onSelect={() => updateDraft({ healthCondition: opt.value })}
+                selected={draft.healthConditions.includes(opt.value)}
+                onSelect={() => toggleHealthCondition(opt.value)}
               />
             ))}
           </div>
+          {draft.healthConditions.includes("OUTRA") ? (
+            <FormField label="Descreve a tua condição" htmlFor="onboarding-health-other">
+              <Input
+                id="onboarding-health-other"
+                type="text"
+                value={draft.healthConditionOther}
+                placeholder="ex.: gastrite, colesterol elevado, insuficiência renal"
+                onChange={(e) => updateDraft({ healthConditionOther: e.target.value })}
+              />
+            </FormField>
+          ) : null}
         </div>
       ),
     },
     {
+      // FE-Y03 (ago/2026): "Alergias" e "Alimentos que não comes" passaram a ser dois grupos
+      // separados (conceitos diferentes — uma exclusão pode ser por opção, não por reação médica).
       id: "alergias",
       content: (
         <div className={styles.step}>
-          <h1 className={styles.question}>Tens alergias ou alimentos que não comes?</h1>
-          <p className={styles.hint}>Opcional. Ex.: amendoim, marisco, lactose.</p>
+          <h1 className={styles.question}>As tuas alergias e exclusões alimentares</h1>
+          <p className={styles.hint}>Ambos os campos são opcionais.</p>
 
+          <h2 className={styles.subQuestion}>Alergias</h2>
+          <p className={styles.hint}>Ex.: amendoim, marisco, lactose.</p>
           <div className={styles.chipRow}>
             {ALLERGY_SUGGESTIONS.map((suggestion) => {
               const selected = draft.allergies.some((a) => a.toLowerCase() === suggestion.toLowerCase());
@@ -289,7 +403,7 @@ export default function OnboardingPage() {
           </div>
 
           <FormField
-            label="Adicionar outra"
+            label="Adicionar outra alergia"
             htmlFor="onboarding-allergy-input"
             error={allergyError ?? undefined}
             hint={allergyError ? undefined : `Escreve e prime Enter para adicionar (máx. ${MAX_ALLERGIES}).`}
@@ -315,7 +429,7 @@ export default function OnboardingPage() {
 
           {draft.allergies.length > 0 ? (
             <>
-              <p className={styles.selectedAllergiesLabel}>As tuas alergias/exclusões</p>
+              <p className={styles.selectedAllergiesLabel}>As tuas alergias</p>
               <div className={styles.selectedAllergies}>
                 {draft.allergies.map((a) => (
                   <Chip key={a} variant="tan" className={styles.removableChip}>
@@ -333,6 +447,80 @@ export default function OnboardingPage() {
               </div>
             </>
           ) : null}
+
+          <h2 className={styles.subQuestion}>Alimentos que não comes</h2>
+          <p className={styles.hint}>Por opção, não por alergia — ex.: carne vermelha, marisco.</p>
+          <FormField
+            label="Adicionar alimento"
+            htmlFor="onboarding-exclusion-input"
+            error={exclusionError ?? undefined}
+            hint={exclusionError ? undefined : `Escreve e prime Enter para adicionar (máx. ${MAX_ALLERGIES}).`}
+          >
+            <div className={styles.allergyInputRow}>
+              <Input
+                id="onboarding-exclusion-input"
+                type="text"
+                value={exclusionInput}
+                maxLength={MAX_ALLERGY_LENGTH}
+                placeholder="ex.: carne de porco"
+                error={!!exclusionError}
+                aria-invalid={!!exclusionError}
+                aria-describedby={exclusionError ? formFieldErrorId("onboarding-exclusion-input") : undefined}
+                onChange={(e) => setExclusionInput(e.target.value)}
+                onKeyDown={handleExclusionInputKeyDown}
+              />
+              <Button type="button" variant="secondary" onClick={() => addFoodExclusion(exclusionInput)}>
+                Adicionar
+              </Button>
+            </div>
+          </FormField>
+
+          {draft.foodExclusions.length > 0 ? (
+            <>
+              <p className={styles.selectedAllergiesLabel}>Os alimentos que não comes</p>
+              <div className={styles.selectedAllergies}>
+                {draft.foodExclusions.map((a) => (
+                  <Chip key={a} variant="tan" className={styles.removableChip}>
+                    {a}
+                    <button
+                      type="button"
+                      className={styles.removeChipButton}
+                      onClick={() => removeFoodExclusion(a)}
+                      aria-label={`Remover ${a}`}
+                    >
+                      <X size={12} aria-hidden="true" />
+                    </button>
+                  </Chip>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      id: "preferencias",
+      content: (
+        <div className={styles.step}>
+          <h1 className={styles.question}>Tens preferências alimentares?</h1>
+          <p className={styles.hint}>Opcional. Podes escolher mais do que uma.</p>
+
+          <div className={styles.chipRow}>
+            {DIETARY_PREFERENCE_OPTIONS.map((opt) => {
+              const selected = draft.dietaryPreferences.includes(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={styles.chipButton}
+                  onClick={() => toggleDietaryPreference(opt.value)}
+                  aria-pressed={selected}
+                >
+                  <Chip variant={selected ? "tan" : "cream"}>{opt.label}</Chip>
+                </button>
+              );
+            })}
+          </div>
         </div>
       ),
     },
@@ -360,8 +548,8 @@ export default function OnboardingPage() {
       id: "refeicoes",
       content: (
         <div className={styles.step}>
-          <h1 className={styles.question}>Quantas refeições fazes por dia?</h1>
-          <p className={styles.hint}>Pequeno-almoço, almoço, jantar — e lanches, se quiseres.</p>
+          <h1 className={styles.question}>Quantas refeições queres incluir no teu plano?</h1>
+          <p className={styles.hint}>Inclui pequeno-almoço, almoço, jantar e, se preferires, lanches.</p>
           <div className={styles.stepper}>
             <button
               type="button"
@@ -393,7 +581,7 @@ export default function OnboardingPage() {
       content: (
         <div className={styles.step}>
           <h1 className={styles.question}>Quantas pessoas moram contigo?</h1>
-          <p className={styles.hint}>Usamos isto para ajustar as quantidades da lista de compras.</p>
+          <p className={styles.hint}>Usamos esta informação para ajustar automaticamente as quantidades da tua lista de compras.</p>
           <div className={styles.stepper}>
             <button
               type="button"
@@ -433,11 +621,36 @@ export default function OnboardingPage() {
               </div>
               <div className={styles.summaryRow}>
                 <dt>Condição de saúde</dt>
-                <dd>{HEALTH_OPTIONS.find((o) => o.value === draft.healthCondition)?.label ?? "—"}</dd>
+                <dd>
+                  {draft.healthConditions.length > 0
+                    ? draft.healthConditions
+                        .map((value) => {
+                          const label = HEALTH_OPTIONS.find((o) => o.value === value)?.label ?? value;
+                          return value === "OUTRA" && draft.healthConditionOther
+                            ? `${label}: ${draft.healthConditionOther}`
+                            : label;
+                        })
+                        .join(", ")
+                    : "—"}
+                </dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Alergias / não como</dt>
+                <dt>Alergias</dt>
                 <dd>{draft.allergies.length > 0 ? draft.allergies.join(", ") : "Nenhuma indicada"}</dd>
+              </div>
+              <div className={styles.summaryRow}>
+                <dt>Alimentos que não comes</dt>
+                <dd>{draft.foodExclusions.length > 0 ? draft.foodExclusions.join(", ") : "Nenhum indicado"}</dd>
+              </div>
+              <div className={styles.summaryRow}>
+                <dt>Preferências alimentares</dt>
+                <dd>
+                  {draft.dietaryPreferences.length > 0
+                    ? draft.dietaryPreferences
+                        .map((v) => DIETARY_PREFERENCE_OPTIONS.find((o) => o.value === v)?.label ?? v)
+                        .join(", ")
+                    : "Nenhuma indicada"}
+                </dd>
               </div>
               <div className={styles.summaryRow}>
                 <dt>Orçamento semanal</dt>
@@ -489,7 +702,11 @@ export default function OnboardingPage() {
 
   let canGoNext = true;
   if (currentStepId === "objetivo") canGoNext = draft.goal !== null;
-  else if (currentStepId === "condicao") canGoNext = draft.healthCondition !== null;
+  else if (currentStepId === "condicao") {
+    canGoNext =
+      draft.healthConditions.length > 0 &&
+      (!draft.healthConditions.includes("OUTRA") || draft.healthConditionOther.trim() !== "");
+  }
   if (isSaving) canGoNext = false;
 
   function handleNext() {

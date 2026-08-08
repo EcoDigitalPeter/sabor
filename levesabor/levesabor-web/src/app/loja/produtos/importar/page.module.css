@@ -1,0 +1,180 @@
+/* FE-L03 · T-25 Import Excel da loja — mesmo idioma de páginas de formulário admin/lojas */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--clay);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--terracotta);
+}
+
+.backLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.templateLinks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--terracotta);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 24px;
+  border: 2px dashed var(--tan);
+  border-radius: var(--radius-input);
+  color: var(--clay);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dropzone:hover,
+.dropzoneActive {
+  border-color: var(--terracotta);
+  background: var(--cream-card-alt);
+}
+
+.dropzoneText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dropzoneHint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--clay-soft);
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.banner {
+  margin-top: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.summaryRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay);
+}
+
+.summaryOk {
+  color: var(--forest, #3a7d44);
+  font-weight: 600;
+}
+
+.summaryError {
+  color: var(--terracotta);
+  font-weight: 600;
+}
+
+.errorTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.errorTable th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--clay-soft);
+  border-bottom: 1px solid var(--tan);
+}
+
+.errorTable td {
+  padding: 8px;
+  border-bottom: 1px solid var(--cream-card-alt);
+  color: var(--ink);
+}
+
+.errorRow td:first-child {
+  color: var(--terracotta);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.resultText {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  color: var(--clay);
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column;
+  }
+}

@@ -47,9 +47,7 @@ export function LandingNav() {
             transform="rotate(-90 20 20)"
           />
         </svg>
-        <span className={styles.wordmark}>
-          leve <span className={styles.accent}>sabor</span>
-        </span>
+        <span className={styles.wordmark}>ottimizo</span>
       </a>
       <div className={styles.links}>
         <a href="#como-funciona" className={styles.link}>
@@ -62,9 +60,14 @@ export function LandingNav() {
           FAQ
         </a>
       </div>
-      <Link href="/registo" className={[styles.cta, scrolled ? styles.ctaEmphasis : ""].filter(Boolean).join(" ")}>
-        Criar conta
-      </Link>
+      <div className={styles.actions}>
+        <Link href="/login" className={styles.loginLink}>
+          Entrar
+        </Link>
+        <Link href="/registo" className={[styles.cta, scrolled ? styles.ctaEmphasis : ""].filter(Boolean).join(" ")}>
+          Criar conta
+        </Link>
+      </div>
     </nav>
   );
 }

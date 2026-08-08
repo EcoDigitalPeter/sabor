@@ -126,7 +126,7 @@ export default function RegistoPage() {
               color: "var(--ink)",
             }}
           >
-            Leve Sabor AI
+            Ottimizo
           </span>
         </div>
 
@@ -307,7 +307,7 @@ export default function RegistoPage() {
                   onChange={(e) =>
                     setValues((v) => ({ ...v, disclaimerAccepted: e.target.checked }))
                   }
-                  label="Compreendo que a Leve Sabor não substitui o meu médico ou nutricionista"
+                  label="Compreendo que a Ottimizo não substitui o meu médico ou nutricionista"
                 />
               </FormField>
 

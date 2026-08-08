@@ -1,22 +1,9 @@
-# CODING AGENTS: READ THIS FIRST
+# Ottimizzo
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+App de planeamento alimentar por IA para Moçambique. A implementação vive em [`levesabor/`](levesabor/README.md); a documentação de referência (visão de produto, plano funcional, UI/UX, base de dados, roadmap, guia de copy e marca, quadro de tarefas) vive em [`docs/plano/`](docs/plano/README.md) — comece por aí.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+Para orientação de trabalho num agente de código, ver [`CLAUDE.md`](CLAUDE.md) (ou [`AGENTS.md`](AGENTS.md) para Codex).
 
-## What you should do — IMPORTANT
+## Histórico
 
-**Read `leve-sabor-ai-website-design-system/project/Leve Sabor AI.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
-
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
-
-## About the design files
-
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
-
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
-
-## Bundle contents
-
-- `leve-sabor-ai-website-design-system/README.md` — this file
-- `leve-sabor-ai-website-design-system/project/` — the `# Leve Sabor AI: Website & Design System` project files (HTML prototypes, assets, components)
+O projeto começou como um handoff de design estático exportado do Claude Design (`project/*.dc.html`), guardado aqui só como referência histórica — já não é o estado atual do produto nem o alvo de implementação. A app real, com portal do cliente, portal admin e portal da loja, está em `levesabor/levesabor-web`.

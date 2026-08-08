@@ -1,0 +1,47 @@
+/* FE-C09 · WeekSelector — pílulas de semana, scroll horizontal (mesmo padrão de DayTabs.module.css) */
+.scroller {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 2px 2px 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: none;
+  scroll-snap-align: start;
+  min-height: 36px;
+  padding: 8px 16px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--cream-card-alt);
+  color: var(--clay);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--tan);
+}
+
+.chip:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.selected {
+  background: var(--terracotta);
+  color: #ffffff;
+}

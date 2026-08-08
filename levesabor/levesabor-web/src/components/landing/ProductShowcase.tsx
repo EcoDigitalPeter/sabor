@@ -37,7 +37,12 @@ function RecipeFrame() {
   return (
     <div className={styles.frame}>
       <div className={styles.recipeHead}>
-        <MacroRing macros={SHOWCASE_RECIPE.macros} kcal={SHOWCASE_RECIPE.kcal} size="lg" />
+        <div className={styles.recipeRingWrap}>
+          <MacroRing macros={SHOWCASE_RECIPE.macros} kcal={SHOWCASE_RECIPE.kcal} size="lg" />
+          <span className={styles.recipeKcalLabel} aria-hidden="true">
+            kcal
+          </span>
+        </div>
       </div>
       <p className={styles.recipeName}>{SHOWCASE_RECIPE.name}</p>
       <div className={styles.recipeChips}>
@@ -81,18 +86,18 @@ function ShoppingFrame() {
 
 const BLOCKS = [
   {
-    title: "O teu plano da semana, dia a dia.",
-    body: "Sete dias, refeição a refeição, com kcal e macros sempre à vista — sem abrir uma folha de cálculo.",
+    title: "O teu plano alimentar, dia a dia.",
+    body: "Sete dias, refeição a refeição, com kcal e macros sempre à vista — sem folhas de cálculo nem complicações.",
     Frame: PlanFrame,
   },
   {
-    title: "Cada receita com macros claros e passos simples.",
+    title: "Cada receita com macros claros e passo-a-passo simples.",
     body: "Ingredientes comuns, passos diretos, e o teu perfil de saúde sempre em conta.",
     Frame: RecipeFrame,
   },
   {
     title: "A lista de compras faz-se sozinha.",
-    body: "Organizada por categoria, com o que já tens marcado — e pronta para levar à loja.",
+    body: "Organizada por categorias, pronta para comprar.",
     Frame: ShoppingFrame,
   },
 ] as const;
@@ -113,7 +118,6 @@ export function ProductShowcase() {
           </div>
         </Reveal>
       ))}
-      <p className={styles.honestNote}>Imagens do produto real, em desenvolvimento.</p>
     </div>
   );
 }

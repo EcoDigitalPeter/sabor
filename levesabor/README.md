@@ -1,14 +1,15 @@
-# Leve Sabor AI — Implementação
+# Ottimizo — Implementação
 
 Monorepo de implementação. Toda a documentação de referência vive em [`../docs/plano/`](../docs/plano/):
 o quadro de tarefas é o [`tasks.md`](../docs/plano/tasks.md) (**frontend primeiro, backend depois**).
 
 ```
 levesabor/
-├── levesabor-web/    # Frontend — Next.js (App Router) + PWA · arquitetura: docs/plano/02-ui-ux-plan.md §5
-├── levesabor-api/    # Backend — Java 17 · Spring Boot 3 · Maven · arquitetura: docs/plano/03-backend-plan.md §2
+├── levesabor-web/    # Next.js (App Router) + PWA, fullstack — arquitetura: docs/plano/README.md §5
 └── docker-compose.dev.yml   # Postgres local para desenvolvimento
 ```
+
+**Mudança de plano (documentada em `docs/plano/README.md` §5):** deixou de existir um serviço de backend Java/Spring Boot separado (`levesabor-api`) — o backend vive dentro do próprio projeto Next.js (Route Handlers em `levesabor-web/src/app/api/`), para permitir um único deploy no Vercel.
 
 ## Arranque rápido
 
@@ -16,11 +17,9 @@ levesabor/
 # Base de dados local
 docker compose -f docker-compose.dev.yml up -d
 
-# Frontend (fase atual — desenvolve contra mocks MSW, cartões MOCK-01..03)
+# App (fase atual — frontend desenvolve contra mocks MSW, cartões MOCK-01..03;
+# as rotas de backend em src/app/api/ ainda estão por construir, ver secção BE-* do tasks.md)
 cd levesabor-web && npm install && npm run dev      # http://localhost:3000
-
-# Backend (fase seguinte)
-cd levesabor-api && mvn spring-boot:run             # http://localhost:8080/api/v1
 ```
 
 ## Convenções

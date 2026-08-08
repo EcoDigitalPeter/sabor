@@ -6,31 +6,39 @@ import styles from "./FaqAccordion.module.css";
 const FAQS = [
   {
     q: "Os meus dados de saúde ficam seguros?",
-    a: "Sim. As informações sobre a tua saúde servem apenas para gerar o teu plano e nunca são partilhadas com terceiros ou vendidas.",
+    a: "Sim. As informações sobre a tua saúde servem apenas para gerar o teu plano e nunca são vendidas nem partilhadas sem a tua autorização.",
   },
   {
     q: "Funciona com pouco dado móvel ou internet instável?",
-    a: "É uma prioridade de design: a Leve Sabor está a ser pensada para pesar pouco em dados, com os planos gerados a ficarem guardados no teu telemóvel.",
+    a: "É uma prioridade de design: a Ottimizo está a ser pensada para pesar pouco em dados, com os planos gerados a ficarem guardados no teu telemóvel.",
   },
   {
     q: "Isto substitui o meu nutricionista ou médico?",
-    a: "Não, nunca. A Leve Sabor é uma ferramenta de apoio — as decisões sobre a tua saúde continuam sempre com o teu médico ou nutricionista.",
+    a: "Não, nunca. A Ottimizo é uma ferramenta de apoio — as decisões sobre a tua saúde continuam sempre com o teu médico ou nutricionista.",
   },
   {
-    q: "Preciso de saber cozinhar bem para seguir os planos?",
-    a: "Não. As receitas são simples, com ingredientes comuns e passos diretos — pensadas para o dia a dia, não para uma cozinha profissional.",
+    q: "Preciso de experiência na cozinha?",
+    a: "Não. As receitas são explicadas passo a passo e adaptadas ao teu nível de experiência.",
   },
   {
     q: "Quanto custa?",
-    a: "Durante o lançamento, é grátis. Se um dia houver planos pagos, haverá sempre uma versão gratuita e avisamos com antecedência.",
+    a: "Podes começar gratuitamente. Os planos pagos serão apresentados de forma transparente, sem custos escondidos.",
   },
   {
     q: "Preciso de cartão de crédito para criar conta?",
-    a: "Não. Só precisas de um email — não pedimos nenhum dado de pagamento para começar.",
+    a: "Não. Só precisas de um email — não pedimos nenhum dado de pagamento para começar. Quando houver planos pagos, aceitaremos os métodos de pagamento disponíveis no teu país.",
   },
   {
     q: "Quando posso começar a usar?",
-    a: "Já — a Leve Sabor está em acesso antecipado. Cria a tua conta e recebe o teu primeiro plano em minutos.",
+    a: "Já — a Ottimizo está em acesso antecipado. Cria a tua conta e recebe o teu primeiro plano em minutos.",
+  },
+  {
+    q: "A IA cria receitas ou usa receitas reais?",
+    a: "A IA trabalha com receitas reais e adapta-as ao teu perfil, objetivos, preferências e restrições alimentares.",
+  },
+  {
+    q: "Posso escolher o tipo de cozinha que prefiro?",
+    a: "O catálogo cresce com o tempo. Hoje o foco são pratos moçambicanos reais, adaptados ao teu gosto e perfil.",
   },
 ];
 

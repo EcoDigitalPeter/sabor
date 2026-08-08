@@ -31,9 +31,7 @@ export function AdminSidebar() {
 
   return (
     <nav aria-label="Navegação admin" className={styles.sidebar}>
-      <div className={styles.brand}>
-        Leve Sabor <span className={styles.brandAccent}>AI</span>
-      </div>
+      <div className={styles.brand}>Ottimizo</div>
 
       <ul className={styles.list}>
         {ADMIN_NAV_ITEMS.map(({ href, label, Icon }) => {

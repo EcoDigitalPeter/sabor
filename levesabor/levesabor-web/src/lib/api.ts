@@ -96,3 +96,11 @@ async function request<T>(path: string, init: RequestInit | undefined, isRetry: 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   return request<T>(path, init, false);
 }
+
+// FE-L03 · para endpoints que devolvem o ficheiro em bruto (não o envelope ApiResponse<T>) —
+// hoje só /loja/products/export e /loja/products/import-template (mock: blob text/csv).
+export async function apiBlob(path: string): Promise<Blob> {
+  const res = await doFetch(path);
+  if (!res.ok) throw new ApiError("Não foi possível descarregar o ficheiro.");
+  return res.blob();
+}

@@ -1,6 +1,7 @@
 // FE-C06 · T-06 Lista de compras — grupos por categoria (ícones P-06), checkboxes otimistas (F1-CLI-06)
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ApiError } from "@/lib/api";
 import {
@@ -17,6 +18,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { BrandIllustration } from "@/components/ui/BrandIllustration";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { Button } from "@/components/ui/Button";
+import { AddItemSheet } from "./AddItemSheet";
 import styles from "./page.module.css";
 
 // Ordem fixa das categorias na lista (docs/plano/02-ui-ux-plan.md §3 T-06)
@@ -45,6 +48,9 @@ export default function ComprasPage() {
   const { data, isLoading, isError, error, refetch } = useShoppingList();
   const updateMutation = useUpdateShoppingItem();
   const { pendingCount, isSyncing } = useShoppingSync();
+  // FE-W04/F1-CLI-06B: bottom-sheet "+ Adicionar item" — visível tanto com a lista vazia como
+  // carregada (ver JSX abaixo); a invalidação de cache no hook trata de atualizar a lista.
+  const [addItemOpen, setAddItemOpen] = useState(false);
 
   function handleToggle(id: number, checked: boolean) {
     updateMutation.mutate({ id, checked });
@@ -108,6 +114,9 @@ export default function ComprasPage() {
   const checkedItems = data.checkedItems ?? 0;
   const groups = groupByCategory(data.items ?? []);
   const hasAnyItem = (data.items?.length ?? 0) > 0;
+  // F3-CLI-07 · "Rancho todo marcado" — momento de check-in não gamificado: texto simples a
+  // forest, sem ícone/animação (ver nota de âmbito em CLAUDE.md/instruções da tarefa).
+  const allChecked = hasAnyItem && checkedItems === totalItems;
 
   return (
     <main className={styles.main}>
@@ -117,6 +126,29 @@ export default function ComprasPage() {
         </div>
       ) : null}
       <h1 className={styles.title}>Lista de compras</h1>
+      <p className={styles.subtitle}>
+        Rancho do mês inteiro. Ao encomendar, escolhe só o que precisas agora.
+      </p>
+
+      <div className={styles.orderLinksRow}>
+        <Link href="/encomendas" className={styles.ordersLink}>
+          Minhas encomendas
+        </Link>
+        <div className={styles.headerActions}>
+          <Button type="button" variant="secondary" size="sm" onClick={() => setAddItemOpen(true)}>
+            + Adicionar item
+          </Button>
+          {hasAnyItem ? (
+            <Link href="/compras/encomendar" className={styles.orderCta}>
+              Encomendar rancho
+            </Link>
+          ) : null}
+        </div>
+      </div>
+
+      <AddItemSheet open={addItemOpen} onClose={() => setAddItemOpen(false)} />
+
+      {allChecked ? <p className={styles.allCheckedMessage}>Rancho todo marcado — bom trabalho.</p> : null}
 
       <div className={styles.metaRow}>
         <div className={styles.metaLeft}>

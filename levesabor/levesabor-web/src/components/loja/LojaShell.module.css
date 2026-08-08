@@ -1,0 +1,18 @@
+/* FE-L01 · LojaShell — cópia do idioma visual de AdminShell.module.css */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--cream);
+}
+
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.main {
+  flex: 1;
+  padding: 24px 32px 48px;
+}

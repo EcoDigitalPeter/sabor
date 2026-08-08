@@ -9,6 +9,7 @@ import type { components } from "@/types/api";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { LineChart } from "@/components/ui/LineChart";
 import { Card } from "@/components/ui/Card";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Select } from "@/components/ui/Select";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -144,6 +145,14 @@ export default function AdminDashboardPage() {
             <h2 className={styles.feedbackTitle}>Pior feedback</h2>
           </Card>
         </div>
+
+        <div className={styles.activityGrid}>
+          <KpiCard label="Pedidos avulsos" value="" isLoading />
+          <KpiCard label="Streak ativo" value="" isLoading />
+          <Card className={styles.feedbackCard} aria-busy="true">
+            <h2 className={styles.feedbackTitle}>Encomendas</h2>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -203,6 +212,46 @@ export default function AdminDashboardPage() {
       <div className={styles.feedbackGrid}>
         <RecipeFeedbackTable title="Melhor feedback" recipes={normalizeRecipes(data.topRecipes)} />
         <RecipeFeedbackTable title="Pior feedback" recipes={normalizeRecipes(data.bottomRecipes)} />
+      </div>
+
+      <div className={styles.activityGrid}>
+        <KpiCard
+          label="Pedidos avulsos"
+          value={data.adHocRecipeRequestsCount ?? 0}
+          hint='"Pedir receita agora"'
+        />
+        <KpiCard
+          label="Streak ativo"
+          value={formatPercent(data.engagement?.activeStreakPercent)}
+          hint={
+            data.engagement?.avgCompletedDaysInMonth
+              ? `~${Math.round(data.engagement.avgCompletedDaysInMonth)} dias/mês em média`
+              : undefined
+          }
+        />
+        <Card className={styles.feedbackCard}>
+          <h2 className={styles.feedbackTitle}>Encomendas — {data.ordersInPeriod?.total ?? 0}</h2>
+          {(data.ordersInPeriod?.byStatus?.length ?? 0) === 0 ? (
+            <p className={styles.feedbackEmpty}>Sem encomendas no período.</p>
+          ) : (
+            <table className={styles.feedbackTable}>
+              <thead>
+                <tr>
+                  <th>Estado</th>
+                  <th className={styles.alignRight}>Nº</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.ordersInPeriod?.byStatus?.map((row) => (
+                  <tr key={row.status}>
+                    <td>{row.status ? <StatusBadge status={row.status} /> : "—"}</td>
+                    <td className={styles.alignRight}>{row.count ?? 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
       </div>
     </div>
   );

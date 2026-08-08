@@ -1,0 +1,114 @@
+/* FE-L04 · T-27 Detalhe de encomenda — mesmo idioma de admin/lojas/[id]/page.module.css */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--clay);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--terracotta);
+}
+
+.backLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.customerName {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.customerContact,
+.note,
+.meta {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.itemsTable th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--clay-soft);
+  border-bottom: 1px solid var(--tan);
+}
+
+.itemsTable td {
+  padding: 8px;
+  border-bottom: 1px solid var(--cream-card-alt);
+  color: var(--ink);
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.actionsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.skeletonBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

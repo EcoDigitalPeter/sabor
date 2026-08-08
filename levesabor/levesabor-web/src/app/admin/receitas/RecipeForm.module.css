@@ -1,0 +1,150 @@
+/* FE-D06 · RecipeForm — formulário rico de receita, mesmo idioma visual do resto do admin */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--tan);
+  background: var(--cream-card-alt);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  resize: vertical;
+}
+
+.textarea:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.ingredientRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.stepRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--cream-card-alt);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--clay);
+}
+
+.stepActions {
+  display: flex;
+  gap: 4px;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-input);
+  background: transparent;
+  color: var(--terracotta);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--cream-card-alt);
+}
+
+.iconButton:disabled {
+  color: var(--clay-soft);
+  cursor: not-allowed;
+}
+
+.fieldError {
+  margin: 0;
+  color: var(--error);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tagButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.macroPanel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.macroHint {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+
+.submitError {
+  margin: 0;
+  color: var(--error);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .ingredientRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}

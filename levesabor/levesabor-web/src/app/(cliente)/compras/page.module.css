@@ -30,6 +30,85 @@
   color: var(--ink);
 }
 
+.subtitle {
+  margin: 0 0 16px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--clay-soft);
+  max-width: 46ch;
+}
+
+.orderLinksRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ordersLink {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--clay);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ordersLink:hover {
+  color: var(--ink);
+}
+
+.ordersLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+/* FE-W04 · agrupa "+ Adicionar item" e o CTA "Encomendar rancho" no lado direito de .orderLinksRow */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* F3-CLI-07 · mesmo padrão visual do CTA "Pedir uma receita" em /plano (.adHocCta) */
+.orderCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.orderCta:hover {
+  background: var(--terracotta-dark);
+}
+
+.orderCta:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+/* F3-CLI-07 · check-in não gamificado — texto simples, sem ícone/confetti (teto: cor forest) */
+.allCheckedMessage {
+  margin: -4px 0 16px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--forest);
+}
+
 .metaRow {
   display: flex;
   align-items: center;

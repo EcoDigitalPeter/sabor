@@ -16,13 +16,13 @@ const BENEFITS = [
   },
   {
     icon: "/images/beneficios/sabor.svg",
-    title: "Come melhor sem desistir do sabor",
-    body: "Menos sal, menos açúcar — sem abrir mão da xima ao domingo.",
+    title: "Come melhor, sem abdicar do sabor",
+    body: "Menos sal, menos açúcar — sem perder o prazer de comer bem.",
   },
   {
     icon: "/images/beneficios/saude.svg",
-    title: "Cuida da tua saúde",
-    body: "Diabetes, hipertensão, celíaca: planos que respeitam a tua condição.",
+    title: "Cuida da tua saúde, ao teu ritmo",
+    body: "Planos adaptados à tua condição, preferências e objetivos.",
   },
 ];
 

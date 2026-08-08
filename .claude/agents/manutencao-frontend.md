@@ -2,7 +2,11 @@
 name: "manutencao-frontend"
 description: "Manutenção Frontend (Cliente/Admin/Loja) — Produto/Frontend. Supervisor humano: Peter. Use quando o trabalho a fazer corresponder às responsabilidades listadas abaixo."
 
-gatilhos: []
+# Reage ao próprio parecer que a desbloqueia — {card_id} vem do
+# chave_negocio desse facto, garantindo que a precedência abaixo (mesmo
+# facto, mesma chave) está sempre satisfeita no momento do despacho.
+gatilhos:
+  - facto: parecer.emitido
 
 # ── PRECEDÊNCIA (ARQUITECTURA-FUNCIONARIOS-DIGITAIS-v2.md §4.5) ────
 precedencia:
@@ -14,7 +18,7 @@ precedencia:
     se_falhou:   escalar
     se_expirado: escalar
   - facto: parecer.emitido
-    chave: "especialista-ui-ux"
+    chave: "{card_id}"
     modo: bloquear
     obrigatorio: true
     se_ausente:  esperar_ate(240) entao escalar

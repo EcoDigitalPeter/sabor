@@ -1,6 +1,13 @@
 // FE-A01 · Esqueleto Next.js + PWA — ver docs/plano/02-ui-ux-plan.md §5
 // Service worker só em produção; rotas /admin excluídas do cache (dados sensíveis).
 import withPWAInit from "@ducanh2912/next-pwa";
+// FE-E02 · Bundle analyzer (ad-hoc, via `npm run analyze`) — ver docs/plano/tasks.md.
+// Inativo por omissão (ANALYZE!=true), logo não tem custo em builds normais.
+import withBundleAnalyzerInit from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = withBundleAnalyzerInit({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -13,7 +20,7 @@ const withPWA = withPWAInit({
       {
         urlPattern: /\/api\/v1\/me\/(meal-plans\/active|shopping-list)$/,
         handler: "StaleWhileRevalidate",
-        options: { cacheName: "levesabor-plano" },
+        options: { cacheName: "ottimizo-plano" },
       },
     ],
     // FE-C08: nenhuma entrada explícita de NetworkOnly é necessária para /api/v1/admin/**.
@@ -38,4 +45,7 @@ const nextConfig = {
   reactStrictMode: true,
 };
 
-export default withPWA(nextConfig);
+// withBundleAnalyzer por fora: só embrulha o output final do withPWA para injetar o
+// plugin de análise no webpack config; a ordem entre os dois não afeta o comportamento do
+// PWA porque o analyzer não altera entries/chunks, só inspeciona o resultado.
+export default withBundleAnalyzer(withPWA(nextConfig));

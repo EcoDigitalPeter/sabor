@@ -47,6 +47,46 @@
   object-fit: cover;
 }
 
+/* FE-C09 · "Comi isto" — badge circular sobre o canto da miniatura, independente do tap do
+   cartão (o handler faz preventDefault/stopPropagation). Verde --forest só quando marcado,
+   sem troféus/confetti — apenas o ícone de confirmação. */
+.completeButton {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card);
+  color: var(--clay-soft);
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.completeButton:hover {
+  border-color: var(--forest);
+}
+
+.completeButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.completeButtonActive {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #ffffff;
+}
+
 .info {
   display: flex;
   flex: 1;

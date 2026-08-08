@@ -1,0 +1,94 @@
+/* FE-L02 · T-24 Formulário de produto (edição) — mesmo idioma de admin/lojas/[id]/page.module.css */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--clay);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--terracotta);
+}
+
+.backLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.banner {
+  margin-bottom: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column;
+  }
+}
+
+.dangerCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dangerTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dangerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dangerHint {
+  margin: 0;
+  color: var(--clay);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.skeletonBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

@@ -1,0 +1,35 @@
+/* FE-D06 · Nova receita — layout de página, mesmo idioma de lojas/nova/page.module.css */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--clay);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--terracotta);
+}
+
+.backLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+  font-weight: 700;
+  color: var(--ink);
+}

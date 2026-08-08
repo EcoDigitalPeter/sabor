@@ -1,0 +1,509 @@
+Landing page parte 1
+
+Porque usar a opção sem cartão de crédito? Remove "crédito"
+
+De "tuas preferências" para "tuas preferências alimentares"
+
+De receitas reais para "refeições reais",
+
+Reveja todo o projeto de modo a Usar português de Portugal e sem o acordo ortográfico. atualize o ficheiro claude com essa instrucao
+
+
+Tela Criar conta 
+•	Nome → Nome completo 
+•	O aviso médico ficaria mais natural:
+Compreendo que a Ottimizzo não substitui o acompanhamento médico ou nutricional.
+E altere a frase apenas por uma palavra: Aviso, Importante, …
+Único ponto que mudaria
+•	Em vez de apresentar esse texto durante o registo (quando o utilizador ainda nem viu o valor da aplicação), apresenta-o imediatamente antes de gerar o primeiro plano alimentar. Nessa altura, o utilizador já percebeu o funcionamento da plataforma e o consentimento faz mais sentido.
+
+No onboarding, ao perguntar objetivo, vamos fazer plano para colocar uma outra imagem
+
+O botao Continua deve "O botão deve estar “desselecionado”  e só ficar habilitado depois de seleccionar o objectivo"
+
+Correcções: 
+•	Ganhar massa → Ganhar massa muscular. 
+•	Gerir uma condição de saúde → Controlar uma condição de saúde
+
+Na tela de condicao de saude o cliente comentou 
+
+Sugestão
+Ao seleccionar uma opção, adicionaria um pequeno visto (✓) ou ícone no canto do cartão. 
+
+
+Melhoraria
+•	Falta a opção "Outra " ou "Outra". Muitas pessoas têm gastrite, colite, colesterol elevado, insuficiência renal, alergias, etc. 
+•	Se seleccionar "Outra", abrir um campo para escrever ou uma lista mais completa. E permitir seleccionar mais do que uma condição, porque é comum alguém ter, por exemplo, diabetes e hipertensão. Eu tenho 2 condições de saúde
+
+
+
+"As tuas alergias/exclusões" → "As tuas alergias e exclusões alimentares". 
+Importante
+•	Separaria Alergias de Alimentos que não comes. São coisas diferentes.
+Ex.: alguém pode não comer carne por opção, mas não ser alérgico. 
+
+
+Sobre preferencias alimentares 
+
+•	Vegan → Vegana (mantém a consistência com "Vegetariana"). 
+•	Baixo teor calórico → Baixo em calorias
+Sugestão
+Acrescentaria uma opção: Sem preferência. 
+Há utilizadores que não seguem nenhum padrão alimentar e essa opção evita dúvidas.
+
+Sobre a tela de orcamento 
+
+Em vez de Baixo | Médio | Confortável, usaria níveis que representam melhor a capacidade financeira: 
+o	Económico 
+o	Equilibrado 
+o	Premium ou Flexível 
+"Confortável" é um pouco vago.
+Se possível, acrescentaria um intervalo indicativo:
+•	Económico (até X MT/semana) 
+•	Equilibrado (X–Y MT)
+•	Premium (+Y MT) 
+
+Sobre o numero de refeicoes por dia a
+•	Em vez de "Quantas refeições fazes por dia?", eu escreveria: 
+o	"Quantas refeições queres incluir no teu plano?" (mais coerente, porque a app está a criar um novo plano e não apenas a perguntar pelos hábitos atuais). 
+o	Em vez de "Pequeno-almoço, almoço, jantar — e lanches, se quiseres." 
+o	Sugestão: "Inclui pequeno-almoço, almoço, jantar e, se preferires, lanches." Pergunta
+o	Em vez de "Quantas refeições fazes por dia?" 
+o	Sugestão: "Quantas refeições pretendes fazer por dia?" 
+
+Sobre quantas pessoas moram contigo
+
+Em vez de:
+Usamos isto para ajustar as quantidades da lista de compras.
+Escreveria:
+Usamos esta informação para ajustar automaticamente as quantidades da tua lista de compras.
+O "automaticamente" reforça o valor da Otimizzo.
+
+
+
+Gosto da ideia de terminar com um resumo antes de gerar o plano. Dá confiança ao utilizador.
+1. Acrescentaria um botão "Editar" em cada secção ou ao lado do botão voltar.
+Exemplo:
+•	Objectivo ---------------------------------..................................... ✏️ Editar 
+•	Condição de saúde ................. ✏️ Editar 
+•	Preferências ......................... ✏️ Editar
+Se o utilizador reparar num erro, não precisa de voltar vários passos.
+________________________________________
+2. "Alergias / Não como"
+Mistura dois conceitos.
+Sugestão:
+•	Alergias e exclusões alimentares 
+ou
+•	Alimentos a excluir 
+________________________________________
+3. Preferências alimentares
+No exemplo aparece:
+Sem lactose, Sem glúten, Vegan, Vegetariana, Alta proteína
+Isto gera conflito.
+Ninguém pode ser vegan e ao mesmo tempo apenas vegetariano.
+A aplicação devia impedir combinações incompatíveis ou mostrar um aviso – para o futuro
+________________________________________
+4. Confirmar
+O botão podia ser mais apelativo:
+•	Gerar o meu plano ⭐ 
+•	Criar o meu plano
+•	Ver o meu plano 
+
+
+No final do onboarding 
+
+1. O texto pode ser mais entusiasmante 
+Em vez de:
+O teu perfil foi guardado. Já podemos preparar o teu primeiro plano alimentar.
+Sugiro:
+O teu perfil está pronto. Agora vamos criar um plano alimentar pensado para ti.
+2. O botão
+Em vez de:
+Gerar o meu plano
+Experimentaria:
+Criar o meu plano
+ou
+Ver o meu plano
+3. Pequena animação
+Quando o utilizador tocar no botão, um loading de 2–3 segundos com frases como:
+•	🥗 A escolher receitas... 
+•	🛒 A preparar a lista de compras... 
+•	📊 A calcular a informação nutricional... 
+•	✨ Quase pronto... 
+Vai aumentar muito a percepção de inteligência da plataforma.
+
+
+Na tela Plano
+
+AO inves de "Nao sabes o que cozinhar agora?" "Queres prepar uma refeicao especial" -> "Pedir  uma receita"
+
+2. "Ainda sem sequência este mês" – como funciona?
+Não é muito claro.
+Sugestões:
+•	Ainda não começaste a tua sequência este mês. 
+
+3. Botão "Pedir uma receita"
+É útil, mas pode ser mais apelativo.
+________________________________________
+4. Nome da refeição
+Xima suave com feijão nhemba (pequeno-almoço reforçado)
+Fica pesado.
+Melhor:
+•	Xima com feijão nhemba 
+•	Em baixo, uma etiqueta: 
+o	Pequeno-almoço reforçado
+5. Informação visível
+Eu acrescentaria logo no cartão:
+•	kcal 
+•	proteína 
+Exemplo:
+400 kcal • 18 g proteína • 20 min
+O utilizador não precisa de abrir a receita.
+________________________________________
+Uma ideia que faria diferença
+Ao lado do "0/30", colocaria uma mensagem positiva, por exemplo:
+Hoje é um bom dia para começares.
+Primeiro dia do teu plano. Vamos lá!
+É muito mais motivador do que dizer apenas que ainda não existe uma sequência.
+
+
+1. Destacar a refeição actual 
+O utilizador deve perceber rapidamente qual é a próxima refeição.
+Exemplo:
+•	Agora são 12h → destacar Almoço. 
+•	À noite → destacar Jantar.
+Hoje todas têm o mesmo peso visual.
+________________________________________
+2. Nomes das refeições
+Evitaria descrições entre parênteses.
+Em vez de:
+Matapa com xima (jantar leve)
+Preferia:
+Matapa com xima
+E abaixo uma pequena etiqueta:
+🌙 Jantar leve
+________________________________________
+3. Total do dia
+Excelente, mas acrescentaria um indicador simples:
+🟢 Dentro do objetivo
+ou
+🎯 Objetivo diário atingido
+Ajuda muito o utilizador.
+________________________________________
+4. "Gerar novo plano"
+Este botão pode assustar um pouco, porque parece que vai apagar tudo.
+Sugestões:
+•	Quero outras sugestões 
+•	Gerar alternativas 
+•	Criar outro plano 
+5. Ícone no canto da foto
+Há um pequeno visto no canto superior direito da imagem.
+Não percebi imediatamente o significado. Se indicar que a refeição foi concluída, eu só o mostraria depois de o utilizador marcar a refeição como consumida.
+________________________________________
+Uma funcionalidade que faria a diferença
+Ao deslizar um cartão para a direita:
+✅ Comi esta refeição
+Ao deslizar para a esquerda:
+🔄 Trocar refeição
+Isso tornaria a experiência muito mais dinâmica.
+
+•	2. Falta contexto.
+•	O utilizador pode perguntar-se: "Porque me estão a perguntar isto?"
+
+3. O "Passo 1 de 4" está um pouco perdido.
+Daria mais destaque ou acrescentaria:
+Passo 1 de 4 • Receita personalizada
+________________________________________
+4. O botão selecionado
+Está apenas com uma borda vermelha.
+Eu preencheria o cartão com a cor da marca (como no onboarding), para ser mais evidente.
+Melhor sugestão
+Eu alteraria o ecrã para:
+Que refeição pretendes preparar?
+Escolhe a refeição e vamos sugerir uma receita adequada.
+Assim o utilizador percebe imediatamente o objectivo deste fluxo.
+
+
+1. Pergunta
+Em vez de:
+Alguma restrição pontual para agora?
+Prefiro:
+Há alguma restrição para esta refeição? ⭐
+É mais natural.
+2. Exemplo
+Em vez de:
+"só tenho o que está na despensa"
+Misturaria restrições com disponibilidade de ingredientes.
+Sugestão:
+Ex.: sem carne hoje, só tenho ovos e arroz, quero algo rápido.
+Assim o utilizador percebe melhor o tipo de informação que pode escrever.
+3. Campo
+Em vez de "Nota", escreveria:
+Escreve aqui 
+
+
+1.	Título
+Em vez de: 
+Confirma o teu pedido
+Eu experimentaria:
+Confirma os teus dados
+ou
+Confirma antes de gerar a receita
+Porque ainda não existe propriamente um "pedido"; o utilizador está a confirmar os parâmetros que serão enviados à IA.
+
+Eu destacaria os valores:
+o	Refeição: Almoço 
+o	Objectivo: Gerir uma condição de saúde 
+o	Restrição: Sem carne vermelha
+2.	Acrescentaria uma mensagem de expectativa.
+Logo abaixo do cartão:
+A Ottimizzo irá gerar uma receita adaptada às tuas preferências e restrições.
+Uma opção "Editar" para voltar rapidamente a um passo anterior sem usar o botão Voltar.
+
+
+Melhorias
+1. Dar mais destaque aos valores
+Neste momento o olhar vai para "Refeição", "Objectivo" e "Restrição". Eu faria o contrário.
+Exemplo:
+Refeição
+Almoço
+Objectivo
+Gerir uma condição de saúde
+Restrição
+Sem carne vermelha
+
+
+Na tela de visualizacao dos planos
+
+
+Sugestões:
+1. Falta indicar a unidade das calorias.
+No centro do gráfico aparece apenas 620.
+Sugiro:
+620 kcal
+________________________________________
+4. Falta um botão de acção visível:
+•	Ver receita 
+•	Começar a cozinhar 
+•	Adicionar à lista de compras 
+________________________________________
+4. Botão "Descartar"
+A palavra Descartar parece definitiva.
+Sugestão:
+•	Gerar outra receita
+•	Não gostei desta 
+•	Quero outra sugestão 
+________________________________________
+Uma sugestão:
+Personalizar esta receita
+Ao clicar, poderia escrever:
+•	"Quero mais proteína." 
+•	"Quero gastar menos." 
+•	"Sem marisco."
+
+
+Melhoraria:
+1. Destacar a refeição actualmente aberta
+Neste momento todas parecem iguais.
+Se estou a guardar Xima com matapa e camarão, seria excelente mostrar:
+SEGUNDA-FEIRA · ALMOÇO
+✔ Xima com matapa e camarão
+Receita actual
+Assim o utilizador sabe exactamente o que está a guardar.
+________________________________________
+2. Acrescentar a data
+Em vez de apenas:
+SEGUNDA-FEIRA · ALMOÇO
+mostrar
+Segunda-feira, 3 Agosto • Almoço
+
+
+3. Confirmar a substituição
+Quando o utilizador toca numa refeição que já existe, apareceria um diálogo simples:
+Substituir esta refeição?
+"Feijão nhemba com arroz e couve" será substituída por "Xima com matapa e camarão".
+Cancelar | Substituir
+Evita alterações acidentais.
+
+
+Neste momento parece desligado do restante conteúdo.
+Em vez de:
+0/30
+0 de 30 dias cumpridos
+ou
+🔥 Sequência: 0 dias
+Evolução futura
+No topo, por baixo do mês, eu mostraria um resumo diário.
+Por exemplo:
+Hoje
+3 refeições
+1450 kcal
+180 MT
+Dá contexto imediato sem obrigar o utilizador a abrir cada refeição.
+
+
+Tela inicio
+
+
+Separação por cartões
+A informação está dividida em blocos:
+•	Refeições de hoje 
+•	Receitas 
+•	Compras 
+ "Ver plano completo"
+2. O indicador "0/30"
+Continua a parecer desligado.
+Se fosse meu faria algo assim:
+🔥 Sequência
+0 dias
+ou
+0/30 dias
+4. Compras
+Mas talvez em vez de:
+mostrar
+29 itens na lista
+Quando começar a comprar:
+12 de 29 comprados
+5. Receitas
+Neste momento diz:
+Explora o catálogo todo, com filtro por dieta.
+Eu escreveria algo mais orientado para benefício:
+Descobre centenas de receitas adaptadas ao teu perfil.
+
+
+Tela compras
+
+
+Resumo
+•	29 produtos 
+•	Estimativa: 2 048 MT 
+•	Comprados: 0
+•	Depois os botões.
+•	Fica muito mais fácil perceber a situação.
+•	________________________________________
+2. O botão "Encomendar rancho"escreveria:Encomendar compras ou Comprar online
+3. "Adicionar item"
+•	Excelente.
+•	Mas eu altera para
+•	➕
+•	Adicionar ingrediente
+4. Tornar "Já tenho um pouco" mais intuitivo
+•	Hoje parece apenas um link.
+•	Eu transformaria num pequeno selector.
+•	Por exemplo:
+•	☐ Comprar tudo
+•	◉ Já tenho algum
+•	ou um controlo que reduz automaticamente a quantidade.
+•	Exemplo:
+•	Frango
+•	3100 g
+•	Tenho:
+•	[-] 500 g [+]
+•	Assim a aplicação recalcula imediatamente.
+•	________________________________________
+•	5. Mostrar o impacto
+•	Se eu marcar que já tenho arroz e pão, gostaria de ver:
+•	Antes
+•	2 048 MT
+•	Depois
+•	1 790 MT
+•	Isto é extremamente satisfatório.
+•	________________________________________
+•	6. Percentagem de progresso
+•	Em vez de:
+•	0 de 29 comprados
+•	Mostraria também uma barra.
+□□□□□□□□□□
+0%
+Quando chegar a 20 produtos:
+███████□□□
+69%
+É muito motivador.
+
+
+Tela compras
+
+
+Isso transmite que a lista foi calculada com base no plano alimentar, e não copiada de uma lista genérica. Mas é importante na lista de comprar, ter em consideração as quantidades reais disponíveis nas lojas. Por exemplo, para o meu rancho podem ser necessários 800ml de óleo, a ottimizzo deve arredondar para 1000ml, porque nas lojas temos disponíveis 500ml, 1000ml, 2000ml and so on. E deve ser possível aditar a lista de modo que permita aumentar quantidades e comprar algo que não venha no meu plano como snaks.
+Reflexão: e se eu precisar de outros produtos na mesma loja, como por exemplo produtos de limpeza. Como poderemos tratar?
+________________________________________
+1. "Já tenho um pouco"
+Alterar para:
+🏠 Tenho em casa
+É mais intuitivo e explica imediatamente a acção.
+________________________________________
+2. Hierarquia do texto
+Hoje vejo:
+Feijão nhemba
+Já tenho um pouco
+600 g
+Eu reorganizaria para:
+Feijão nhemba
+600 g
+Tenho em casa
+O peso é uma informação muito importante e deveria estar mais próximo do nome.
+3. Quantidades em unidades mais naturais
+Algumas medidas podem soar estranhas para o utilizador.
+Por exemplo:
+57 g de alho
+Parece excessivamente preciso.
+Seria mais amigável mostrar:
+•	1 cabeça de alho (≈ 60 g) 
+•	2 cebolas médias 
+•	6 bananas 
+•	1 garrafa de água (5 L)
+•	Quando possível, usar unidades comuns torna a lista muito mais prática durante as compras.
+•	________________________________________
+•	4. Estado visual dos produtos
+•	Quando um produto for marcado como comprado, eu faria algo como:
+•	☑️ Feijão nhemba
+•	600 g
+•	A linha desapareceria gradualmente para o fundo da lista ou ficaria esbatida
+•	________________________________________
+•	5. Colapsar automaticamente
+•	Se todos os itens de "Leguminosas" estiverem comprados, a categoria podia ficar fechada automaticamente e mostrar:
+•	✅ Leguminosas (3/3)
+•	Isso reduz o scroll à medida que a lista vai sendo concluída.
+
+
+
+
+ Quantidades pouco naturais
+alguns exemplos como:
+•	Água — 4200 ml 
+•	Leite de coco — 2260 ml 
+•	Couve — 1050 g 
+Embora tecnicamente correctos, não são a forma como as pessoas fazem compras.
+Eu apresentaria:
+•	🥥 Bebidas / Despensa → Água e leite de coco 
+Uma boa organização reduz muito o tempo que o utilizador demora a encontrar os produtos.
+________________________________________
+5. Feijão nhemba cozido
+Aqui levantaria uma questão funcional.
+Se o utilizador cozinha o feijão em casa, talvez a lista de compras devesse mostrar:
+Feijão nhemba seco — 300 g
+em vez de:
+Feijão nhemba cozido — 600 g
+Porque normalmente não se compra feijão já cozido.
+
+
+Para a escolha das lojas
+
+Mostrar informação útil da loja 
+Em vez de apenas Mercado Central. Acrescentaria algo como:
+•	⭐ 4,8 
+•	🚚 Entrega disponível 
+•	🕒 Fecha às 18h 
+•	💰 Preço médio 
+•	Tempo estimado de entrega
+
+
+
+Pesquisa
+Quando houver muitas lojas, deveria existir:
+🔍 Procurar loja...
+________________________________________
+8. Indicar um mapa
+Um pequeno mapa com a localização das lojas aumentaria muito a confiança.
+
+

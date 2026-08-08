@@ -5,7 +5,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function loginAsClient(page: Page) {
   await page.goto("/login");
-  await page.getByLabel("Email").fill("amelia@levesabor.mz");
+  await page.getByLabel("Email").fill("amelia@ottimizo.mz");
   // Ver nota em e2e/pedir-agora.spec.ts: getByLabel("Password", { exact: true }) não bate certo
   // com o campo real (label acessível ganha um "(obrigatório)" invisível, e sem exact:true
   // "Password" também correspondia ao botão "Mostrar/Ocultar password"). O id é estável.

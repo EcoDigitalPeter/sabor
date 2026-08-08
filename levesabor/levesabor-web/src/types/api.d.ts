@@ -99,7 +99,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Pedir geração de plano semanal (F1-CLI-02) */
+        /** Pedir geração de plano mensal (F1-CLI-02) */
         post: operations["requestMealPlanGeneration"];
         delete?: never;
         options?: never;
@@ -175,6 +175,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/meal-plans/entries/{id}/completed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Marcar/desmarcar "Comi isto" numa refeição do plano (F1-CLI-04) */
+        patch: operations["setMealPlanEntryCompleted"];
+        trace?: never;
+    };
     "/me/recipes/{id}/feedback": {
         parameters: {
             query?: never;
@@ -224,6 +241,83 @@ export interface paths {
         head?: never;
         /** Marcar/desmarcar item (F1-CLI-06) */
         patch: operations["setShoppingListItemChecked"];
+        trace?: never;
+    };
+    "/stores": {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["PageQuery"];
+                size?: components["parameters"]["SizeQuery"];
+                sort?: components["parameters"]["SortQuery"];
+                q?: components["parameters"]["SearchQuery"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar lojas parceiras ativas (F3-CLI-07) */
+        get: operations["listActiveStores"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/orders": {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["PageQuery"];
+                size?: components["parameters"]["SizeQuery"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar as minhas encomendas, mais recentes primeiro (F3-CLI-07) */
+        get: operations["listMyOrders"];
+        put?: never;
+        /** Encomendar itens da lista de compras a uma loja (F3-CLI-07) */
+        post: operations["createOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalhe de uma encomenda (F3-CLI-07) */
+        get: operations["getOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Cancelar encomenda, só permitido em PENDENTE/ACEITE (F3-CLI-07) */
+        patch: operations["cancelOrder"];
         trace?: never;
     };
     "/admin/users": {
@@ -583,7 +677,7 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /** @enum {string} */
-        ErrorCode: "LSA001_VALIDATION" | "LSA002_INVALID_CREDENTIALS" | "LSA003_ACCOUNT_SUSPENDED" | "LSA004_FORBIDDEN" | "LSA005_NOT_FOUND" | "LSA006_DUPLICATE" | "LSA010_PROFILE_INCOMPLETE" | "LSA011_GENERATION_IN_PROGRESS" | "LSA012_GENERATION_LIMIT" | "LSA013_AI_UNAVAILABLE" | "LSA014_NO_ALTERNATIVE" | "LSA015_ADHOC_LIMIT" | "LSA020_IMPORT_INVALID_FILE" | "LSA021_INGREDIENT_IN_USE" | "LSA022_LAST_ADMIN" | "LSA023_RECIPE_INCOMPLETE" | "LSA099_INTERNAL";
+        ErrorCode: "LSA001_VALIDATION" | "LSA002_INVALID_CREDENTIALS" | "LSA003_ACCOUNT_SUSPENDED" | "LSA004_FORBIDDEN" | "LSA005_NOT_FOUND" | "LSA006_DUPLICATE" | "LSA010_PROFILE_INCOMPLETE" | "LSA011_GENERATION_IN_PROGRESS" | "LSA012_GENERATION_LIMIT" | "LSA013_AI_UNAVAILABLE" | "LSA014_NO_ALTERNATIVE" | "LSA015_ADHOC_LIMIT" | "LSA016_STORE_INACTIVE" | "LSA017_ORDER_NOT_CANCELABLE" | "LSA020_IMPORT_INVALID_FILE" | "LSA021_INGREDIENT_IN_USE" | "LSA022_LAST_ADMIN" | "LSA023_RECIPE_INCOMPLETE" | "LSA099_INTERNAL";
         ApiResponseVoid: {
             /** @enum {string} */
             status: "success" | "error";
@@ -619,7 +713,9 @@ export interface components {
                 name?: string;
                 email?: string;
                 /** @enum {string} */
-                role?: "CLIENTE" | "ADMIN";
+                role?: "CLIENTE" | "ADMIN" | "LOJISTA";
+                /** @description Só definido quando role === "LOJISTA" — id da loja a que a conta está ligada (FE-L01). */
+                storeId?: number | null;
             };
         };
         AuthResponseEnvelope: components["schemas"]["ApiResponseVoid"] & {
@@ -628,17 +724,24 @@ export interface components {
         /** @enum {string} */
         Goal: "PERDER_PESO" | "COMER_MELHOR" | "GANHAR_MASSA" | "GERIR_CONDICAO";
         /** @enum {string} */
-        HealthCondition: "NENHUMA" | "DIABETES_TIPO_2" | "HIPERTENSAO" | "DOENCA_CELIACA";
+        HealthCondition: "NENHUMA" | "DIABETES_TIPO_2" | "HIPERTENSAO" | "DOENCA_CELIACA" | "OUTRA";
         /** @enum {string} */
         BudgetBand: "BAIXO" | "MEDIO" | "CONFORTAVEL";
         Profile: {
             goal?: components["schemas"]["Goal"];
-            healthCondition?: components["schemas"]["HealthCondition"];
+            /** @description FE-Y02 (ago/2026) — 1 ou mais condições (o cliente pode ter, por exemplo, diabetes + hipertensão em simultâneo). Substitui o antigo campo singular `healthCondition`. */
+            healthConditions?: components["schemas"]["HealthCondition"][];
+            /** @description Texto livre quando `healthConditions` inclui "OUTRA". */
+            healthConditionOther?: string;
             allergies?: string[];
+            /** @description FE-Y03 (ago/2026) — alimentos excluídos por opção (não por alergia); campo separado de `allergies` a pedido do cliente. */
+            foodExclusions?: string[];
             budgetBand?: components["schemas"]["BudgetBand"];
             mealsPerDay?: number;
             /** @description Para quantas pessoas cozinhar/comprar; escala quantidades da lista de compras e das receitas (não kcal/macros). Intervalo 1-8, default 1. */
             householdSize?: number;
+            /** @description Vocabulário fechado: vegetariana, vegan, sem_gluten, sem_lactose, alta_proteina, baixo_calorico. Máx. 6 itens. */
+            dietaryPreferences?: string[];
         };
         UpdateProfileRequest: components["schemas"]["Profile"];
         ProfileEnvelope: components["schemas"]["ApiResponseVoid"] & {
@@ -683,6 +786,8 @@ export interface components {
             recipe?: components["schemas"]["RecipeSnapshot"];
             /** @enum {string} */
             feedback?: "NONE" | "LIKE" | "DISLIKE";
+            /** @description "Comi isto" — o cliente marcou a refeição como feita. Default false. */
+            completed?: boolean;
         };
         MealPlanDay: {
             /** Format: date */
@@ -696,7 +801,7 @@ export interface components {
             /** Format: int64 */
             id?: number;
             /** Format: date */
-            weekStart?: string;
+            monthStart?: string;
             /** @enum {string} */
             status?: "ACTIVE" | "ARCHIVED";
             days?: components["schemas"]["MealPlanDay"][];
@@ -706,6 +811,9 @@ export interface components {
         };
         MealPlanEntryEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["MealPlanEntry"];
+        };
+        SetCompletedRequest: {
+            completed: boolean;
         };
         GenerationHandle: {
             /** Format: int64 */
@@ -774,6 +882,8 @@ export interface components {
             estimatedCostMt?: number | null;
             /** Quantidade que o cliente já diz ter, na mesma `unit` do item; default 0 (FE-R01). */
             haveQuantity?: number;
+            /** @description Origem do item: `MANUAL` sobrevive a regenerações do plano; `PLANO` é recalculado a cada agregação. @enum {string} */
+            origin?: "PLANO" | "MANUAL";
         };
         ShoppingList: {
             /** Format: int64 */
@@ -792,6 +902,14 @@ export interface components {
             /** Quantidade que o cliente já diz ter, na mesma `unit` do item (FE-R01). */
             haveQuantity?: number;
         };
+        /** @description Criação de item manual na lista de compras (F1-CLI-06B). */
+        CreateShoppingListItemRequest: {
+            ingredientName: string;
+            category: components["schemas"]["ShoppingListItem"]["category"];
+            quantity: number;
+            unit: string;
+            estimatedCostMt?: number | null;
+        };
         ShoppingListItemEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["ShoppingListItem"];
         };
@@ -803,7 +921,7 @@ export interface components {
             name?: string;
             email?: string;
             /** @enum {string} */
-            role?: "CLIENTE" | "ADMIN";
+            role?: "CLIENTE" | "ADMIN" | "LOJISTA";
             status?: components["schemas"]["UserStatus"];
             /** Format: date-time */
             createdAt?: string;
@@ -846,6 +964,57 @@ export interface components {
         StorePageEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["PageResponse"] & {
                 items?: components["schemas"]["Store"][];
+            };
+        };
+        /** @enum {string} */
+        OrderStatus: "PENDENTE" | "ACEITE" | "EM_PREPARACAO" | "PRONTA" | "CONCLUIDA" | "RECUSADA" | "CANCELADA";
+        /** @description Snapshot de um item da lista de compras no momento da encomenda. */
+        OrderItem: {
+            ingredientName?: string;
+            quantity?: number;
+            unit?: string;
+            priceMt?: number | null;
+        };
+        Order: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            storeId?: number;
+            storeName?: string;
+            storeContact?: string | null;
+            // Snapshot do cliente que fez o pedido — mesmo padrão de storeName/storeContact
+            // (este mock só tem 1 cliente fixture; sem campo de telefone em lado nenhum do
+            // sistema, por isso o "contacto" aqui é o email). Usado pelo Portal da Loja (FE-L04).
+            customerName?: string;
+            customerContact?: string | null;
+            status?: components["schemas"]["OrderStatus"];
+            note?: string | null;
+            items?: components["schemas"]["OrderItem"][];
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        OrderRequest: {
+            /** Format: int64 */
+            storeId: number;
+            note?: string;
+            items: {
+                /** Format: int64 */
+                itemId: number;
+                quantity: number;
+            }[];
+        };
+        // FE-L04 · avançar/recusar o estado de uma encomenda do lado da loja — sem endpoint
+        // dedicado no contrato original (nasceu só com a perspetiva do cliente, ver OrderRequest).
+        OrderStatusUpdateRequest: {
+            status: components["schemas"]["OrderStatus"];
+            reason?: string | null;
+        };
+        OrderEnvelope: components["schemas"]["ApiResponseVoid"] & {
+            data?: components["schemas"]["Order"];
+        };
+        OrderPageEnvelope: components["schemas"]["ApiResponseVoid"] & {
+            data?: components["schemas"]["PageResponse"] & {
+                items?: components["schemas"]["Order"][];
             };
         };
         Product: {
@@ -1005,6 +1174,22 @@ export interface components {
                 likeCount?: number;
                 dislikeCount?: number;
             }[];
+            /** FE-X01: pedidos avulsos ("Pedir receita agora") no período — hand-editado, como FE-S01/FE-T01. */
+            adHocRecipeRequestsCount?: number;
+            /** FE-X02: encomendas agregadas no período — hand-editado, como FE-S01/FE-T01. */
+            ordersInPeriod?: {
+                total?: number;
+                byStatus?: {
+                    status?: components["schemas"]["OrderStatus"];
+                    count?: number;
+                }[];
+            };
+            /** FE-X03 [Sugestão]: engajamento (streaks) — hand-editado, como FE-S01/FE-T01. */
+            engagement?: {
+                /** @description Percentagem 0–1 */
+                activeStreakPercent?: number;
+                avgCompletedDaysInMonth?: number;
+            };
         };
         MetricsSummaryEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["MetricsSummary"];
@@ -1076,6 +1261,24 @@ export interface components {
         };
         /** @description LSA014 — sem alternativa disponível */
         NoAlternative: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ApiResponseVoid"];
+            };
+        };
+        /** @description LSA016 — loja não está ativa */
+        StoreInactive: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ApiResponseVoid"];
+            };
+        };
+        /** @description LSA017 — encomenda não pode ser cancelada neste estado */
+        OrderNotCancelable: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1379,7 +1582,14 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description Motivo livre e opcional da troca, máx. 140 caracteres. Não filtra a alternativa escolhida — o mock não tem IA real para o interpretar. */
+                    reason?: string;
+                };
+            };
+        };
         responses: {
             /** @description Alternativa proposta ou troca aplicada */
             200: {
@@ -1392,6 +1602,33 @@ export interface operations {
             };
             404: components["responses"]["NotFound"];
             409: components["responses"]["NoAlternative"];
+        };
+    };
+    setMealPlanEntryCompleted: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["PathId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCompletedRequest"];
+            };
+        };
+        responses: {
+            /** @description Estado "Comi isto" atualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MealPlanEntryEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
         };
     };
     setRecipeFeedback: {
@@ -1467,6 +1704,128 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    listActiveStores: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["PageQuery"];
+                size?: components["parameters"]["SizeQuery"];
+                sort?: components["parameters"]["SortQuery"];
+                q?: components["parameters"]["SearchQuery"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de lojas ativas */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorePageEnvelope"];
+                };
+            };
+        };
+    };
+    listMyOrders: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["PageQuery"];
+                size?: components["parameters"]["SizeQuery"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de encomendas do cliente, mais recentes primeiro */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderPageEnvelope"];
+                };
+            };
+        };
+    };
+    createOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderRequest"];
+            };
+        };
+        responses: {
+            /** @description Encomenda criada, estado inicial PENDENTE */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderEnvelope"];
+                };
+            };
+            400: components["responses"]["Validation"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["StoreInactive"];
+        };
+    };
+    getOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["PathId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Encomenda */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    cancelOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["PathId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Encomenda cancelada */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["OrderNotCancelable"];
         };
     };
     listUsers: {

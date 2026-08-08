@@ -2,7 +2,21 @@
 import type { HTMLAttributes } from "react";
 import styles from "./StatusBadge.module.css";
 
-export type Status = "ACTIVE" | "SUSPENDED" | "DRAFT" | "PUBLISHED";
+export type Status =
+  | "ACTIVE"
+  | "SUSPENDED"
+  | "DRAFT"
+  | "PUBLISHED"
+  // FE-D07 · Ingredient.active (boolean) mapeado para um estado exibível, mesmo padrão dos outros
+  | "INACTIVE"
+  // F3-CLI-07 · estados de encomenda (Order.status)
+  | "PENDENTE"
+  | "ACEITE"
+  | "EM_PREPARACAO"
+  | "PRONTA"
+  | "CONCLUIDA"
+  | "RECUSADA"
+  | "CANCELADA";
 
 export type StatusBadgeProps = Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {
   status: Status;
@@ -13,14 +27,31 @@ const STATUS_LABEL: Record<Status, string> = {
   SUSPENDED: "Suspenso",
   DRAFT: "Rascunho",
   PUBLISHED: "Publicada",
+  INACTIVE: "Inativo",
+  PENDENTE: "Pendente",
+  ACEITE: "Aceite",
+  EM_PREPARACAO: "Em preparação",
+  PRONTA: "Pronta",
+  CONCLUIDA: "Concluída",
+  RECUSADA: "Recusada",
+  CANCELADA: "Cancelada",
 };
 
-// ACTIVE/PUBLISHED → forest (sucesso) · SUSPENDED → terracotta (aviso/perigo) · DRAFT → clay-soft (neutro/mudo)
+// ACTIVE/PUBLISHED/PRONTA/CONCLUIDA → forest (sucesso) · SUSPENDED/RECUSADA → terracotta (aviso/perigo)
+// · DRAFT/PENDENTE/CANCELADA → clay-soft (neutro/mudo) · ACEITE/EM_PREPARACAO → amber (em curso)
 const STATUS_TONE: Record<Status, string> = {
   ACTIVE: styles.forest,
   PUBLISHED: styles.forest,
   SUSPENDED: styles.terracotta,
   DRAFT: styles.claySoft,
+  INACTIVE: styles.claySoft,
+  PENDENTE: styles.claySoft,
+  ACEITE: styles.amber,
+  EM_PREPARACAO: styles.amber,
+  PRONTA: styles.forest,
+  CONCLUIDA: styles.forest,
+  RECUSADA: styles.terracotta,
+  CANCELADA: styles.claySoft,
 };
 
 export function StatusBadge({ status, className, ...rest }: StatusBadgeProps) {

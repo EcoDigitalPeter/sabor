@@ -5,6 +5,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Check } from "lucide-react";
 import styles from "./OptionCard.module.css";
 
 export type OptionCardProps = {
@@ -24,6 +25,11 @@ export function OptionCard({ label, description, selected, onSelect, icon }: Opt
 
   return (
     <button type="button" className={classNames} onClick={onSelect} aria-pressed={selected}>
+      {selected ? (
+        <span className={styles.checkBadge} aria-hidden="true">
+          <Check size={12} strokeWidth={3} />
+        </span>
+      ) : null}
       {icon ? (
         <span className={styles.icon} aria-hidden="true">
           {icon}

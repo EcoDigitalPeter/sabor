@@ -31,7 +31,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Leve Sabor AI — o teu plano alimentar, feito para a tua vida",
+  title: "Ottimizo — o teu plano alimentar, feito para a tua vida",
   manifest: "/manifest.webmanifest",
 };
 

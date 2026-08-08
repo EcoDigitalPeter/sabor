@@ -248,7 +248,7 @@ create unique index ux_stores_name_city on stores (lower(name), lower(city));
 -- Admin inicial (hash de password lido de process.env.SEED_ADMIN_BCRYPT pelo script de seed;
 -- NUNCA um hash de password real versionado no repositório)
 insert into users (name, email, password_hash, role, status, disclaimer_accepted_at)
-values ('Admin Leve Sabor', 'admin@levesabor.co.mz', '${seed_admin_bcrypt}', 'ADMIN', 'ACTIVE', now());
+values ('Admin Ottimizo', 'admin@ottimizo.ai', '${seed_admin_bcrypt}', 'ADMIN', 'ACTIVE', now());
 
 -- Catálogo mínimo do MVP: ~30 ingredientes + ≥ 40 receitas moçambicanas PUBLISHED com tags e macros.
 -- O conteúdo (nomes, nutrição, tags de saúde) é fornecido/validado pelo cliente do projeto — ver risco R2

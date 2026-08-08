@@ -1,0 +1,169 @@
+/* F3-CLI-07 · "Minhas encomendas" — lista + detalhe em BottomSheet */
+
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.title {
+  margin: 0 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 1.15rem + 1vw, 1.75rem);
+  color: var(--ink);
+}
+
+.skeletonRow {
+  margin-bottom: 14px;
+}
+
+.emptyCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.emptyCta:hover {
+  background: var(--terracotta-dark);
+}
+
+/* ---------- Lista ---------- */
+
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.orderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  border-radius: var(--radius-card);
+  background: var(--cream-card);
+  box-shadow: 0 1px 3px rgba(36, 26, 20, 0.06);
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.orderRow:hover {
+  box-shadow: 0 2px 8px rgba(36, 26, 20, 0.1);
+}
+
+.orderRow:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.orderRowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.orderStore {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--ink);
+}
+
+.orderMeta {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--clay-soft);
+}
+
+/* ---------- Detalhe (BottomSheet) ---------- */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.detailMeta {
+  margin: -6px 0 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay-soft);
+}
+
+.detailItemList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.detailItemRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(36, 26, 20, 0.08);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.detailItemQty {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--clay);
+  white-space: nowrap;
+}
+
+.detailNote {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+
+.detailContact {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
