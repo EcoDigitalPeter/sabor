@@ -725,6 +725,12 @@ export function updateProfile(patch: Profile): MockResult<Profile> {
   ) {
     return errResult("LSA001_VALIDATION", "Descreve a condição de saúde em \"Outra\".", 400);
   }
+  // FE-Y04 (ago/2026): consentimento médico é pedido aqui (resumo do onboarding), não no registo.
+  // Só rejeita se vier explicitamente `false` — omitir o campo (ex.: edição posterior do perfil em
+  // /perfil, que já foi aceite uma vez) não deve reabrir a exigência.
+  if (patch.medicalDisclaimerAccepted === false) {
+    return errResult("LSA001_VALIDATION", "É necessário aceitar o aviso antes de gerar o teu plano.", 400);
+  }
   profile = { ...profile, ...patch };
   return okResult(profile);
 }
@@ -1156,7 +1162,6 @@ export function registerAccount(body: {
   email?: string;
   password?: string;
   confirmPassword?: string;
-  disclaimerAccepted?: boolean;
 }): MockResult<AuthResult> {
   if (!body.name || body.name.length < 2) {
     return errResult("LSA001_VALIDATION", "Nome deve ter pelo menos 2 caracteres.", 400);
@@ -1167,9 +1172,8 @@ export function registerAccount(body: {
   if (body.password !== body.confirmPassword) {
     return errResult("LSA001_VALIDATION", "A confirmação de password não coincide.", 400);
   }
-  if (!body.disclaimerAccepted) {
-    return errResult("LSA001_VALIDATION", "É necessário aceitar o aviso antes de continuar.", 400);
-  }
+  // FE-Y04 (ago/2026): o consentimento médico saiu do registo — passou a ser pedido no resumo do
+  // onboarding, validado em updateProfile() (medicalDisclaimerAccepted), não aqui.
   if (body.email?.toLowerCase() === DUPLICATE_REGISTER_EMAIL) {
     return errResult("LSA006_DUPLICATE", "Já existe uma conta com este email.", 409);
   }

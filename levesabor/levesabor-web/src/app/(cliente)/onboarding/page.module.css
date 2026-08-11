@@ -192,6 +192,13 @@
   border-top: 1px solid rgba(36, 26, 20, 0.08);
 }
 
+.summaryRowHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .summaryRow dt {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -207,6 +214,29 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--ink);
+}
+
+/* FE-Y04: link "Editar" por secção — devolve o utilizador diretamente ao passo em causa. */
+.editLink {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--terracotta);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.editLink:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}
+
+.disclaimerRow {
+  margin-top: 18px;
 }
 
 .submitError {
