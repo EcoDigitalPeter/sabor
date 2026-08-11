@@ -47,11 +47,10 @@ export async function register(
   email: string,
   password: string,
   confirmPassword: string,
-  disclaimerAccepted: boolean,
 ): Promise<Session> {
   const result = await api<AuthResult>("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ name, email, password, confirmPassword, disclaimerAccepted }),
+    body: JSON.stringify({ name, email, password, confirmPassword }),
   });
   return applyAuthResult(result);
 }

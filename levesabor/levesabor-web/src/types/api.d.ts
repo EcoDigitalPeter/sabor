@@ -698,7 +698,6 @@ export interface components {
             email: string;
             password: string;
             confirmPassword: string;
-            disclaimerAccepted: boolean;
         };
         LoginRequest: {
             /** Format: email */
@@ -742,6 +741,8 @@ export interface components {
             householdSize?: number;
             /** @description Vocabulário fechado: vegetariana, vegan, sem_gluten, sem_lactose, alta_proteina, baixo_calorico. Máx. 6 itens. */
             dietaryPreferences?: string[];
+            /** @description FE-Y04 (ago/2026) — consentimento movido do registo para o resumo do onboarding (o utilizador já percebeu o valor da app nessa altura). Substitui o antigo `disclaimerAccepted` de `/auth/register`. */
+            medicalDisclaimerAccepted?: boolean;
         };
         UpdateProfileRequest: components["schemas"]["Profile"];
         ProfileEnvelope: components["schemas"]["ApiResponseVoid"] & {

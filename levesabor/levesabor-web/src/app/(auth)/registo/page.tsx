@@ -10,13 +10,14 @@ import { register } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
 import { FormField, fieldError, formFieldErrorId } from "@/components/ui/FormField";
 import { ErrorState } from "@/components/ui/ErrorState";
 
 // Espelha as regras de F1-VIS-01: nome 2-120, email válido, password >= 8 chars com
-// >= 1 letra e >= 1 dígito, confirmação igual, checkbox de disclaimer obrigatória.
+// >= 1 letra e >= 1 dígito, confirmação igual.
+// FE-Y04 (ago/2026): o consentimento médico saiu daqui — passou a ser pedido no resumo do
+// onboarding (feedback.txt L12-18: o utilizador ainda não viu o valor da app neste ecrã).
 const registoSchema = z
   .object({
     name: z
@@ -29,11 +30,6 @@ const registoSchema = z
       .min(8, "A password deve ter pelo menos 8 caracteres.")
       .regex(/(?=.*[A-Za-z])(?=.*\d)/, "A password deve ter pelo menos 1 letra e 1 dígito."),
     confirmPassword: z.string().min(1, "Confirma a password."),
-    disclaimerAccepted: z.literal(true, {
-      errorMap: () => ({
-        message: "Tens de aceitar o aviso para continuar.",
-      }),
-    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As passwords não coincidem.",
@@ -45,7 +41,6 @@ type RegistoFormValues = {
   email: string;
   password: string;
   confirmPassword: string;
-  disclaimerAccepted: boolean;
 };
 
 type RegistoFieldErrors = Partial<Record<keyof RegistoFormValues, { message: string }>>;
@@ -59,7 +54,6 @@ export default function RegistoPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    disclaimerAccepted: false,
   });
   const [fieldErrors, setFieldErrors] = useState<RegistoFieldErrors>({});
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
@@ -88,8 +82,7 @@ export default function RegistoPage() {
         result.data.name,
         result.data.email,
         result.data.password,
-        result.data.confirmPassword,
-        result.data.disclaimerAccepted
+        result.data.confirmPassword
       );
       // Nova conta de cliente aterra sempre no onboarding (F1-VIS-01).
       router.push("/onboarding");
@@ -152,7 +145,7 @@ export default function RegistoPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <FormField
-                label="Nome"
+                label="Nome completo"
                 htmlFor="registo-name"
                 required
                 error={fieldError({ error: fieldErrors.name })}
@@ -286,29 +279,6 @@ export default function RegistoPage() {
                     )}
                   </button>
                 </div>
-              </FormField>
-
-              <FormField
-                label="Aviso médico"
-                htmlFor="registo-disclaimer"
-                required
-                error={fieldError({ error: fieldErrors.disclaimerAccepted })}
-              >
-                <Checkbox
-                  id="registo-disclaimer"
-                  checked={values.disclaimerAccepted}
-                  disabled={submitting}
-                  aria-invalid={!!fieldErrors.disclaimerAccepted}
-                  aria-describedby={
-                    fieldErrors.disclaimerAccepted
-                      ? formFieldErrorId("registo-disclaimer")
-                      : undefined
-                  }
-                  onChange={(e) =>
-                    setValues((v) => ({ ...v, disclaimerAccepted: e.target.checked }))
-                  }
-                  label="Compreendo que a Ottimizo não substitui o meu médico ou nutricionista"
-                />
               </FormField>
 
               <Button type="submit" loading={submitting} disabled={submitting}>

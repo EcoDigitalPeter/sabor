@@ -10,15 +10,10 @@ test.describe("Registo → onboarding → primeiro plano", () => {
     await page.goto("/registo");
 
     const uniqueEmail = `nova.cliente.${Date.now()}@ottimizo.mz`;
-    await page.getByLabel("Nome").fill("Nova Cliente");
+    await page.getByLabel("Nome completo").fill("Nova Cliente");
     await page.getByLabel("Email").fill(uniqueEmail);
     await page.locator("#registo-password").fill("password123");
     await page.locator("#registo-confirm-password").fill("password123");
-    // O <input> real do Checkbox é visualmente escondido (sr-only, Checkbox.module.css) — clicar no
-    // texto do <label> aciona o toggle nativamente, tal como um clique real faria na caixa visível.
-    await page
-      .getByText("Compreendo que a Ottimizo não substitui o meu médico ou nutricionista")
-      .click();
     await page.getByRole("button", { name: "Criar conta" }).click();
 
     await page.waitForURL("**/onboarding");
@@ -62,11 +57,17 @@ test.describe("Registo → onboarding → primeiro plano", () => {
     // Passo 8: resumo — confirma que a preferência escolhida aparece antes de submeter.
     await expect(page.getByRole("heading", { name: "Confirma os teus dados" })).toBeVisible();
     await expect(page.getByText("Vegetariana")).toBeVisible();
-    await page.getByRole("button", { name: "Confirmar" }).click();
+    // FE-Y04: consentimento médico movido do registo para aqui — o <input> real do Checkbox é
+    // visualmente escondido (sr-only, Checkbox.module.css), clicar no texto do <label> aciona o
+    // toggle nativamente, tal como um clique real faria na caixa visível.
+    await page
+      .getByText("Compreendo que a Ottimizzo não substitui o acompanhamento médico ou nutricional.")
+      .click();
+    await page.getByRole("button", { name: "Criar o meu plano" }).click();
 
     // Ecrã de sucesso do onboarding.
     await expect(page.getByRole("heading", { name: "Tudo pronto!" })).toBeVisible();
-    await page.getByRole("button", { name: "Gerar o meu plano" }).click();
+    await page.getByRole("button", { name: "Ver o meu plano" }).click();
 
     await page.waitForURL("**/plano/gerar");
     // A geração usa polling; ao terminar redireciona automaticamente para /plano.

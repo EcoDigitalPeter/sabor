@@ -11,6 +11,7 @@ import { api, ApiError } from "@/lib/api";
 import type { components } from "@/types/api";
 import { Wizard, type WizardStep } from "@/components/ui/Wizard";
 import { Card } from "@/components/ui/Card";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { Chip } from "@/components/ui/Chip";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -91,6 +92,9 @@ type OnboardingDraft = {
   budgetBand: BudgetBand | null;
   mealsPerDay: number;
   householdSize: number;
+  // FE-Y04 (ago/2026): consentimento médico saiu do registo — passa a ser pedido aqui, no resumo,
+  // já depois de o utilizador perceber o valor da app (feedback.txt L12-18).
+  disclaimerAccepted: boolean;
 };
 
 const DEFAULT_DRAFT: OnboardingDraft = {
@@ -103,6 +107,7 @@ const DEFAULT_DRAFT: OnboardingDraft = {
   budgetBand: null,
   mealsPerDay: 3,
   householdSize: 1,
+  disclaimerAccepted: false,
 };
 
 type StoredDraft = { draft: OnboardingDraft; stepIndex: number };
@@ -318,8 +323,15 @@ export default function OnboardingPage() {
       budgetBand: draft.budgetBand ?? undefined,
       mealsPerDay: draft.mealsPerDay,
       householdSize: draft.householdSize,
+      medicalDisclaimerAccepted: draft.disclaimerAccepted,
     };
     saveProfile.mutate(profile);
+  }
+
+  // FE-Y04 (ago/2026): botão "Editar" por secção no resumo — evita ter de voltar vários passos
+  // para corrigir um erro isolado (feedback.txt L84-91).
+  function goToStep(index: number) {
+    setStepIndex(index);
   }
 
   const steps: WizardStep[] = [
@@ -616,11 +628,21 @@ export default function OnboardingPage() {
           <Card className={styles.summaryCard}>
             <dl className={styles.summaryList}>
               <div className={styles.summaryRow}>
-                <dt>Objetivo</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Objetivo</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(0)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>{GOAL_OPTIONS.find((o) => o.value === draft.goal)?.label ?? "—"}</dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Condição de saúde</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Condição de saúde</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(1)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>
                   {draft.healthConditions.length > 0
                     ? draft.healthConditions
@@ -635,7 +657,12 @@ export default function OnboardingPage() {
                 </dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Alergias</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Alergias e exclusões alimentares</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(2)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>{draft.allergies.length > 0 ? draft.allergies.join(", ") : "Nenhuma indicada"}</dd>
               </div>
               <div className={styles.summaryRow}>
@@ -643,7 +670,12 @@ export default function OnboardingPage() {
                 <dd>{draft.foodExclusions.length > 0 ? draft.foodExclusions.join(", ") : "Nenhum indicado"}</dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Preferências alimentares</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Preferências alimentares</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(3)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>
                   {draft.dietaryPreferences.length > 0
                     ? draft.dietaryPreferences
@@ -653,19 +685,45 @@ export default function OnboardingPage() {
                 </dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Orçamento semanal</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Orçamento semanal</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(4)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>{BUDGET_OPTIONS.find((o) => o.value === draft.budgetBand)?.label ?? "Não indicado"}</dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Refeições por dia</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Refeições por dia</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(5)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>{draft.mealsPerDay}</dd>
               </div>
               <div className={styles.summaryRow}>
-                <dt>Pessoas em casa</dt>
+                <div className={styles.summaryRowHead}>
+                  <dt>Pessoas em casa</dt>
+                  <button type="button" className={styles.editLink} onClick={() => goToStep(6)}>
+                    Editar
+                  </button>
+                </div>
                 <dd>{draft.householdSize}</dd>
               </div>
             </dl>
           </Card>
+
+          {/* FE-Y04 (ago/2026): consentimento médico pedido aqui — o utilizador já percebeu o
+              funcionamento da app, faz mais sentido do que durante o registo (feedback.txt L18).
+              Label encurtada de "Aviso médico" para "Aviso", a pedido do cliente. */}
+          <h2 className={`${styles.subQuestion} ${styles.disclaimerRow}`}>Aviso</h2>
+          <Checkbox
+            id="onboarding-disclaimer"
+            checked={draft.disclaimerAccepted}
+            onChange={(e) => updateDraft({ disclaimerAccepted: e.target.checked })}
+            label="Compreendo que a Ottimizzo não substitui o acompanhamento médico ou nutricional."
+          />
 
           {saveProfile.isError ? (
             <ErrorState
@@ -687,10 +745,10 @@ export default function OnboardingPage() {
         <BrandIllustration variant="onboarding-success" size={180} />
         <h1 className={styles.successTitle}>Tudo pronto!</h1>
         <p className={styles.successText}>
-          O teu perfil foi guardado. Já podemos preparar o teu primeiro plano alimentar.
+          O teu perfil está pronto. Agora vamos criar um plano alimentar pensado para ti.
         </p>
         <Button className={styles.successCta} onClick={() => router.push("/plano/gerar")}>
-          Gerar o meu plano
+          Ver o meu plano
         </Button>
       </main>
     );
@@ -706,6 +764,10 @@ export default function OnboardingPage() {
     canGoNext =
       draft.healthConditions.length > 0 &&
       (!draft.healthConditions.includes("OUTRA") || draft.healthConditionOther.trim() !== "");
+  } else if (currentStepId === "resumo") {
+    // FE-Y04 (ago/2026): consentimento médico obrigatório aqui — substitui a antiga checkbox do
+    // registo (feedback.txt L18).
+    canGoNext = draft.disclaimerAccepted;
   }
   if (isSaving) canGoNext = false;
 
@@ -728,7 +790,7 @@ export default function OnboardingPage() {
       onNext={handleNext}
       onBack={handleBack}
       canGoNext={canGoNext}
-      nextLabel={isLastStep ? (isSaving ? "A guardar…" : "Confirmar") : "Continuar"}
+      nextLabel={isLastStep ? (isSaving ? "A guardar…" : "Criar o meu plano") : "Continuar"}
     />
   );
 }
