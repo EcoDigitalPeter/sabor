@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: ottimizo
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/ottimizo}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_JWT_ISSUER:http://localhost}
+          jwk-set-uri: ${SUPABASE_JWKS_URI:http://localhost/.well-known/jwks.json}
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:dev-disabled}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+          temperature: 0.2
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+ottimizo:
+  cors:
+    allowed-origins: ${APP_CORS_ORIGINS:http://localhost:3000}
