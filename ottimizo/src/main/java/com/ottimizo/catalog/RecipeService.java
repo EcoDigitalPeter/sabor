@@ -43,6 +43,29 @@ public class RecipeService {
         return recipes.search(statusValue, tagValue, qValue, pageable);
     }
 
+    /**
+     * Catalogo navegavel do cliente (BE-C08/F1-CLI-08): so {@code PUBLISHED},
+     * filtro por tags (AND — todas as tags pedidas tem de estar presentes) e
+     * pesquisa por nome, ambos opcionais.
+     */
+    @Transactional(readOnly = true)
+    public Page<Recipe> listPublished(List<String> tags, String q, Pageable pageable) {
+        String tagsCsv = normalizeTags(tags);
+        String qValue = q == null || q.isBlank() ? null : q.trim();
+        return recipes.searchPublished(tagsCsv, qValue, pageable);
+    }
+
+    private String normalizeTags(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return null;
+        }
+        List<String> cleaned = tags.stream()
+            .filter(tag -> tag != null && !tag.isBlank())
+            .map(String::trim)
+            .toList();
+        return cleaned.isEmpty() ? null : String.join(",", cleaned);
+    }
+
     @Transactional(readOnly = true)
     public Recipe get(Long id) {
         return recipes.findById(id)

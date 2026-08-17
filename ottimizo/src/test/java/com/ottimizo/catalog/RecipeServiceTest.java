@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +25,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -160,6 +166,57 @@ class RecipeServiceTest {
 
         assertThat(result.status()).isEqualTo(RecipeStatus.DRAFT);
         verify(audit).record(eq(actor), eq("recipe.unpublish"), eq("Recipe"), eq(3L));
+    }
+
+    // -- listPublished (BE-C08/F1-CLI-08: catalogo navegavel do cliente) --
+
+    @Test
+    void listPublished_withTagsAndQuery_normalizesAndForwardsToRepository() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Recipe> emptyPage = new PageImpl<>(List.of());
+        when(recipes.searchPublished(eq("vegan,sem_gluten"), eq("frango"), eq(pageable))).thenReturn(emptyPage);
+
+        Page<Recipe> result = service.listPublished(List.of(" vegan ", "sem_gluten"), "  frango  ", pageable);
+
+        assertThat(result).isSameAs(emptyPage);
+        verify(recipes).searchPublished("vegan,sem_gluten", "frango", pageable);
+    }
+
+    @Test
+    void listPublished_withNullOrEmptyTags_passesNullTagsCsv() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(recipes.searchPublished(isNull(), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of()));
+
+        service.listPublished(null, null, pageable);
+        service.listPublished(List.of(), null, pageable);
+        service.listPublished(List.of("  ", ""), null, pageable);
+
+        verify(recipes, times(3)).searchPublished(isNull(), isNull(), eq(pageable));
+    }
+
+    @Test
+    void listPublished_withBlankQuery_passesNullQ() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(recipes.searchPublished(any(), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of()));
+
+        service.listPublished(null, "   ", pageable);
+
+        verify(recipes).searchPublished(null, null, pageable);
+    }
+
+    @Test
+    void listPublished_returnsRepositoryPageVerbatim_soControllerCanPaginate() {
+        Pageable pageable = PageRequest.of(1, 5);
+        Recipe recipe = BeanUtils.instantiateClass(Recipe.class);
+        ReflectionTestUtils.setField(recipe, "id", 42L);
+        ReflectionTestUtils.setField(recipe, "status", RecipeStatus.PUBLISHED);
+        Page<Recipe> page = new PageImpl<>(List.of(recipe), pageable, 6);
+        when(recipes.searchPublished(any(), any(), eq(pageable))).thenReturn(page);
+
+        Page<Recipe> result = service.listPublished(List.of("alta_proteina"), "arroz", pageable);
+
+        assertThat(result.getContent()).containsExactly(recipe);
+        assertThat(result.getTotalElements()).isEqualTo(6);
     }
 
     private RecipeRequest completeRequest() {
