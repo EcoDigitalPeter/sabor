@@ -27,4 +27,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsByStoreIdAndNameIgnoreCase(Long storeId, String name);
 
     boolean existsByStoreIdAndNameIgnoreCaseAndIdNot(Long storeId, String name, Long id);
+
+    /**
+     * Resolucao de preco best-effort para {@code com.ottimizo.orders.OrderService}
+     * (BE-C07): produto activo da loja alvo ligado ao mesmo ingrediente
+     * curado do item da lista de compras.
+     */
+    Optional<Product> findFirstByStoreIdAndIngredientIdAndStatus(Long storeId, Long ingredientId, ProductStatus status);
+
+    /**
+     * Fallback de {@code OrderService} quando o item nao tem
+     * {@code ingredientId} (ex. item manual da lista de compras) — tenta por
+     * nome exacto (ignorando maiusculas/minusculas) dentro da loja alvo.
+     */
+    Optional<Product> findFirstByStoreIdAndStatusAndNameIgnoreCase(Long storeId, ProductStatus status, String name);
 }
