@@ -26,7 +26,8 @@ import org.hibernate.type.SqlTypes;
  * prepMinutes, estimatedCostMt, macros, healthTags, healthNote, ingredients,
  * steps) — por isso e devolvida tal e qual em {@link MealPlanEntryResponse},
  * mesmo que a receita original seja depois editada ou removida do catalogo.
- * Leitura apenas (BE-C04) — feedback/swap pertencem a BE-C05.
+ * Leitura + {@link #applySwap} apenas (BE-C04 leu; BE-C05 acrescentou a
+ * mutacao de troca) — a criacao das entradas continua a pertencer a BE-C03.
  */
 @Entity
 @Table(name = "meal_plan_entries")
@@ -74,6 +75,20 @@ public class MealPlanEntry {
         this.recipeSnapshot = recipeSnapshot;
         this.feedback = EntryFeedback.NONE;
         this.completed = false;
+    }
+
+    /**
+     * Aplica uma troca (BE-C05, {@code POST .../entries/{id}/swap} com
+     * {@code confirm=true}): substitui a receita da entrada e reinicia o
+     * feedback dessa entrada para {@link EntryFeedback#NONE} — o feedback
+     * anterior era sobre a receita antiga, ja nao se aplica a nova (mesmo
+     * comportamento do mock em {@code fixtures.ts applyRecipeToEntry}).
+     * {@code completed} nao e alterado.
+     */
+    public void applySwap(Long recipeId, JsonNode recipeSnapshot) {
+        this.recipeId = recipeId;
+        this.recipeSnapshot = recipeSnapshot;
+        this.feedback = EntryFeedback.NONE;
     }
 
     @PrePersist
