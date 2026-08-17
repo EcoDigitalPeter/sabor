@@ -65,4 +65,20 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
         nativeQuery = true
     )
     Page<Recipe> searchPublished(@Param("tagsCsv") String tagsCsv, @Param("q") String q, Pageable pageable);
+
+    /**
+     * Carrega receitas com {@code ingredients}/{@code ingredient} num unico
+     * round-trip (join fetch), para agregadores como
+     * {@code com.ottimizo.plans.ShoppingListService#rebuildForPlan} nao
+     * pagarem N+1 ao ler as linhas de ingrediente de varias receitas do
+     * plano. {@code distinct} porque o join fetch de uma colecao
+     * {@code OneToMany} duplica a linha "um" por cada "muitos".
+     */
+    @Query("""
+        select distinct r from Recipe r
+        left join fetch r.ingredients ri
+        left join fetch ri.ingredient
+        where r.id in :ids
+        """)
+    List<Recipe> findByIdInWithIngredients(@Param("ids") List<Long> ids);
 }
