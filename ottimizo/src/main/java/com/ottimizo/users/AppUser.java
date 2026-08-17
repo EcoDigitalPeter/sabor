@@ -47,10 +47,25 @@ public class AppUser {
     }
 
     public AppUser(UUID authUserId, String name, String email, Role role) {
+        this(authUserId, name, email, role, null);
+    }
+
+    public AppUser(UUID authUserId, String name, String email, Role role, Long storeId) {
         this.authUserId = authUserId;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.storeId = storeId;
+    }
+
+    /**
+     * Suspensao/reactivacao administrativa (BE-B03). A revogacao da sessao
+     * Supabase correspondente e feita a parte pelo {@code AdminUserService}
+     * via {@link com.ottimizo.users.SupabaseSessionRevoker} — esta chamada
+     * so altera o estado local.
+     */
+    public void changeStatus(UserStatus status) {
+        this.status = status;
     }
 
     public Long id() {
