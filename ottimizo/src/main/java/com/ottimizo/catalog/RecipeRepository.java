@@ -37,4 +37,32 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
         nativeQuery = true
     )
     Page<Recipe> search(@Param("status") String status, @Param("tag") String tag, @Param("q") String q, Pageable pageable);
+
+    /**
+     * Catalogo navegavel do cliente (BE-C08/F1-CLI-08): so receitas
+     * {@code PUBLISHED}, filtro opcional por tags (AND — a receita tem de
+     * conter todas as tags pedidas, criterio de aceitacao explicito) e
+     * pesquisa opcional por nome (contains, case-insensitive). {@code tagsCsv}
+     * nulo ou em branco desliga o filtro de tags; passamos uma string
+     * separada por virgulas em vez de um array nativo para evitar problemas
+     * de binding de {@code text[]} em query nativa — {@code string_to_array}
+     * faz a conversao do lado do Postgres.
+     */
+    @Query(
+        value = """
+            select r.* from recipes r
+            where r.status = 'PUBLISHED'
+              and (:tagsCsv is null or r.health_tags @> string_to_array(cast(:tagsCsv as text), ','))
+              and (:q is null or lower(r.name) like lower(concat('%', cast(:q as text), '%')))
+            order by r.name asc
+            """,
+        countQuery = """
+            select count(*) from recipes r
+            where r.status = 'PUBLISHED'
+              and (:tagsCsv is null or r.health_tags @> string_to_array(cast(:tagsCsv as text), ','))
+              and (:q is null or lower(r.name) like lower(concat('%', cast(:q as text), '%')))
+            """,
+        nativeQuery = true
+    )
+    Page<Recipe> searchPublished(@Param("tagsCsv") String tagsCsv, @Param("q") String q, Pageable pageable);
 }
