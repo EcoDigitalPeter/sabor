@@ -22,6 +22,7 @@ public enum ErrorCode {
     LSA021_INGREDIENT_IN_USE(HttpStatus.CONFLICT, "Ingrediente em uso."),
     LSA022_LAST_ADMIN(HttpStatus.CONFLICT, "Tem de existir pelo menos um administrador activo."),
     LSA023_RECIPE_INCOMPLETE(HttpStatus.CONFLICT, "Receita incompleta."),
+    LSA024_STORE_IN_USE(HttpStatus.CONFLICT, "Esta loja tem lojistas ou encomendas associadas e nao pode ser removida."),
     LSA030_INVALID_ORDER_TRANSITION(HttpStatus.CONFLICT, "Transicao de estado invalida."),
     LSA099_INTERNAL(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno. A equipa foi notificada.");
 
