@@ -87,14 +87,26 @@ public class Order {
     }
 
     /**
-     * Mudanca de estado generica (usada por {@link #cancel()} agora; a
-     * maquina de estados completa do lado da loja, {@code
-     * OrderStateMachine}, fica para BE-L04 — este metodo so estabelece o
-     * padrao ja usado em {@code Product#changeStatus}/{@code
-     * Store#changeStatus}).
+     * Mudanca de estado sem motivo (usada por {@link #cancel()} e pelas
+     * transicoes da loja, BE-L04, que nao sejam RECUSADA). Delega em
+     * {@link #changeStatus(OrderStatus, String)} com {@code rejectReason}
+     * nulo.
      */
     public void changeStatus(OrderStatus status) {
+        changeStatus(status, null);
+    }
+
+    /**
+     * Mudanca de estado do lado da loja, com motivo opcional (BE-L04,
+     * {@code OrderStateMachine} valida a transicao antes de chamar isto —
+     * este metodo em si nao valida nada, so aplica). {@code rejectReason}
+     * so faz sentido quando {@code status == RECUSADA}; o chamador e
+     * responsavel por so o passar nesse caso ({@link
+     * com.ottimizo.orders.LojaOrderService#updateStatus} garante isso).
+     */
+    public void changeStatus(OrderStatus status, String rejectReason) {
         this.status = status;
+        this.rejectReason = rejectReason;
         this.updatedAt = OffsetDateTime.now();
     }
 
