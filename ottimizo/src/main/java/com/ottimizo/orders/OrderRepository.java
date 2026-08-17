@@ -15,4 +15,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * mesmo padrao de {@code ProductRepository#findByIdAndStoreId}.
      */
     Optional<Order> findByIdAndUserId(Long id, Long userId);
+
+    /** Lado da loja (BE-L04) — lista escopada ao storeId do lojista autenticado. */
+    Page<Order> findByStoreId(Long storeId, Pageable pageable);
+
+    /** Lado da loja (BE-L04) — filtro opcional por estado, mesmo escopo de {@link #findByStoreId}. */
+    Page<Order> findByStoreIdAndStatus(Long storeId, OrderStatus status, Pageable pageable);
+
+    /**
+     * Lookup com ownership embutido na query, lado da loja (BE-L04): se a
+     * encomenda existir mas pertencer a outra loja, o resultado e vazio
+     * (404, nunca 403) — mesmo padrao de {@link #findByIdAndUserId}.
+     */
+    Optional<Order> findByIdAndStoreId(Long id, Long storeId);
 }
