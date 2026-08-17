@@ -14,6 +14,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindingResult;
@@ -87,6 +88,16 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ApiResponse<Void>> response = handler.handleInvalidBody(ex);
 
         assertThat(response.getBody().message()).isEqualTo(ErrorCode.LSA001_VALIDATION.defaultMessage());
+    }
+
+    @Test
+    void handleUnreadableBody_mapsToLsa001Validation() {
+        HttpMessageNotReadableException ex = mock(HttpMessageNotReadableException.class);
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleUnreadableBody(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().code()).isEqualTo("LSA001_VALIDATION");
     }
 
     @Test

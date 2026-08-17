@@ -4,6 +4,7 @@ import com.ottimizo.common.api.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -35,6 +36,11 @@ public class GlobalExceptionHandler {
             .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
             .collect(Collectors.joining("; "));
         return validation(message);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableBody(HttpMessageNotReadableException ex) {
+        return validation("Corpo do pedido invalido, mal formado ou com um valor fora do enum esperado.");
     }
 
     @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
