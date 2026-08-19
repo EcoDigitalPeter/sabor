@@ -1,0 +1,96 @@
+# ============================================================================
+# Perfil Spring "prod" — Supabase real de producao (DB-07)
+# ============================================================================
+# Nenhuma credencial real está neste ficheiro nem deve alguma vez estar --
+# tudo vem de variaveis de ambiente definidas fora do repositorio (secrets
+# do servico de deploy). Activar com -Dspring.profiles.active=prod (ou
+# SPRING_PROFILES_ACTIVE=prod), depois de definidas as variaveis abaixo.
+# Ao contrario de application.yml (base, com defaults localhost para dev),
+# este ficheiro NAO tem defaults -- se uma variavel faltar, o arranque falha
+# em vez de cair silenciosamente para uma ligacao errada. Isto e proposital.
+#
+# VARIAVEIS DE AMBIENTE A DEFINIR (Peter, fora do repo):
+#
+#   SUPABASE_DB_URL
+#     Onde obter: dashboard Supabase -> Project Settings -> Database ->
+#     "Connection pooling" -> modo "Transaction" (Supavisor, porta 6543).
+#     O dashboard mostra o URI no formato "postgresql://...". Para o
+#     datasource do Spring/JDBC tem de vir com o prefixo "jdbc:", ex.:
+#       jdbc:postgresql://aws-0-xx-region.pooler.supabase.com:6543/postgres?prepareThreshold=0
+#     (o "?prepareThreshold=0" e necessario -- o pooler em modo transaccao
+#     nao suporta prepared statements ao nivel de sessao; sem isto o driver
+#     pgjdbc tenta preparar statements no servidor e falha em produção.)
+#
+#   SUPABASE_DB_USERNAME
+#     No mesmo ecra ("Connection pooling"). Em modo pooler o utilizador NAO
+#     e "postgres" simples -- e "postgres.<project-ref>" (o dashboard mostra
+#     o valor exacto a copiar).
+#
+#   SUPABASE_DB_PASSWORD
+#     Password da base de dados definida na criação do projecto Supabase
+#     (ou reposta em Project Settings -> Database -> "Reset database
+#     password" se se tiver perdido).
+#
+#   SUPABASE_JWT_ISSUER
+#     Authentication -> URL Configuration (ou "JWT Settings"), formato
+#     https://<project-ref>.supabase.co/auth/v1
+#
+#   SUPABASE_JWKS_URI
+#     Authentication -> JWT Settings -> "JWKS URL", tipicamente
+#     https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json
+#
+# DECISAO issuer-uri vs jwk-set-uri: definimos as duas propriedades, tal
+# como ja acontecia em application.yml (base). O Spring Boot usa o
+# jwk-set-uri directamente para ir buscar as chaves publicas (nao depende
+# do endpoint de discovery OIDC completo, que o Supabase pode nao expor no
+# formato padrao) e, por o issuer-uri tambem estar definido, acrescenta na
+# mesma o validador da claim "iss" do token (JwtValidators.createDefault-
+# WithIssuer) -- ou seja, validação completa sem depender de discovery.
+#
+# MIGRAÇÕES (Flyway): a datasource do Flyway NAO esta redefinida abaixo de
+# proposito -- por omissao o Flyway do Spring Boot usa a mesma DataSource
+# principal da aplicação (spring.datasource.*), portanto herda estas
+# variaveis automaticamente; nao ha "spring.flyway.url/user/password"
+# duplicados aqui. Como spring.flyway.enabled=true ja vem de application.yml
+# (base), as migrações correm sozinhas no arranque da aplicação com este
+# perfil activo -- nao e preciso nenhum passo manual para o caso normal.
+# Se algum dia for preciso correr só as migrações sem arrancar a aplicação
+# toda (ex. passo isolado de deploy), seria necessário acrescentar o
+# flyway-maven-plugin ao pom.xml, que hoje NAO esta configurado -- essa e
+# uma decisão de ferramentas de deploy/CI, não tomada aqui; sinalizar ao
+# Especialista de Base de Dados / Ops de Deploy se vier a ser necessária.
+# Com o plugin la, o comando seria:
+#   mvn flyway:migrate -Dspring.profiles.active=prod
+# (as variaveis SUPABASE_DB_* têm de estar definidas no ambiente que corre
+# o mvn, tal como no arranque normal da aplicação.)
+#
+# BACKUP: recomendação simples (não implementada aqui) -- cron diário numa
+# maquina/serviço de deploy a correr `pg_dump --format=custom` contra
+# SUPABASE_DB_URL (usar a connection string DIRECTA, porta 5432, não o
+# pooler, para o dump) e a enviar o ficheiro resultante para um storage
+# externo (ex. bucket S3/Backblaze fora do Supabase), com retenção de pelo
+# menos 7-14 dias -- o Supabase já faz backups geridos no plano pago, mas
+# uma cópia externa independente é uma rede de segurança barata.
+# ============================================================================
+
+spring:
+  datasource:
+    url: ${SUPABASE_DB_URL}
+    username: ${SUPABASE_DB_USERNAME}
+    password: ${SUPABASE_DB_PASSWORD}
+    hikari:
+      # Pool pequeno de propósito: o Supavisor (pooler) já agrupa ligações
+      # do lado do Supabase: um pool grande aqui só multiplica ligações
+      # desnecessárias contra o pooler.
+      maximum-pool-size: ${SUPABASE_DB_POOL_SIZE:5}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_JWT_ISSUER}
+          jwk-set-uri: ${SUPABASE_JWKS_URI}
+
+logging:
+  level:
+    root: WARN
+    com.ottimizo: INFO
