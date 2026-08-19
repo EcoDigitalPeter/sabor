@@ -51,3 +51,5 @@ management:
 ottimizo:
   cors:
     allowed-origins: ${APP_CORS_ORIGINS:http://localhost:3000}
+  ai:
+    meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:3}
