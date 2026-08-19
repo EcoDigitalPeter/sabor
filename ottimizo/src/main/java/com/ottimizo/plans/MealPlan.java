@@ -60,6 +60,16 @@ public class MealPlan {
         this.status = MealPlanStatus.ACTIVE;
     }
 
+    /**
+     * Arquiva este plano (BE-C03): chamado antes de activar um novo plano
+     * mensal para o mesmo utilizador, para respeitar
+     * {@code ux_meal_plans_one_active} (no maximo um {@code ACTIVE} por
+     * utilizador).
+     */
+    public void archive() {
+        this.status = MealPlanStatus.ARCHIVED;
+    }
+
     @PrePersist
     void onCreate() {
         OffsetDateTime now = OffsetDateTime.now();
