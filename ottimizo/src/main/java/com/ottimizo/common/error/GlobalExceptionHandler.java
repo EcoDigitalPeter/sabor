@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -41,6 +42,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnreadableBody(HttpMessageNotReadableException ex) {
         return validation("Corpo do pedido invalido, mal formado ou com um valor fora do enum esperado.");
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUploadTooLarge(MaxUploadSizeExceededException ex) {
+        return ResponseEntity
+            .status(ErrorCode.LSA020_IMPORT_INVALID_FILE.status())
+            .body(ApiResponse.error(ErrorCode.LSA020_IMPORT_INVALID_FILE.name(), "Ficheiro excede o limite de 5 MB."));
     }
 
     @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
