@@ -1,5 +1,6 @@
 package com.ottimizo.loja;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * {@link LojaProductService} em todos os acessos por id.
      */
     Optional<Product> findByIdAndStoreId(Long id, Long storeId);
+
+    /**
+     * Usado por {@link LojaImportService#confirm} para decidir, linha a
+     * linha, se um produto do ficheiro Excel deve criar um novo registo ou
+     * actualizar um existente (upsert por nome dentro da loja).
+     */
+    Optional<Product> findByStoreIdAndNameIgnoreCase(Long storeId, String name);
+
+    /** Usado por {@link LojaImportService#export} para gerar o .xlsx completo do catalogo. */
+    List<Product> findByStoreIdOrderByNameAsc(Long storeId);
 
     Page<Product> findByStoreId(Long storeId, Pageable pageable);
 
