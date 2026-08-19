@@ -1,0 +1,29 @@
+# DB-06 · Perfil de desenvolvimento local.
+#
+# spring.datasource.url/username/password NAO sao definidos aqui — sao injectados em
+# runtime pelo DevEmbeddedPostgresEnvironmentPostProcessor (com.ottimizo.common.config),
+# que arranca um Postgres embutido (io.zonky.test:embedded-postgres) num processo filho e
+# aponta o datasource para ele antes do Flyway/JPA arrancarem. Nao precisa de Docker nem de
+# nenhuma base de dados a correr previamente na maquina.
+spring:
+  # NOTA (DB-06, fora do ambito desta tarefa): sem isto o arranque falha com
+  # BeanDefinitionOverrideException em "jsonComponentModule" — o spring-ai-bom 2.0.0
+  # declarado no pom.xml traz transitivamente org.springframework.boot:spring-boot-starter-jackson
+  # 4.1.0 (Spring Boot 4.1), que colide com o spring-boot-autoconfigure:3.5.16 do parent deste
+  # projecto. Isto acontece com QUALQUER arranque de contexto Spring completo (nao e especifico
+  # do perfil dev nem do Postgres embutido) — foi so aqui que ficou visivel pela primeira vez
+  # porque e o primeiro arranque real fora de testes unitarios com mocks. Fica so no perfil dev
+  # como contorno minimo para nao bloquear o seed local; o pom.xml em si nao foi tocado —
+  # reportado ao supervisor como um problema de versao a resolver a parte.
+  main:
+    allow-bean-definition-overriding: true
+  flyway:
+    # Localizacao extra (classpath:db/dev-seed) só entra neste perfil: as migracoes reais
+    # V001..V00N (geridas pelo Especialista de Base de Dados) ficam inalteradas, e o seed de
+    # desenvolvimento (stub do schema auth + utilizador admin + ingredientes + receitas) corre
+    # a seguir, com numeracao V9xxx para nunca colidir com migracoes futuras da BD real.
+    locations: classpath:db/migration,classpath:db/dev-seed
+
+logging:
+  level:
+    com.ottimizo: DEBUG

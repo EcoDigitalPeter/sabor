@@ -1,0 +1,6 @@
+# DB-06: EnvironmentPostProcessor ainda usa o mecanismo de registo classico (spring.factories)
+# nesta versao do Spring Boot — o spring-boot core (3.5.16) tambem regista os seus proprios
+# EnvironmentPostProcessor por aqui, nao via META-INF/spring/*.imports (esse mecanismo mais
+# recente so cobre outros SPIs, ex. AutoConfiguration.imports).
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.ottimizo.common.config.DevEmbeddedPostgresEnvironmentPostProcessor
