@@ -83,6 +83,20 @@
             <version>5.2.3</version>
         </dependency>
 
+        <!--
+          DB-06: Postgres embutido/em processo para o perfil "dev" local (sem Docker, sem
+          Testcontainers). Escopo normal (nao "test") de proposito: tem de estar disponivel
+          num arranque normal da app via `mvn spring-boot:run -Dspring-boot.run.profiles=dev`,
+          nao so em testes. So e activado pelo DevEmbeddedPostgresEnvironmentPostProcessor
+          quando o perfil "dev" esta activo — nos restantes perfis fica so no classpath, sem
+          efeito nenhum.
+        -->
+        <dependency>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
