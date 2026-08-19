@@ -23,6 +23,10 @@ spring:
         jwt:
           issuer-uri: ${SUPABASE_JWT_ISSUER:http://localhost}
           jwk-set-uri: ${SUPABASE_JWKS_URI:http://localhost/.well-known/jwks.json}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   ai:
     openai:
       api-key: ${OPENAI_API_KEY:dev-disabled}
