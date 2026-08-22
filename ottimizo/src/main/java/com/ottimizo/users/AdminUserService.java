@@ -6,6 +6,8 @@ import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
 import com.ottimizo.common.security.CurrentUser;
 import com.ottimizo.common.security.Role;
+import com.ottimizo.profile.ClientProfileRepository;
+import com.ottimizo.profile.ProfileResponse;
 import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -23,11 +25,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminUserService {
 
     private final AppUserRepository users;
+    private final ClientProfileRepository clientProfiles;
     private final AuditService audit;
     private final SupabaseSessionRevoker sessionRevoker;
 
-    public AdminUserService(AppUserRepository users, AuditService audit, SupabaseSessionRevoker sessionRevoker) {
+    public AdminUserService(
+        AppUserRepository users,
+        ClientProfileRepository clientProfiles,
+        AuditService audit,
+        SupabaseSessionRevoker sessionRevoker
+    ) {
         this.users = users;
+        this.clientProfiles = clientProfiles;
         this.audit = audit;
         this.sessionRevoker = sessionRevoker;
     }
@@ -41,6 +50,21 @@ public class AdminUserService {
     @Transactional(readOnly = true)
     public AdminUserResponse get(Long id) {
         return AdminUserResponse.from(findOrThrow(id));
+    }
+
+    /**
+     * {@code GET /admin/users/{id}/health-profile} — reveal explícito e
+     * auditado do perfil de saúde (`FE-D02`): mesmos campos devolvidos ao
+     * próprio cliente em {@code GET /me/profile}, reaproveitando
+     * {@link ProfileResponse} em vez de duplicar o mapeamento. Utilizador
+     * sem perfil ainda criado (nunca fez onboarding) devolve
+     * {@link ProfileResponse#empty()}, tal como o próprio endpoint do
+     * cliente.
+     */
+    @Transactional(readOnly = true)
+    public ProfileResponse getHealthProfile(Long id) {
+        findOrThrow(id);
+        return clientProfiles.findByUserId(id).map(ProfileResponse::from).orElseGet(ProfileResponse::empty);
     }
 
     @Transactional

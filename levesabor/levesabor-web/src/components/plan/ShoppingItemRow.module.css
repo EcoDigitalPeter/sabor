@@ -1,9 +1,17 @@
-/* FE-R01 · ShoppingItemRow — linha de item com toggle "comprado" + input "já tenho" */
+/* FE-R01/FE-Y07 · ShoppingItemRow — linha de item com toggle "comprado" + selector "tenho em casa" */
 
 .item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* FE-Y07: item comprado fica esbatido (feedback: "deveria ficar esbatida/desaparecer
+   gradualmente"); a transição de opacidade acompanha o toggle, e ShoppingGroup ordena os itens
+   comprados para o fundo da lista. */
+.itemChecked {
+  opacity: 0.45;
+  transition: opacity var(--motion-slow) var(--ease-out);
 }
 
 .mainRow {
@@ -36,66 +44,61 @@
 
 .pantryRow {
   padding-left: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.pantryLink {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--forest);
+.pantryLabel {
   font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  color: var(--clay);
 }
 
-.pantryLink:focus-visible {
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepperButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--tan);
+  background: var(--cream-card-alt);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stepperButton:hover:not(:disabled) {
+  background: var(--tan);
+}
+
+.stepperButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stepperButton:focus-visible {
   outline: var(--focus-on-light);
   outline-offset: 2px;
 }
 
-.pantryEdit {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.pantryLabel {
-  font-size: 0.8rem;
-  color: var(--clay);
-  white-space: nowrap;
-}
-
-.pantryInput {
-  width: 64px;
-  padding: 4px 8px;
-  border-radius: var(--radius-input);
-  border: 1.5px solid var(--tan);
-  background: var(--cream-card-alt);
-  color: var(--ink);
+.stepperValue {
+  min-width: 56px;
+  text-align: center;
   font-family: var(--font-mono);
   font-size: 0.85rem;
-}
-
-.pantryInput:focus-visible {
-  outline: var(--focus-on-light);
-  outline-offset: 1px;
-}
-
-.pantryNote {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--clay-soft);
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  cursor: pointer;
-  text-align: left;
-}
-
-.pantryNote:hover,
-.pantryNote:focus-visible {
-  color: var(--clay);
+  color: var(--ink);
+  white-space: nowrap;
 }

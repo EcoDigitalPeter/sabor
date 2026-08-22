@@ -41,9 +41,11 @@ public class Recipe {
     @Column(name = "health_note")
     private String healthNote;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "prep_minutes", nullable = false)
     private Integer prepMinutes = 0;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(nullable = false)
     private Integer servings = 1;
 
@@ -56,15 +58,19 @@ public class Recipe {
 
     private BigDecimal kcal;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "protein_pct")
     private Integer proteinPct;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "carbs_pct")
     private Integer carbsPct;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "fat_pct")
     private Integer fatPct;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "fiber_pct")
     private Integer fiberPct;
 

@@ -140,7 +140,7 @@ export default function ImportarPage() {
           Descarregar template
         </button>
         <button type="button" className={styles.linkButton} onClick={handleDownloadExport}>
-          Exportar catálogo atual
+          Exportar catálogo actual
         </button>
       </div>
 

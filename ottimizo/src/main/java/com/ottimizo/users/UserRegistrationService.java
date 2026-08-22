@@ -43,7 +43,7 @@ public class UserRegistrationService {
         String name = resolveName(request, jwt, email);
 
         AppUser created = createOrFetch(authUserId, name, email);
-        auditService.record(created.id(), "UTILIZADOR_REGISTADO", "user", created.id(), Map.of("email", email));
+        auditService.record((Long) null, "UTILIZADOR_REGISTADO", "user", created.id(), Map.of("email", email));
         return new RegistrationResult(AppUserResponse.from(created), true);
     }
 

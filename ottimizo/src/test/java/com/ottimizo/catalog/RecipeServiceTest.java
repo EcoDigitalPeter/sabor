@@ -39,6 +39,8 @@ class RecipeServiceTest {
     @Mock
     private IngredientRepository ingredients;
     @Mock
+    private RecipeSwapReasonRepository swapReasons;
+    @Mock
     private AuditService audit;
 
     private final RecipeMacroCalculator macroCalculator = new RecipeMacroCalculator();
@@ -50,7 +52,7 @@ class RecipeServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new RecipeService(recipes, ingredients, macroCalculator, publicationValidator, audit);
+        service = new RecipeService(recipes, ingredients, macroCalculator, publicationValidator, swapReasons, audit);
     }
 
     @Test

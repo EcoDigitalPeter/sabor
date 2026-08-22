@@ -10,6 +10,7 @@ public enum ErrorCode {
     LSA005_NOT_FOUND(HttpStatus.NOT_FOUND, "Recurso nao encontrado."),
     LSA006_DUPLICATE(HttpStatus.CONFLICT, "Recurso duplicado."),
     LSA007_STORE_OWNERSHIP(HttpStatus.FORBIDDEN, "Esta loja nao pertence a tua conta."),
+    LSA008_UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "Sessao invalida ou expirada. Inicia sessao novamente."),
     LSA010_PROFILE_INCOMPLETE(HttpStatus.CONFLICT, "Completa o teu perfil antes de gerar um plano."),
     LSA011_GENERATION_IN_PROGRESS(HttpStatus.CONFLICT, "Ja existe uma geracao em curso."),
     LSA012_GENERATION_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "Limite diario de geracoes atingido."),

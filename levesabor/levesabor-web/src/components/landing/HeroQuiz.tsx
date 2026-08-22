@@ -198,7 +198,7 @@ function QuizFlow() {
     <>
       {step === "goal" && (
         <div className={styles.rise}>
-          <p className={styles.question}>Qual é o teu objetivo?</p>
+          <p className={styles.question}>Qual é o teu objectivo?</p>
           <div className={styles.optionGrid}>
             {GOAL_ORDER.map((key) => (
               <button key={key} type="button" className={styles.option} onClick={() => selectGoal(key)}>
@@ -212,7 +212,7 @@ function QuizFlow() {
       {step === "condition" && goal && (
         <div className={styles.rise}>
           <p className={styles.subtext}>
-            Objetivo: <span className={styles.subtextAccent}>{GOAL_LABELS[goal]}</span>
+            Objectivo: <span className={styles.subtextAccent}>{GOAL_LABELS[goal]}</span>
           </p>
           <p className={styles.question}>Alguma condição de saúde a considerar?</p>
           <div className={styles.optionGrid}>

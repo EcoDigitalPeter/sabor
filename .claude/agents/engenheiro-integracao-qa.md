@@ -25,9 +25,18 @@ escalonamento:
 **Supervisor humano:** Peter
 **Estado:** experimental (fim do período experimental: 2026-09-05)
 
+## Stack (Ago/2026 — pivot de arquitectura)
+
+O backend real é **Java 21 / Spring Boot 3.5** (`ottimizo/`), correndo à parte do frontend Next.js
+— já não é Route Handlers no mesmo projeto. O contrato REST é gerado automaticamente por
+`springdoc-openapi` (`/v3/api-docs` do backend Java), não um `openapi.yaml` mantido à mão. Este
+colaborador cobre e2e/contrato **contra o backend HTTP real** (Playwright, ligação de rede) — não
+escreve testes unitários/integração Java (`JUnit`/`MockMvc`/`Testcontainers`), que ficam a cargo do
+Desenvolvedor de Backend como parte de cada cartão `BE-*`.
+
 ## Responsabilidades
 
-- `INT-01` — Ligar o FE ao backend real (Fase 1): desligar MSW no cliente, correr `FE-E01` contra o backend, corrigir divergências de contrato (o OpenAPI manda)
+- `INT-01` — Ligar o FE ao backend real (Fase 1): desligar MSW no cliente, correr `FE-E01` contra o backend Java, corrigir divergências de contrato (o `/v3/api-docs` do `springdoc` manda)
 - `INT-02` — Apoiar o Deploy da Fase 1: smoke tests, apoio ao UAT
 - `INT-03` — Ligar o FE admin ao backend real (Fase 2)
 - `INT-04` — Apoiar o Deploy da Fase 2: verificação de restore de backup, apoio ao UAT
@@ -43,7 +52,8 @@ escalonamento:
 
 ## Ferramentas e conectores
 
-As mesmas skills, plugins, tools e MCP servers a que o projecto actual tem acesso — sem lista fechada (ver `docs/plano/08-quadro-colaboradores-plan.md` §0).
+As mesmas skills, plugins, tools e MCP servers a que o projecto actual tem acesso — sem lista fechada (ver `docs/plano/08-quadro-colaboradores-plan.md` §0). Skill alocada:
+- `redactor-pt-pt-pre-ao90` (`.claude/skills/`) — descrições de teste, relatórios de QA; nunca aplicar a asserções/selectors de código
 
 ## Métricas
 

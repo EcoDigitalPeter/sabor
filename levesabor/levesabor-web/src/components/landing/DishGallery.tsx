@@ -9,7 +9,7 @@ import Link from "next/link";
 import { UtensilsCrossed } from "lucide-react";
 import { MacroRing } from "@/components/macro-ring/MacroRing";
 import { Chip } from "@/components/ui/Chip";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/components/ui/Reveal";
 import { DISH_GALLERY } from "./dish-gallery-data";
 import styles from "./DishGallery.module.css";
 

@@ -76,6 +76,16 @@ public class MealPlanService {
         return MealPlanEntryResponse.from(entry);
     }
 
+    /** {@code PATCH /me/meal-plans/entries/{id}/completed} — "Comi isto" (gamificacao discreta, FE-V01). */
+    @Transactional
+    public MealPlanEntryResponse setCompleted(Long id, boolean completed, CurrentUser actor) {
+        MealPlanEntry entry = mealPlanEntries.findByIdWithOwnership(id)
+            .filter(e -> e.day().mealPlan().userId().equals(actor.id()))
+            .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
+        entry.setCompleted(completed);
+        return MealPlanEntryResponse.from(entry);
+    }
+
     private MealPlanResponse toResponse(MealPlan plan) {
         List<MealPlanDay> days = mealPlanDays.findByMealPlan_IdOrderByDateAsc(plan.id());
         List<Long> dayIds = days.stream().map(MealPlanDay::id).toList();

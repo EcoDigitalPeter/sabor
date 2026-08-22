@@ -50,6 +50,12 @@ public class AdminRecipeController {
         return ApiResponse.success(RecipeResponse.from(recipeService.get(id)));
     }
 
+    @GetMapping("/{id}/swap-reasons")
+    public ApiResponse<java.util.List<RecipeSwapReasonResponse>> swapReasons(@PathVariable Long id) {
+        var reasons = recipeService.recentSwapReasons(id).stream().map(RecipeSwapReasonResponse::from).toList();
+        return ApiResponse.success(reasons);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<RecipeResponse> create(

@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e33]:
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - paragraph [ref=e36]: Boa tarde, Amélia
+        - heading "O teu plano · 13–19 Jul" [level=1] [ref=e37]
+      - tablist "Dias da semana" [ref=e38]:
+        - tab "seg 13" [selected] [ref=e39] [cursor=pointer]:
+          - generic [ref=e40]: seg
+          - generic [ref=e41]: "13"
+        - tab "ter 14" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]: ter
+          - generic [ref=e44]: "14"
+        - tab "qua 15" [ref=e45] [cursor=pointer]:
+          - generic [ref=e46]: qua
+          - generic [ref=e47]: "15"
+        - tab "qui 16" [ref=e48] [cursor=pointer]:
+          - generic [ref=e49]: qui
+          - generic [ref=e50]: "16"
+        - tab "sex 17" [ref=e51] [cursor=pointer]:
+          - generic [ref=e52]: sex
+          - generic [ref=e53]: "17"
+        - tab "sáb 18" [ref=e54] [cursor=pointer]:
+          - generic [ref=e55]: sáb
+          - generic [ref=e56]: "18"
+        - tab "dom 19" [ref=e57] [cursor=pointer]:
+          - generic [ref=e58]: dom
+          - generic [ref=e59]: "19"
+      - generic [ref=e60]:
+        - link "Pequeno-almoço Papinha de amendoim com banana 10 min 320 kcal — Proteína 12%, Carboidratos 58%, Gordura 24%, Fibra 6%" [ref=e61] [cursor=pointer]:
+          - /url: /plano/refeicao/1
+          - generic [ref=e63]:
+            - generic [ref=e64]: Pequeno-almoço
+            - heading "Papinha de amendoim com banana" [level=3] [ref=e65]
+            - generic [ref=e66]: 10 min
+          - img "320 kcal — Proteína 12%, Carboidratos 58%, Gordura 24%, Fibra 6%" [ref=e70]:
+            - generic [ref=e77]: "320"
+        - link "Almoço Xima com matapa e camarão 40 min 620 kcal — Proteína 24%, Carboidratos 48%, Gordura 22%, Fibra 6%" [ref=e78] [cursor=pointer]:
+          - /url: /plano/refeicao/2
+          - generic [ref=e80]:
+            - generic [ref=e81]: Almoço
+            - heading "Xima com matapa e camarão" [level=3] [ref=e82]
+            - generic [ref=e83]: 40 min
+          - img "620 kcal — Proteína 24%, Carboidratos 48%, Gordura 22%, Fibra 6%" [ref=e87]:
+            - generic [ref=e94]: "620"
+        - link "Jantar Caril de galinha com batata-doce 45 min 560 kcal — Proteína 26%, Carboidratos 46%, Gordura 22%, Fibra 6%" [ref=e95] [cursor=pointer]:
+          - /url: /plano/refeicao/3
+          - generic [ref=e97]:
+            - generic [ref=e98]: Jantar
+            - heading "Caril de galinha com batata-doce" [level=3] [ref=e99]
+            - generic [ref=e100]: 45 min
+          - img "560 kcal — Proteína 26%, Carboidratos 46%, Gordura 22%, Fibra 6%" [ref=e104]:
+            - generic [ref=e111]: "560"
+      - generic [ref=e113]:
+        - img "1500 kcal — Proteína 22%, Carboidratos 50%, Gordura 22%, Fibra 6%" [ref=e114]:
+          - generic [ref=e121]: "1500"
+        - generic [ref=e122]:
+          - paragraph [ref=e123]: Total do dia
+          - paragraph [ref=e124]: 1500 kcal
+          - list [ref=e125]:
+            - listitem [ref=e126]:
+              - generic [ref=e128]: Proteína
+              - generic [ref=e129]: 22%
+            - listitem [ref=e130]:
+              - generic [ref=e132]: Carboidratos
+              - generic [ref=e133]: 50%
+            - listitem [ref=e134]:
+              - generic [ref=e136]: Gordura
+              - generic [ref=e137]: 22%
+            - listitem [ref=e138]:
+              - generic [ref=e140]: Fibra
+              - generic [ref=e141]: 6%
+      - button "Gerar novo plano" [ref=e143] [cursor=pointer]
+    - navigation "Navegação principal" [ref=e145]:
+      - link "Plano" [ref=e146] [cursor=pointer]:
+        - /url: /plano
+      - link "Compras" [ref=e150] [cursor=pointer]:
+        - /url: /compras
+      - link "Perfil" [ref=e156] [cursor=pointer]:
+        - /url: /perfil

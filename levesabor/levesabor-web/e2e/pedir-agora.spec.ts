@@ -50,19 +50,23 @@ test.describe("Pedir receita agora", () => {
     const firstRow = page.locator('[class*="dayRow"]').first();
     await firstRow.click();
 
+    // FE-Y06: substituir uma refeição já preenchida pede confirmação antes de submeter.
+    await expect(page.getByRole("heading", { name: "Substituir esta refeição?" })).toBeVisible();
+    await page.getByRole("button", { name: "Substituir" }).click();
+
     await page.waitForURL("**/plano");
     await expect(page.getByRole("heading", { name: /O teu plano/ })).toBeVisible();
 
-    // 2º e 3º pedidos avulsos: ainda dentro do limite diário de 3 — descarta cada um para voltar
-    // ao dashboard e poder pedir o seguinte.
+    // 2º e 3º pedidos avulsos: ainda dentro do limite diário de 3 — "Não gostei desta" (FE-Y06:
+    // renomeado de "Descartar", que soava definitivo) devolve ao dashboard para pedir o seguinte.
     await requestAdHocRecipeFromDashboard(page);
     await expect(page.getByRole("button", { name: "Guardar num dia" })).toBeVisible({ timeout: 15000 });
-    await page.getByRole("button", { name: "Descartar" }).click();
+    await page.getByRole("button", { name: "Não gostei desta" }).click();
     await page.waitForURL("**/plano");
 
     await requestAdHocRecipeFromDashboard(page);
     await expect(page.getByRole("button", { name: "Guardar num dia" })).toBeVisible({ timeout: 15000 });
-    await page.getByRole("button", { name: "Descartar" }).click();
+    await page.getByRole("button", { name: "Não gostei desta" }).click();
     await page.waitForURL("**/plano");
 
     // 4º pedido avulso no mesmo dia: excede o limite (LSA015_ADHOC_LIMIT).

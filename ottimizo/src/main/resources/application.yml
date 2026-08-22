@@ -23,16 +23,22 @@ spring:
         jwt:
           issuer-uri: ${SUPABASE_JWT_ISSUER:http://localhost}
           jwk-set-uri: ${SUPABASE_JWKS_URI:http://localhost/.well-known/jwks.json}
+          jws-algorithms: ES256
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 6MB
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:dev-disabled}
+      # OPENAI_BASE_URL permite apontar a qualquer endpoint compativel com a API da
+      # OpenAI (chat completions) sem mudar de starter/dependencia — ex. NVIDIA NIM
+      # (https://integrate.api.nvidia.com/v1, OPENAI_CHAT_MODEL=deepseek-ai/deepseek-v4-flash-0731)
+      # em vez da OpenAI real. Por omissao fica no endpoint oficial da OpenAI.
+      base-url: ${OPENAI_BASE_URL:https://integrate.api.nvidia.com/v1}
+      api-key: ${OPENAI_API_KEY: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}
       chat:
         options:
-          model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+          model: ${OPENAI_CHAT_MODEL:deepseek-ai/deepseek-v4-flash-0731}
           temperature: 0.2
 
 server:

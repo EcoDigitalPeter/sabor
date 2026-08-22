@@ -39,7 +39,8 @@ test.describe("Admin — Receitas", () => {
     await page.getByRole("button", { name: "Nova receita" }).click();
     await page.waitForURL("**/admin/receitas/nova");
 
-    await page.getByLabel("Nome").fill("Receita Teste E2E");
+    const recipeName = `Receita Teste E2E ${Date.now()}`;
+    await page.getByLabel("Nome").fill(recipeName);
     await page.getByLabel("Preparação (min)").fill("15");
 
     // getByLabel("Ingrediente") também apanharia o botão "Remover ingrediente" (substring,
@@ -56,7 +57,7 @@ test.describe("Admin — Receitas", () => {
 
     await page.getByRole("button", { name: "Criar receita" }).click();
 
-    await expect(page.getByRole("heading", { name: "Receita Teste E2E" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: recipeName })).toBeVisible();
   });
 
   test("bloqueia publicação de receita incompleta (checklist)", async ({ page }) => {

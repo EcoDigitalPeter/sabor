@@ -1,0 +1,44 @@
+/* FE-Y08 · StoresMiniMap — mapa ilustrativo (sem tiles), mesmo espírito visual de MacroRing */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.svg {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1 / 1;
+}
+
+.background {
+  fill: var(--cream-card-alt);
+  stroke: rgba(36, 26, 20, 0.1);
+  stroke-width: 1.5;
+}
+
+.pin {
+  fill: var(--clay-soft);
+}
+
+.pinSelected {
+  fill: var(--terracotta);
+}
+
+.pinLabel {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 11px;
+  fill: var(--ink);
+  text-anchor: middle;
+}
+
+.caption {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--clay-soft);
+}

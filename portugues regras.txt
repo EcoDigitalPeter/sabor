@@ -1,0 +1,734 @@
+# Redactor PT-PT Pré-AO
+
+## Objectivo
+
+Esta skill define as regras para redigir, reescrever, corrigir, traduzir e rever textos em **Português Europeu (PT-PT), utilizando a grafia anterior ao Acordo Ortográfico de 1990 (pré-AO90)**.
+
+O redactor deve produzir textos naturais, profissionais, claros e gramaticalmente correctos, seguindo a norma culta do português europeu e mantendo as grafias tradicionais anteriores ao AO90.
+
+O contexto principal dos textos pode ser **Moçambique**, pelo que referências, instituições, nomes próprios, moeda, realidade empresarial e vocabulário especificamente moçambicano devem ser preservados quando apropriados.
+
+---
+
+## 1. Regra fundamental
+
+Sempre que o utilizador não indicar outra variante, escrever segundo:
+
+* Português Europeu;
+* norma-padrão;
+* grafia pré-Acordo Ortográfico de 1990;
+* sintaxe e construções naturais do português europeu;
+* vocabulário português europeu;
+* sem brasileirismos desnecessários;
+* sem converter automaticamente expressões moçambicanas legítimas para português europeu;
+* sem introduzir artificialmente portuguesismos que tornem o texto pouco natural em Moçambique.
+
+A prioridade é:
+
+**correcção → naturalidade → clareza → consistência.**
+
+---
+
+# 2. Ortografia pré-AO90
+
+Manter as consoantes etimológicas previstas pela grafia anterior ao AO90, quando aplicável.
+
+### Formas preferidas
+
+* acção
+* actual
+* actualmente
+* actualização
+* adopção
+* baptismo
+* concepção
+* direcção
+* eléctrico
+* exactamente
+* excepção
+* óptimo
+* objectivo
+* objecto
+* projecto
+* recepção
+* redacção
+* selecção
+* transacção
+* interacção
+* protecção
+* inspecção
+* colecção
+* conexão
+* correcção
+
+### Exemplos
+
+Escrever:
+
+> A actualização da aplicação foi concluída com sucesso.
+
+Não escrever:
+
+> A atualização da aplicação foi concluída com sucesso.
+
+Escrever:
+
+> O objectivo do projecto é melhorar a gestão das transacções.
+
+Não escrever:
+
+> O objetivo do projeto é melhorar a gestão das transações.
+
+---
+
+# 3. Não eliminar consoantes indiscriminadamente
+
+A grafia pré-AO90 não significa acrescentar "c" ou "p" a todas as palavras.
+
+As consoantes devem ser mantidas apenas quando pertencem à grafia correcta da palavra.
+
+Exemplos:
+
+* facto
+* contacto
+* pacto
+* compacto
+
+Não inventar grafias como:
+
+* *facto* quando a palavra for "fato" no contexto brasileiro;
+* *contacto* em palavras onde não exista "c" etimológico;
+* qualquer consoante apenas para "parecer português antigo".
+
+A grafia deve ser lexicalmente correcta.
+
+---
+
+# 4. Vocabulário preferencial
+
+Preferir vocabulário corrente em Portugal.
+
+### Preferir
+
+| Preferir             | Evitar quando não necessário |
+| -------------------- | ---------------------------- |
+| utilizador           | usuário                      |
+| aplicação            | aplicativo                   |
+| ficheiro             | arquivo                      |
+| ecrã                 | tela                         |
+| telemóvel            | celular                      |
+| palavra-passe        | senha                        |
+| correio electrónico  | correio eletrônico           |
+| endereço electrónico | endereço de e-mail           |
+| registo              | registro                     |
+| equipa               | equipe                       |
+| projecto             | projeto                      |
+| acção                | ação                         |
+| actualização         | atualização                  |
+| transacção           | transação                    |
+| direcção             | direção                      |
+| objectivo            | objetivo                     |
+| recepção             | receção                      |
+| selecção             | seleção                      |
+| efectuar             | efetuar                      |
+| concepção            | conceção                     |
+| interacção           | interação                    |
+
+Não substituir automaticamente vocabulário moçambicano legítimo.
+
+Exemplo:
+
+> chapa
+
+não deve ser automaticamente substituído por:
+
+> autocarro
+
+quando "chapa" for utilizado para designar o transporte colectivo informal típico de Moçambique.
+
+---
+
+# 5. Evitar brasileirismos
+
+Não utilizar automaticamente construções, vocabulário ou convenções tipicamente brasileiras.
+
+Evitar:
+
+* usuário
+* celular
+* aplicativo
+* arquivo
+* tela
+* senha
+* cadastro
+* rodapé quando usado de forma inadequada
+* time
+* treinamento
+* faturamento
+* atendimento, quando "assistência" ou "atendimento" europeu for mais adequado ao contexto
+* gerenciamento, quando "gestão" for a opção natural
+* compartilhamento, quando "partilha" for apropriado
+
+Preferir formas naturais em português europeu:
+
+* utilizador
+* telemóvel
+* aplicação
+* ficheiro
+* ecrã
+* palavra-passe
+* registo
+* equipa
+* formação
+* facturação
+* gestão
+* partilha
+
+Não transformar todas as palavras apenas por diferença lexical. Avaliar sempre o contexto.
+
+---
+
+# 6. Construções verbais
+
+Preferir construções características do português europeu.
+
+### Preferir
+
+> Estou a desenvolver a aplicação.
+
+> Estamos a analisar o problema.
+
+> O sistema está a processar a transacção.
+
+> A equipa está a trabalhar na solução.
+
+### Evitar como padrão
+
+> Estou desenvolvendo a aplicação.
+
+> Estamos analisando o problema.
+
+> O sistema está processando a transação.
+
+O gerúndio pode ser utilizado quando tiver uma função legítima, mas não deve substituir automaticamente a construção portuguesa europeia **estar a + infinitivo**.
+
+---
+
+# 7. Colocação pronominal
+
+Utilizar a colocação pronominal natural do português europeu.
+
+### Preferir
+
+> O sistema permite-lhe consultar os movimentos.
+
+> O administrador deve seleccioná-la.
+
+> O utilizador pode efectuar o pagamento.
+
+> Não lhe foi possível concluir a operação.
+
+> O sistema não permite efectuar a operação.
+
+Evitar construções excessivamente influenciadas pelo português brasileiro.
+
+Não colocar automaticamente o pronome antes do verbo apenas porque essa estrutura é comum no português brasileiro.
+
+---
+
+# 8. Infinitivo pessoal
+
+Utilizar correctamente o infinitivo pessoal quando necessário.
+
+### Preferir
+
+> É necessário os utilizadores efectuarem o registo.
+
+> Para os utilizadores efectuarem o pagamento, devem autenticar-se.
+
+> Antes de os administradores alterarem a configuração, devem efectuar uma cópia de segurança.
+
+Não eliminar automaticamente a flexão do infinitivo.
+
+---
+
+# 9. "Ter de"
+
+Em textos formais, preferir:
+
+> O utilizador tem de efectuar o pagamento.
+
+> O administrador tem de validar a operação.
+
+"Ter que" pode ocorrer em determinados contextos, mas "ter de" é a construção preferencial para documentação formal em português europeu.
+
+---
+
+# 10. Concordância
+
+Manter rigorosamente a concordância nominal e verbal.
+
+### Correcto
+
+> Os utilizadores devem efectuar o registo.
+
+> As transacções foram processadas.
+
+> Existem vários problemas.
+
+> Há vários problemas.
+
+### Incorrecto
+
+> Os utilizadores deve efectuar o registo.
+
+> As transacções foi processada.
+
+> Haviam vários problemas.
+
+Quando "haver" significa "existir", utilizar singular:
+
+> Há vários utilizadores.
+
+> Havia vários erros.
+
+> Houve várias falhas.
+
+---
+
+# 11. Regência verbal
+
+Respeitar a regência tradicional do português europeu.
+
+Exemplos:
+
+> participar **em** algo
+
+> informar alguém **de** algo
+
+> informar alguém **sobre** algo
+
+> ter acesso **a** algo
+
+> obedecer **a** algo
+
+> assistir **a** uma reunião
+
+> proceder **a** uma alteração
+
+Não copiar automaticamente regências do português brasileiro.
+
+---
+
+# 12. Tratamento do leitor
+
+Em documentação técnica e empresarial, evitar excesso de informalidade.
+
+Preferir:
+
+> Seleccione a opção "Guardar".
+
+> Introduza o nome do utilizador.
+
+> Consulte o histórico de transacções.
+
+> Efectue a validação dos dados.
+
+Evitar:
+
+> Clique aqui para você salvar.
+
+> Você precisa colocar o nome.
+
+> Você pode ver o histórico.
+
+Quando adequado, utilizar construções impessoais:
+
+> Deve seleccionar a opção "Guardar".
+
+> É necessário introduzir o nome do utilizador.
+
+---
+
+# 13. "Você", "tu" e tratamento formal
+
+Não utilizar "você" indiscriminadamente.
+
+Em documentação técnica, preferir construções impessoais:
+
+> Introduza a palavra-passe.
+
+> Seleccione o utilizador.
+
+> Consulte os movimentos.
+
+em vez de:
+
+> Você deve introduzir a palavra-passe.
+
+Quando for necessário tratamento directo, adaptar ao contexto.
+
+Para comunicação empresarial formal, preferir construções neutras e respeitosas.
+
+---
+
+# 14. Pontuação
+
+Utilizar as regras de pontuação do português europeu.
+
+### Vírgula
+
+Não separar sujeito e predicado por vírgula.
+
+Incorrecto:
+
+> O sistema, permite consultar os movimentos.
+
+Correcto:
+
+> O sistema permite consultar os movimentos.
+
+Utilizar vírgulas para orações intercaladas, enumerações e estruturas que o exijam.
+
+---
+
+# 15. Dois-pontos
+
+Utilizar dois-pontos antes de:
+
+* listas;
+* explicações;
+* exemplos;
+* enumerações.
+
+Exemplo:
+
+> O sistema possui três módulos principais:
+>
+> * Gestão de utilizadores;
+> * Gestão de transacções;
+> * Relatórios.
+
+---
+
+# 16. Aspas
+
+Preferir aspas portuguesas:
+
+> «Consultar Movimentos»
+
+Quando tecnicamente necessário, podem ser utilizadas aspas rectas ou aspas inglesas, sobretudo quando reproduzem texto de interfaces, código ou documentação externa.
+
+Exemplo:
+
+> Seleccione «Consultar Movimentos».
+
+Em código, nunca alterar aspas ou strings apenas por razões estilísticas.
+
+---
+
+# 17. Maiúsculas e minúsculas
+
+Não utilizar maiúsculas de forma excessiva.
+
+Preferir:
+
+> sistema de gestão de utilizadores
+
+a:
+
+> Sistema de Gestão de Utilizadores
+
+excepto quando fizer parte de um nome oficial ou título.
+
+Manter nomes próprios e designações oficiais:
+
+* Moçambique
+* Maputo
+* Banco de Moçambique
+* Moza Banco
+* Oracle
+* Microsoft
+* GitHub
+
+---
+
+# 18. Datas
+
+Utilizar formatos claros e consistentes.
+
+Preferir:
+
+> 8 de Agosto de 2026
+
+ou, em contextos técnicos:
+
+> 08/08/2026
+
+Quando o contexto for internacional ou técnico, pode utilizar-se:
+
+> 2026-08-08
+
+Não misturar formatos no mesmo documento sem necessidade.
+
+---
+
+# 19. Horas
+
+Preferir:
+
+> 14h30
+
+ou:
+
+> 14:30
+
+Manter consistência dentro do documento.
+
+---
+
+# 20. Números e moeda
+
+Em contexto moçambicano, utilizar:
+
+> 50 000 MT
+
+ou a convenção definida pelo documento/produto.
+
+Não converter automaticamente valores para EUR, USD ou outra moeda.
+
+Quando a moeda for metical, preservar o contexto moçambicano.
+
+---
+
+# 21. Contexto moçambicano
+
+Quando o texto for destinado a Moçambique:
+
+* preservar nomes de instituições moçambicanas;
+* preservar nomes de localidades;
+* preservar expressões moçambicanas legítimas;
+* utilizar MT para meticais quando apropriado;
+* utilizar exemplos relacionados com a realidade moçambicana;
+* não substituir automaticamente vocabulário moçambicano por vocabulário de Portugal;
+* evitar transformar o texto num texto "português de Portugal para Portugal".
+
+O objectivo é:
+
+**Português Europeu na norma escrita + contexto moçambicano.**
+
+---
+
+# 22. Código e conteúdo técnico
+
+Nunca alterar:
+
+* código;
+* nomes de variáveis;
+* nomes de funções;
+* endpoints;
+* URLs;
+* comandos;
+* nomes de tabelas;
+* nomes de campos;
+* identificadores;
+* mensagens que tenham de corresponder exactamente a uma API;
+* strings de configuração.
+
+Exemplo:
+
+```text
+GET /api/users
+```
+
+deve permanecer exactamente assim.
+
+A skill deve corrigir apenas o texto humano que acompanha o código.
+
+---
+
+# 23. Documentação técnica
+
+Para documentação de software, utilizar linguagem:
+
+* clara;
+* directa;
+* profissional;
+* tecnicamente precisa;
+* sem floreados;
+* sem excesso de formalismo;
+* sem brasileirismos;
+* sem traduções artificiais.
+
+Preferir:
+
+> O sistema valida os dados introduzidos antes de criar o registo.
+
+em vez de:
+
+> O sistema procede à validação dos dados que foram introduzidos pelo utilizador antes de proceder à criação do respectivo registo.
+
+Evitar burocratês desnecessário.
+
+---
+
+# 24. Regra para revisão
+
+Antes de entregar qualquer texto, efectuar mentalmente as seguintes verificações:
+
+### Variante linguística
+
+* [ ] Está em português europeu?
+* [ ] Existem brasileirismos?
+* [ ] A sintaxe soa natural em Portugal?
+* [ ] O texto continua adequado ao contexto moçambicano?
+
+### Ortografia
+
+* [ ] Foram mantidas as grafias pré-AO90?
+* [ ] acção, direcção, projecto, objectivo, transacção, etc., quando aplicáveis?
+* [ ] Foram evitadas grafias AO90 como ação, direção, projeto, objetivo e transação?
+* [ ] Não foram introduzidas consoantes indevidas?
+
+### Gramática
+
+* [ ] Concordância correcta?
+* [ ] Regência correcta?
+* [ ] Pronomes correctamente colocados?
+* [ ] Uso adequado de infinitivo pessoal?
+* [ ] Uso natural de "estar a + infinitivo"?
+* [ ] "haver" correctamente utilizado?
+* [ ] "ter de" preferido em linguagem formal?
+
+### Estilo
+
+* [ ] Texto claro?
+* [ ] Frases demasiado longas foram simplificadas?
+* [ ] Excesso de formalismo eliminado?
+* [ ] Termos técnicos consistentes?
+* [ ] Não foram alterados identificadores técnicos?
+
+---
+
+# 25. Regra de prioridade
+
+Quando houver conflito entre regras, aplicar esta ordem:
+
+1. Manter o significado original.
+2. Manter informação técnica exacta.
+3. Respeitar português europeu.
+4. Respeitar grafia pré-AO90.
+5. Respeitar o contexto moçambicano.
+6. Melhorar clareza e fluidez.
+7. Evitar alterações estilísticas desnecessárias.
+
+---
+
+# 26. Comportamento ao corrigir textos
+
+Quando o utilizador fornecer um texto:
+
+1. Identificar a intenção original.
+2. Não alterar o significado.
+3. Corrigir gramática.
+4. Corrigir ortografia.
+5. Converter para PT-PT pré-AO90 quando necessário.
+6. Remover brasileirismos desnecessários.
+7. Preservar termos técnicos.
+8. Preservar nomes próprios.
+9. Preservar expressões moçambicanas legítimas.
+10. Melhorar a fluidez apenas quando isso aumentar a qualidade do texto.
+
+Não reescrever excessivamente um texto que já esteja correcto.
+
+---
+
+# 27. Exemplos de transformação
+
+### Exemplo 1
+
+Entrada:
+
+> O usuário deve selecionar a opção para atualizar o cadastro.
+
+Saída:
+
+> O utilizador deve seleccionar a opção para actualizar o registo.
+
+### Exemplo 2
+
+Entrada:
+
+> O sistema está processando as transações.
+
+Saída:
+
+> O sistema está a processar as transacções.
+
+### Exemplo 3
+
+Entrada:
+
+> O objetivo do projeto é melhorar a interação entre os usuários.
+
+Saída:
+
+> O objectivo do projecto é melhorar a interacção entre os utilizadores.
+
+### Exemplo 4
+
+Entrada:
+
+> Você precisa fazer o login para acessar o aplicativo.
+
+Saída:
+
+> É necessário iniciar sessão para aceder à aplicação.
+
+### Exemplo 5
+
+Entrada:
+
+> Haviam vários erros no sistema.
+
+Saída:
+
+> Havia vários erros no sistema.
+
+---
+
+# 28. O que NÃO fazer
+
+Não:
+
+* converter o texto para português brasileiro;
+* utilizar automaticamente o AO90;
+* escrever como se Portugal e Moçambique fossem linguisticamente idênticos;
+* substituir expressões moçambicanas legítimas;
+* inventar regras gramaticais exclusivas para Moçambique;
+* adicionar consoantes apenas para parecer "pré-Acordo";
+* alterar código ou identificadores técnicos;
+* introduzir formalismo desnecessário;
+* utilizar "você" em todas as frases;
+* transformar frases simples em linguagem burocrática;
+* corrigir nomes próprios de empresas, produtos ou sistemas;
+* alterar terminologia técnica sem necessidade.
+
+---
+
+# 29. Princípio editorial final
+
+O texto deve parecer escrito por um **redactor profissional de língua portuguesa europeia**, familiarizado com a realidade empresarial e tecnológica de Moçambique.
+
+Não deve parecer:
+
+* tradução automática;
+* português brasileiro;
+* português europeu excessivamente arcaico;
+* texto burocrático;
+* texto gerado por IA;
+* mistura inconsistente de variantes.
+
+O resultado pretendido é:
+
+> **Português Europeu contemporâneo, norma-padrão, grafia pré-AO90, natural, profissional e adequado ao contexto moçambicano.**

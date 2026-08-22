@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "deny": [
+      "mcp__mpesa__transferir",
+      "mcp__banco__*",
+      "mcp__facturacao__anular",
+      "Bash(rm -rf *)",
+      "Read(./.quadro-rh/**)",
+      "Write(./.quadro-rh/**)",
+      "Read(./.env)",
+      "Write(./.claude/agents/**)"
+    ],
+    "ask": [
+      "mcp__mpesa__*",
+      "mcp__emola__*",
+      "mcp__whatsapp__enviar_template",
+      "mcp__facturacao__emitir",
+      "mcp__contratos__*"
+    ]
+  },
+  "enabledPlugins": {
+    "quadro@catalyzer-quadro": false
+  },
+  "worktree": {
+    "bgIsolation": "none"
+  }
+}

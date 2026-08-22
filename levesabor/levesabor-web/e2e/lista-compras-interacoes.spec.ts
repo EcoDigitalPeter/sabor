@@ -27,34 +27,40 @@ test.describe("Lista de compras — interações", () => {
     // Não fixamos o total de itens (soma agregada de 30 dias × 3 refeições, frágil a mudanças no
     // catálogo/menu mensal) — lemos o total inicial do próprio ecrã e confirmamos que só o
     // contador de "comprados" sobe 1, mantendo o mesmo total.
-    const progressText = page.getByText(/de \d+ comprados/);
-    const initialText = (await progressText.textContent()) ?? "";
-    const [, , total] = initialText.match(/^(\d+) de (\d+) comprados$/) ?? [];
-    expect(initialText).toMatch(/^0 de \d+ comprados$/);
+    // FE-Y07: o contador "X de Y" e o rótulo "comprados" vivem agora em elementos separados
+    // (ShoppingSummary), por isso a leitura aponta ao valor, não a uma frase única.
+    const progressValue = page.locator('[class*="statValue"]').filter({ hasText: /^\d+ de \d+$/ });
+    const initialText = (await progressValue.textContent()) ?? "";
+    const [, , total] = initialText.match(/^(\d+) de (\d+)$/) ?? [];
+    expect(initialText).toMatch(/^0 de \d+$/);
 
     // O <input> real do Checkbox é visualmente escondido (sr-only, Checkbox.module.css) — clicar
     // no <label> que o envolve (com o nome do item) aciona o toggle nativamente, tal como um
     // clique real faria na caixa visível.
+    // FE-Y07: itens comprados afundam para o fundo do grupo (ShoppingGroup), por isso guardamos o
+    // nome do item ANTES de clicar — "primeiro <li>" já não aponta ao mesmo item depois do toggle.
     const firstItem = page.locator('li:has(input[type="checkbox"])').first();
+    const itemName = (await firstItem.locator("label").textContent())?.trim() ?? "";
     await firstItem.locator("label").click();
 
-    await expect(progressText).toHaveText(`1 de ${total} comprados`);
-    await expect(firstItem.getByRole("checkbox")).toBeChecked();
+    await expect(progressValue).toHaveText(`1 de ${total}`);
+    const checkedItem = page.locator('li:has(input[type="checkbox"])').filter({ hasText: itemName });
+    await expect(checkedItem.getByRole("checkbox")).toBeChecked();
   });
 
-  test('"já tenho X" regista a quantidade que o cliente já tem em casa', async ({ page }) => {
+  test('"tenho em casa" regista a quantidade que o cliente já tem em casa', async ({ page }) => {
     await loginAsClient(page);
     await goToCompras(page);
 
+    // FE-Y07: o antigo link "Já tenho um pouco" + campo de texto foi trocado por um selector
+    // [-]/[+] sempre visível (feedback do cliente) — recalcula de imediato, sem editar nada.
     const firstItem = page.locator('li:has(input[type="checkbox"])').first();
-    await firstItem.getByRole("button", { name: "Já tenho um pouco" }).click();
+    const stepperValue = firstItem.locator('[class*="stepperValue"]');
+    await expect(stepperValue).toHaveText(/^0\s/);
 
-    const pantryInput = firstItem.locator('input[type="number"]');
-    await expect(pantryInput).toBeVisible();
-    await pantryInput.fill("1");
-    await pantryInput.press("Enter");
+    await firstItem.getByRole("button", { name: /Aumentar a quantidade/ }).click();
 
-    await expect(firstItem.getByText(/já tens 1/)).toBeVisible();
+    await expect(stepperValue).not.toHaveText(/^0\s/);
   });
 
   test("+ Adicionar item cria um novo item manual na lista", async ({ page }) => {

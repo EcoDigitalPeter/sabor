@@ -2,7 +2,8 @@
 // (F2-ADM-06). Estados: loading (skeleton dos cartões) · ready · empty (sem dados no período) · erro.
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { components } from "@/types/api";
@@ -65,6 +66,17 @@ function isMetricsEmpty(data: MetricsSummary): boolean {
   );
 }
 
+// FE-D01 · P-07 — faixa decorativa fixa no topo do dashboard (ver PROMPT.md em
+// public/images/admin-banner/); o cabeçalho (título + seletor de período) fica por cima.
+function AdminBanner({ children }: { children: ReactNode }) {
+  return (
+    <div className={styles.banner}>
+      <Image src="/images/admin-banner/admin-banner.png" alt="" fill className={styles.bannerImage} />
+      <div className={styles.bannerContent}>{children}</div>
+    </div>
+  );
+}
+
 function RecipeFeedbackTable({ title, recipes }: { title: string; recipes: RecipeFeedback[] }) {
   return (
     <Card className={styles.feedbackCard}>
@@ -117,10 +129,12 @@ export default function AdminDashboardPage() {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Dashboard</h1>
-          {periodSelector}
-        </header>
+        <AdminBanner>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Dashboard</h1>
+            {periodSelector}
+          </div>
+        </AdminBanner>
 
         <div className={styles.kpiGrid}>
           <KpiCard label="Utilizadores" value="" isLoading />
@@ -160,10 +174,12 @@ export default function AdminDashboardPage() {
   if (isError || !data) {
     return (
       <div className={styles.page}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Dashboard</h1>
-          {periodSelector}
-        </header>
+        <AdminBanner>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Dashboard</h1>
+            {periodSelector}
+          </div>
+        </AdminBanner>
         <ErrorState
           message="Não foi possível carregar as métricas. Verifica a tua ligação e tenta novamente."
           onRetry={() => refetch()}
@@ -175,10 +191,12 @@ export default function AdminDashboardPage() {
   if (isMetricsEmpty(data)) {
     return (
       <div className={styles.page}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Dashboard</h1>
-          {periodSelector}
-        </header>
+        <AdminBanner>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Dashboard</h1>
+            {periodSelector}
+          </div>
+        </AdminBanner>
         <EmptyState
           title="Sem dados neste período"
           description="Ainda não há atividade suficiente para mostrar métricas."
@@ -189,10 +207,12 @@ export default function AdminDashboardPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Dashboard</h1>
-        {periodSelector}
-      </header>
+      <AdminBanner>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Dashboard</h1>
+          {periodSelector}
+        </div>
+      </AdminBanner>
 
       <div className={styles.kpiGrid}>
         <KpiCard label="Utilizadores" value={data.totalUsers ?? "—"} />

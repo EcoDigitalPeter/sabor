@@ -40,7 +40,7 @@ Um objetivo, condição ou conceito tem **um único** label em pt-PT, usado sem 
 
 ## 6. Argumentos de confiança merecem destaque visual
 
-"Grátis · sem cartão de crédito · 2 minutos" é um argumento de confiança, não uma legenda menor — deve ter peso visual próprio (badge/pill, cor de destaque), não só ser mais uma linha de texto pequeno.
+"Grátis · 2 minutos" é um argumento de confiança, não uma legenda menor — deve ter peso visual próprio (badge/pill, cor de destaque), não só ser mais uma linha de texto pequeno. Evitar trazer "cartão de crédito" para a copy activa quando o fluxo já comunica que não há pagamento no registo.
 
 ---
 
@@ -48,7 +48,7 @@ Um objetivo, condição ou conceito tem **um único** label em pt-PT, usado sem 
 
 Uma segunda ronda de feedback (`feedback6..15`) repetiu e intensificou a regra 1 ao ponto de pedir a remoção de nomes de pratos específicos até do subtítulo do hero (não só de títulos de secção) — o padrão "isto só serve para X" aplica-se a qualquer menção a "Moçambique"/pratos concretos em copy de posicionamento (hero, secção de confiança, CTA final, footer), não só a títulos de secção. A mesma ronda pediu explicitamente para reposicionar a comunicação de "aplicação de receitas" para "assistente inteligente de alimentação" — o produto ajuda a decidir o que comer, o que comprar e como organizar a alimentação, não é uma base de receitas estática.
 
-- **Como aplicar:** em copy de posicionamento (hero, proof strip, secção de confiança, CTA final, footer), preferir "receitas reais" a listar pratos específicos por nome. Nomes de pratos concretos (matapa, xima…) ficam bem em conteúdo que já é claramente ilustrativo/exemplo (galeria de pratos, exemplos de pedidos, badge de "sugestão do dia") — aí não são uma promessa da marca, são um exemplo real de output.
+- **Como aplicar:** em copy de posicionamento (hero, proof strip, secção de confiança, CTA final, footer), preferir "refeições reais" a listar pratos específicos por nome. Nomes de pratos concretos (matapa, xima…) ficam bem em conteúdo que já é claramente ilustrativo/exemplo (galeria de pratos, exemplos de pedidos, badge de "sugestão do dia") — aí não são uma promessa da marca, são um exemplo real de output.
 - Ao escrever sobre o que a IA faz, preferir verbos de assistência ativa ("ajuda a decidir", "planeia", "organiza") a descrições passivas de catálogo.
 
 ## 8. Um caso concreto de honestidade vs. inclusão (regras 1 e 2 em tensão)

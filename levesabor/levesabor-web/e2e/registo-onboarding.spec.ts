@@ -19,7 +19,7 @@ test.describe("Registo → onboarding → primeiro plano", () => {
     await page.waitForURL("**/onboarding");
 
     // Passo 1: objetivo (obrigatório) — bloqueia "Continuar" antes de escolher.
-    await expect(page.getByRole("heading", { name: "Qual é o teu objetivo?" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Qual é o teu objectivo?" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Continuar" })).toBeDisabled();
     await page.getByRole("button", { name: "Ganhar massa muscular" }).click();
     await page.getByRole("button", { name: "Continuar" }).click();

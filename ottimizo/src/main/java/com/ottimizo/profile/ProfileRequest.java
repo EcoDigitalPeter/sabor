@@ -25,6 +25,10 @@ public record ProfileRequest(
     @Min(2) @Max(5) Integer mealsPerDay,
     @Min(1) @Max(8) Integer householdSize,
     @Size(max = 6) List<@Size(max = 40) String> dietaryPreferences,
+    @Size(max = 80) String shoppingProvince,
+    @Size(max = 80) String shoppingCity,
+    @Size(max = 120) String shoppingNeighborhood,
+    @Size(max = 180) String shoppingAddressDescription,
     Boolean medicalDisclaimerAccepted
 ) {
 }

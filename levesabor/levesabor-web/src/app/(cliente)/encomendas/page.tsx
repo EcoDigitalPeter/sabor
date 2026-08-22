@@ -1,6 +1,6 @@
 // F3-CLI-07 · "Minhas encomendas" — lista (GET /me/orders) + detalhe em BottomSheet + cancelar
 // (PATCH /me/orders/{id}/cancel, só quando PENDENTE/ACEITE) com o mesmo padrão de confirmação
-// dupla-clique usado noutras ações destrutivas (ConfirmDialog, ver /plano "Gerar novo plano").
+// dupla-clique usado noutras ações destrutivas (ConfirmDialog, ver /plano "Criar outro plano").
 "use client";
 
 import { useState } from "react";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { BrandIllustration } from "@/components/ui/BrandIllustration";
 import { useToast } from "@/components/ui/Toast";
 import styles from "./page.module.css";
 
@@ -84,6 +85,7 @@ export default function EncomendasPage() {
       <main className={styles.main}>
         <h1 className={styles.title}>Minhas encomendas</h1>
         <ErrorState
+          illustration={<BrandIllustration variant="generic-error" />}
           message={error instanceof ApiError ? error.message : "Não foi possível carregar as encomendas."}
           onRetry={() => refetch()}
         />
@@ -97,6 +99,7 @@ export default function EncomendasPage() {
 
       {orders.length === 0 ? (
         <EmptyState
+          illustration={<BrandIllustration variant="empty-orders" size={200} />}
           title="Ainda sem encomendas"
           description="Quando encomendares o teu rancho a uma loja parceira, aparece aqui."
           action={

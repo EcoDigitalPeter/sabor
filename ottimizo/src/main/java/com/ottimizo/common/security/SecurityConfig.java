@@ -29,7 +29,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(
+        HttpSecurity http,
+        RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+        RestAccessDeniedHandler restAccessDeniedHandler
+    ) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
@@ -42,7 +46,17 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/stores").hasAnyRole(Role.CLIENTE.name(), Role.ADMIN.name())
                 .anyRequest().authenticated()
             )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+            // Envelope ApiResponse consistente em 401 (token ausente/invalido) e 403 (role sem
+            // permissao) — sem isto o Spring devolve corpo vazio/plano, que quebra o cliente HTTP
+            // do frontend (levesabor-web/src/lib/api.ts espera sempre {status,code,message,data}).
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                .accessDeniedHandler(restAccessDeniedHandler)
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+            );
         return http.build();
     }
 

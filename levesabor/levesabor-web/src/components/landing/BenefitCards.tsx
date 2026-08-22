@@ -22,7 +22,7 @@ const BENEFITS = [
   {
     icon: "/images/beneficios/saude.svg",
     title: "Cuida da tua saúde, ao teu ritmo",
-    body: "Planos adaptados à tua condição, preferências e objetivos.",
+    body: "Planos adaptados à tua condição, preferências e objectivos.",
   },
 ];
 

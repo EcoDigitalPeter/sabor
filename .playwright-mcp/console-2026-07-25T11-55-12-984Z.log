@@ -1,0 +1,22 @@
+[   16985ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[   17211ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/favicon.ico:0
+[   17663ms] [LOG] %cDocumentation: %chttps://mswjs.io/docs font-weight:bold font-weight:normal @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2565
+[   17663ms] [LOG] Found an issue? https://github.com/mswjs/msw/issues @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2570
+[   17663ms] [LOG] Worker script URL: http://127.0.0.1:3100/mockServiceWorker.js @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2571
+[   17663ms] [LOG] Worker scope: http://127.0.0.1:3100/ @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2572
+[   17663ms] [LOG] Client ID: %s (%s) 68d08f66-0273-4c21-91ac-b67e09d65e3e top-level @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2574
+[   23802ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[   23807ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/login:0
+[   66360ms] [LOG] Request {url: URL, method: POST, headers: Object, body: {"email":"amelia@levesabor.mz","password":"password123"}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[   66362ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[   66362ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"accessToken":"mock-ac…"email":"amelia@levesabor.mz","role":"CLIENTE"}}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[   66562ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[   67736ms] [LOG] [Fast Refresh] done in 1175ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[   67899ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[   67899ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[   67899ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":1001,"monthStart"…go."}]},"feedback":"NONE","completed":false}]}]}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[   68477ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[   68481ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/plano:0
+[  115732ms] [LOG] Request {url: URL, method: PATCH, headers: Object, body: {"completed":true}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  115732ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  115732ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":37,"mealSlot":"PE…grossar."}]},"feedback":"NONE","completed":true}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116

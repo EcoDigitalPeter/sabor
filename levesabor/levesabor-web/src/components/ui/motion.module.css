@@ -1,4 +1,4 @@
-/* FE-P02 · motion — primitivas de movimento partilhadas pela landing v2 (Reveal + hover-lift).
+/* FE-P02 · motion — primitivas de movimento partilhadas por toda a app (Reveal + hover-lift).
    Estado base é sempre visível (opacity:1) — sem JS ou antes do observer montar, nada fica
    escondido; a classe .hidden só é aplicada pelo próprio Reveal.tsx depois de montar. */
 

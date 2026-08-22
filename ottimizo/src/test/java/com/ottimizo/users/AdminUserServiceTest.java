@@ -45,6 +45,8 @@ class AdminUserServiceTest {
     @Mock
     private AppUserRepository users;
     @Mock
+    private com.ottimizo.profile.ClientProfileRepository clientProfiles;
+    @Mock
     private AuditService audit;
     @Mock
     private SupabaseSessionRevoker sessionRevoker;
@@ -55,7 +57,7 @@ class AdminUserServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AdminUserService(users, audit, sessionRevoker);
+        service = new AdminUserService(users, clientProfiles, audit, sessionRevoker);
     }
 
     // --- LSA022 — ultimo admin activo -----------------------------------

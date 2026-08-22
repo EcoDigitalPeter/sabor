@@ -31,6 +31,7 @@ type SectionKey =
   | "alergias"
   | "exclusoes"
   | "preferencias"
+  | "zonaCompras"
   | "orcamento"
   | "refeicoes"
   | "pessoas";
@@ -86,6 +87,9 @@ const DIETARY_PREFERENCE_OPTIONS: { value: string; label: string }[] = [
 
 const MAX_ALLERGIES = 20;
 const MAX_ALLERGY_LENGTH = 60;
+const MAX_LOCATION_LENGTH = 80;
+const MAX_NEIGHBORHOOD_LENGTH = 120;
+const MAX_DESCRIPTION_LENGTH = 180;
 const GENERIC_ERROR_MESSAGE = "Não foi possível guardar. Tenta novamente.";
 
 type SaveVars = { section: SectionKey; patch: Profile };
@@ -118,6 +122,11 @@ export default function PerfilPage() {
   const [exclusionInput, setExclusionInput] = useState("");
   const [exclusionsLocalError, setExclusionsLocalError] = useState<string | undefined>(undefined);
   const [dietaryPreferencesDraft, setDietaryPreferencesDraft] = useState<string[]>([]);
+  const [shoppingProvinceDraft, setShoppingProvinceDraft] = useState("");
+  const [shoppingCityDraft, setShoppingCityDraft] = useState("");
+  const [shoppingNeighborhoodDraft, setShoppingNeighborhoodDraft] = useState("");
+  const [shoppingAddressDescriptionDraft, setShoppingAddressDescriptionDraft] = useState("");
+  const [locationLocalError, setLocationLocalError] = useState<string | undefined>(undefined);
 
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -156,6 +165,13 @@ export default function PerfilPage() {
     // src/types/api.d.ts (outro agente em paralelo trata desse ficheiro); assume-se que vai
     // existir como `dietaryPreferences?: string[]`.
     if (section === "preferencias") setDietaryPreferencesDraft(profile.dietaryPreferences ?? []);
+    if (section === "zonaCompras") {
+      setShoppingProvinceDraft(profile.shoppingProvince ?? "");
+      setShoppingCityDraft(profile.shoppingCity ?? "");
+      setShoppingNeighborhoodDraft(profile.shoppingNeighborhood ?? "");
+      setShoppingAddressDescriptionDraft(profile.shoppingAddressDescription ?? "");
+      setLocationLocalError(undefined);
+    }
     setEditingSection(section);
   }
 
@@ -165,6 +181,7 @@ export default function PerfilPage() {
     setAllergyInput("");
     setExclusionsLocalError(undefined);
     setExclusionInput("");
+    setLocationLocalError(undefined);
   }
 
   // PUT substitui o recurso Profile inteiro — envia-se sempre o perfil atual com o campo da
@@ -237,6 +254,38 @@ export default function PerfilPage() {
     });
   }
 
+  function saveShoppingLocation() {
+    const province = shoppingProvinceDraft.trim();
+    const city = shoppingCityDraft.trim();
+    const neighborhood = shoppingNeighborhoodDraft.trim();
+    const description = shoppingAddressDescriptionDraft.trim();
+
+    if (!province || !city || !neighborhood) {
+      setLocationLocalError("Preenche a província, a cidade e o bairro/zona.");
+      return;
+    }
+    if (province.length > MAX_LOCATION_LENGTH || city.length > MAX_LOCATION_LENGTH) {
+      setLocationLocalError(`Província e cidade devem ter no máximo ${MAX_LOCATION_LENGTH} caracteres.`);
+      return;
+    }
+    if (neighborhood.length > MAX_NEIGHBORHOOD_LENGTH) {
+      setLocationLocalError(`O bairro ou zona deve ter no máximo ${MAX_NEIGHBORHOOD_LENGTH} caracteres.`);
+      return;
+    }
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      setLocationLocalError(`A descrição deve ter no máximo ${MAX_DESCRIPTION_LENGTH} caracteres.`);
+      return;
+    }
+
+    setLocationLocalError(undefined);
+    save("zonaCompras", {
+      shoppingProvince: province,
+      shoppingCity: city,
+      shoppingNeighborhood: neighborhood,
+      shoppingAddressDescription: description || undefined,
+    });
+  }
+
   // logout() é best-effort (limpa sempre a sessão local) mas NÃO navega — a navegação é
   // responsabilidade explícita de quem chama (ver docstring em src/lib/auth.ts).
   async function handleLogout() {
@@ -298,7 +347,7 @@ export default function PerfilPage() {
 
       <div className={styles.sections}>
         <ProfileSectionCard
-          title="Objetivo"
+          title="Objectivo"
           editing={editingSection === "objetivo"}
           saving={savingSection("objetivo")}
           error={sectionServerError("objetivo")}
@@ -309,7 +358,7 @@ export default function PerfilPage() {
           onSave={() => goalDraft && save("objetivo", { goal: goalDraft })}
         >
           <OptionGroup
-            name="Objetivo"
+            name="Objectivo"
             options={GOAL_OPTIONS}
             value={goalDraft}
             onChange={setGoalDraft}
@@ -563,6 +612,69 @@ export default function PerfilPage() {
         </ProfileSectionCard>
 
         <ProfileSectionCard
+          title="Zona para compras"
+          editing={editingSection === "zonaCompras"}
+          saving={savingSection("zonaCompras")}
+          error={locationLocalError ?? sectionServerError("zonaCompras")}
+          saveDisabled={savingSection("zonaCompras")}
+          displayValue={
+            profile.shoppingProvince || profile.shoppingCity || profile.shoppingNeighborhood ? (
+              <span>
+                {[profile.shoppingNeighborhood, profile.shoppingCity, profile.shoppingProvince].filter(Boolean).join(", ")}
+                {profile.shoppingAddressDescription ? ` · ${profile.shoppingAddressDescription}` : ""}
+              </span>
+            ) : (
+              "Define a tua zona para mostrarmos as lojas mais próximas primeiro."
+            )
+          }
+          onEdit={() => startEdit("zonaCompras")}
+          onCancel={cancelEdit}
+          onSave={saveShoppingLocation}
+        >
+          <div className={styles.locationGrid}>
+            <Input
+              type="text"
+              placeholder="Província"
+              value={shoppingProvinceDraft}
+              maxLength={MAX_LOCATION_LENGTH}
+              disabled={savingSection("zonaCompras")}
+              onChange={(event) => setShoppingProvinceDraft(event.target.value)}
+              aria-label="Província para compras"
+            />
+            <Input
+              type="text"
+              placeholder="Cidade"
+              value={shoppingCityDraft}
+              maxLength={MAX_LOCATION_LENGTH}
+              disabled={savingSection("zonaCompras")}
+              onChange={(event) => setShoppingCityDraft(event.target.value)}
+              aria-label="Cidade para compras"
+            />
+            <Input
+              type="text"
+              placeholder="Bairro ou zona"
+              value={shoppingNeighborhoodDraft}
+              maxLength={MAX_NEIGHBORHOOD_LENGTH}
+              disabled={savingSection("zonaCompras")}
+              onChange={(event) => setShoppingNeighborhoodDraft(event.target.value)}
+              aria-label="Bairro ou zona para compras"
+            />
+            <Input
+              type="text"
+              placeholder="Descrição opcional (ex.: perto do mercado)"
+              value={shoppingAddressDescriptionDraft}
+              maxLength={MAX_DESCRIPTION_LENGTH}
+              disabled={savingSection("zonaCompras")}
+              onChange={(event) => setShoppingAddressDescriptionDraft(event.target.value)}
+              aria-label="Descrição da zona para compras"
+            />
+          </div>
+          <p className={styles.locationHint}>
+            Usamos esta zona apenas para ordenar as lojas por proximidade quando fores encomendar.
+          </p>
+        </ProfileSectionCard>
+
+        <ProfileSectionCard
           title="Orçamento"
           editing={editingSection === "orcamento"}
           saving={savingSection("orcamento")}
@@ -642,7 +754,7 @@ export default function PerfilPage() {
           </div>
           <p className={styles.householdHint}>
             Ao contrário das outras secções, isto ajusta já a lista de compras e as receitas do plano
-            atual — não só dos próximos planos.
+            actual — não só dos próximos planos.
           </p>
         </ProfileSectionCard>
       </div>

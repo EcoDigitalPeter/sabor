@@ -1,0 +1,33 @@
+- generic [active] [ref=f1e2]:
+  - alert [ref=f1e1]
+  - generic [ref=f1e33]:
+    - main [ref=f1e497]:
+      - generic [ref=f1e498]:
+        - generic [ref=f1e499]:
+          - generic [ref=f1e500]: Passo 1 de 2
+          - progressbar [ref=f1e501]
+        - generic [ref=f1e503]:
+          - heading "Escolhe a loja" [level=1] [ref=f1e504]
+          - generic [ref=f1e505]:
+            - button "Mercado Central Baixa, Maputo · +258 84 111 2233" [ref=f1e506] [cursor=pointer]:
+              - generic [ref=f1e507]: Mercado Central
+              - generic [ref=f1e508]: Baixa, Maputo · +258 84 111 2233
+            - button "Shoprite Matola Fomento, Matola · +258 82 222 3344" [ref=f1e509] [cursor=pointer]:
+              - generic [ref=f1e510]: Shoprite Matola
+              - generic [ref=f1e511]: Fomento, Matola · +258 82 222 3344
+            - button "Mercearia Central Polana, Maputo · +258 84 333 4455" [ref=f1e512] [cursor=pointer]:
+              - generic [ref=f1e513]: Mercearia Central
+              - generic [ref=f1e514]: Polana, Maputo · +258 84 333 4455
+            - button "Loja Zambézia Chabeco, Quelimane · +258 86 555 6677" [ref=f1e515] [cursor=pointer]:
+              - generic [ref=f1e516]: Loja Zambézia
+              - generic [ref=f1e517]: Chabeco, Quelimane · +258 86 555 6677
+        - generic [ref=f1e518]:
+          - button "Voltar" [disabled] [ref=f1e519]
+          - button "Continuar" [disabled] [ref=f1e520]
+    - navigation "Navegação principal" [ref=f1e170]:
+      - link "Plano" [ref=f1e171] [cursor=pointer]:
+        - /url: /plano
+      - link "Compras" [ref=f1e175] [cursor=pointer]:
+        - /url: /compras
+      - link "Perfil" [ref=f1e181] [cursor=pointer]:
+        - /url: /perfil

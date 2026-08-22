@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "quadro": {
+      "command": "bun",
+      "args": [
+        "run",
+        "${CLAUDE_PLUGIN_ROOT}/server/mcp.ts"
+      ],
+      "env": {
+        "QUADRO_PORT": "4318"
+      }
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=fdbgtfafynvteakamkuf&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
+    }
+  }
+}

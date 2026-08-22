@@ -9,7 +9,10 @@ export type ApiResponse<T> = {
   data: T;
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_USE_MOCKS === "true"
+    ? "/api/v1"
+    : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1");
 
 // Access token: apenas em memória, nunca em localStorage/sessionStorage (docs/plano/03-backend-plan.md §4).
 // auth.ts lê/escreve através de getAccessToken/setAccessToken — nunca guarda a sua própria cópia.
@@ -78,9 +81,14 @@ async function request<T>(path: string, init: RequestInit | undefined, isRetry: 
   const res = await doFetch(path, init);
 
   if (res.status === 401 && !isRetry) {
-    const refreshed = await refreshAccessToken();
-    if (refreshed) {
-      return request<T>(path, init, true);
+    // Em modo real (Supabase) nao ha /auth/refresh no backend — o SDK Supabase ja renova o
+    // token proactivamente (autoRefreshToken), por isso um 401 aqui significa mesmo sessao
+    // invalida/expirada: vai direito para o login, sem tentar a dança de refresh do mock.
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === "true") {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return request<T>(path, init, true);
+      }
     }
     redirectToLogin();
     throw new ApiError("Sessão expirada. Inicie sessão novamente.");

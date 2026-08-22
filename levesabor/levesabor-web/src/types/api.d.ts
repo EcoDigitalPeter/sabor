@@ -741,6 +741,11 @@ export interface components {
             householdSize?: number;
             /** @description Vocabulário fechado: vegetariana, vegan, sem_gluten, sem_lactose, alta_proteina, baixo_calorico. Máx. 6 itens. */
             dietaryPreferences?: string[];
+            /** @description Zona usada para ordenar lojas por proximidade quando o cliente encomenda. Nao e morada de entrega. */
+            shoppingProvince?: string;
+            shoppingCity?: string;
+            shoppingNeighborhood?: string;
+            shoppingAddressDescription?: string;
             /** @description FE-Y04 (ago/2026) — consentimento movido do registo para o resumo do onboarding (o utilizador já percebeu o valor da app nessa altura). Substitui o antigo `disclaimerAccepted` de `/auth/register`. */
             medicalDisclaimerAccepted?: boolean;
         };
@@ -770,6 +775,8 @@ export interface components {
             /** Format: int64 */
             recipeId?: number;
             name?: string;
+            /** @description FE-Y05 (ago/2026) — etiqueta curta mostrada por baixo do nome (ex.: "Pequeno-almoço reforçado", "🌙 Jantar leve"), a pedido do cliente: nomes de receita deixam de trazer descrições entre parênteses, que passam a viver aqui em separado. */
+            mealTag?: string | null;
             kcal?: number;
             prepMinutes?: number;
             estimatedCostMt?: number | null;
@@ -795,6 +802,8 @@ export interface components {
             date?: string;
             weekday?: string;
             totalKcal?: number;
+            /** @description FE-Y05 [Sugestão] (ago/2026): meta diária de kcal usada pelo indicador "dentro do objectivo" — hand-editado, como FE-X03; o backend real ainda não devolve uma meta calculada a partir do perfil (peso/altura/objectivo declarado no onboarding). */
+            targetKcal?: number | null;
             macros?: components["schemas"]["Macros"];
             entries?: components["schemas"]["MealPlanEntry"][];
         };
@@ -942,6 +951,8 @@ export interface components {
             /** @enum {string} */
             status: "ACTIVE" | "SUSPENDED";
         };
+        /** @enum {string} */
+        StorePriceLevel: "BAIXO" | "MEDIO" | "ALTO";
         Store: {
             /** Format: int64 */
             id?: number;
@@ -952,12 +963,35 @@ export interface components {
             /** @enum {string} */
             status?: "ACTIVE" | "SUSPENDED";
             productCount?: number;
+            /** @description FE-Y08 (ago/2026) — avaliação média da loja, 0-5. Campo aditivo, só mock (sem endpoint real de avaliações). */
+            rating?: number | null;
+            /** @description FE-Y08 (ago/2026) — texto livre de horário, ex. "Fecha às 18h". Sem estrutura de horário por dia — mock simples a pedido do cartão. */
+            openingHoursText?: string | null;
+            /** @description FE-Y08 (ago/2026) — se a loja tem entrega disponível (mostrado como "🚚 Entrega disponível" na escolha de loja). */
+            deliveryAvailable?: boolean;
+            /** @description FE-Y08 (ago/2026) — nível de preço médio da loja. */
+            averagePriceLevel?: components["schemas"]["StorePriceLevel"] | null;
+            /** @description FE-Y08 (ago/2026) — coordenadas para o mapa ilustrativo da escolha de loja. */
+            latitude?: number | null;
+            /** @description FE-Y08 (ago/2026) — coordenadas para o mapa ilustrativo da escolha de loja. */
+            longitude?: number | null;
         };
         StoreRequest: {
             name: string;
             city: string;
             neighborhood?: string | null;
             contact?: string | null;
+            /** @description FE-Y08 (ago/2026) — ver `Store.rating`. */
+            rating?: number | null;
+            /** @description FE-Y08 (ago/2026) — ver `Store.openingHoursText`. */
+            openingHoursText?: string | null;
+            /** @description FE-Y08 (ago/2026) — ver `Store.deliveryAvailable`. */
+            deliveryAvailable?: boolean;
+            /** @description FE-Y08 (ago/2026) — ver `Store.averagePriceLevel`. */
+            averagePriceLevel?: components["schemas"]["StorePriceLevel"] | null;
+            /** @description FE-Y08 (ago/2026) — ver `Store.latitude`/`Store.longitude`. */
+            latitude?: number | null;
+            longitude?: number | null;
         };
         StoreEnvelope: components["schemas"]["ApiResponseVoid"] & {
             data?: components["schemas"]["Store"];

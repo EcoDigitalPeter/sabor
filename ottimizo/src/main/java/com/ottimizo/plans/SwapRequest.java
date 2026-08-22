@@ -2,11 +2,11 @@ package com.ottimizo.plans;
 
 /**
  * Corpo de {@code POST /me/meal-plans/entries/{id}/swap}. {@code reason} e'
- * livre e opcional ("Porque queres trocar?", FE-Q06) — recebido para bater
- * com o contrato ({@code operations.swapMealPlanEntry} em api.d.ts), mas
- * nesta versao nao e' persistido: nao ha IA a interpretar o motivo e o
- * registo do motivo por receita ({@code recipe_swap_reasons}, V002) e'
- * consumido por um ecra de admin (BE-D06) fora do ambito deste cartao.
+ * livre e opcional ("Porque queres trocar?", FE-Q06) — quando presente e a
+ * troca e' confirmada ({@code confirm=true}), fica gravado contra a receita
+ * "de saida" ({@code recipe_swap_reasons}, V002) e consumido pelo admin em
+ * {@code GET /admin/recipes/{id}/swap-reasons} (BE-D06/INT-01). Nao ha IA a
+ * interpretar o motivo — e' so texto livre arquivado.
  */
 public record SwapRequest(
     String reason

@@ -4,6 +4,7 @@ import com.ottimizo.common.api.ApiResponse;
 import com.ottimizo.common.api.PageResponse;
 import com.ottimizo.common.security.Role;
 import com.ottimizo.common.security.UserContextService;
+import com.ottimizo.profile.ProfileResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,6 +47,11 @@ public class AdminUserController {
     @GetMapping("/{id}")
     public ApiResponse<AdminUserResponse> get(@PathVariable Long id) {
         return ApiResponse.success(service.get(id));
+    }
+
+    @GetMapping("/{id}/health-profile")
+    public ApiResponse<ProfileResponse> getHealthProfile(@PathVariable Long id) {
+        return ApiResponse.success(service.getHealthProfile(id));
     }
 
     @PostMapping

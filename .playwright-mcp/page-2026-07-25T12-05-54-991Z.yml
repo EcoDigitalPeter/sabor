@@ -1,0 +1,103 @@
+- generic [ref=f1e2]:
+  - alert [ref=f1e1]
+  - generic [ref=f1e33]:
+    - main [ref=f1e743]:
+      - heading "Minhas encomendas" [level=1] [ref=f1e744]
+      - list [ref=f1e745]:
+        - listitem [ref=f1e746]:
+          - button "Mercado Central 25/07/2026 · 25 itens Pendente" [ref=f1e747] [cursor=pointer]:
+            - generic [ref=f1e748]:
+              - generic [ref=f1e749]: Mercado Central
+              - generic [ref=f1e750]: 25/07/2026 · 25 itens
+            - generic [ref=f1e751]: Pendente
+      - dialog [active] [ref=f1e753]:
+        - generic [ref=f1e756]:
+          - generic [ref=f1e757]:
+            - heading "Mercado Central" [level=2] [ref=f1e758]
+            - generic [ref=f1e759]: Pendente
+          - paragraph [ref=f1e760]: 25/07/2026
+          - list [ref=f1e761]:
+            - listitem [ref=f1e762]:
+              - generic [ref=f1e763]: Farinha de milho (fuba)
+              - generic [ref=f1e764]: 2 kg
+            - listitem [ref=f1e765]:
+              - generic [ref=f1e766]: Arroz
+              - generic [ref=f1e767]: 3 kg
+            - listitem [ref=f1e768]:
+              - generic [ref=f1e769]: Pão
+              - generic [ref=f1e770]: 10 unidade
+            - listitem [ref=f1e771]:
+              - generic [ref=f1e772]: Peixe (garoupa)
+              - generic [ref=f1e773]: 1.5 kg
+            - listitem [ref=f1e774]:
+              - generic [ref=f1e775]: Frango
+              - generic [ref=f1e776]: 2 kg
+            - listitem [ref=f1e777]:
+              - generic [ref=f1e778]: Camarão
+              - generic [ref=f1e779]: 0.4 kg
+            - listitem [ref=f1e780]:
+              - generic [ref=f1e781]: Ovo
+              - generic [ref=f1e782]: 12 unidade
+            - listitem [ref=f1e783]:
+              - generic [ref=f1e784]: Folhas de mandioca (matapa)
+              - generic [ref=f1e785]: 1 kg
+            - listitem [ref=f1e786]:
+              - generic [ref=f1e787]: Quiabo
+              - generic [ref=f1e788]: 0.5 kg
+            - listitem [ref=f1e789]:
+              - generic [ref=f1e790]: Tomate
+              - generic [ref=f1e791]: 1 kg
+            - listitem [ref=f1e792]:
+              - generic [ref=f1e793]: Cebola
+              - generic [ref=f1e794]: 1 kg
+            - listitem [ref=f1e795]:
+              - generic [ref=f1e796]: Repolho
+              - generic [ref=f1e797]: 1 kg
+            - listitem [ref=f1e798]:
+              - generic [ref=f1e799]: Batata-doce
+              - generic [ref=f1e800]: 1.5 kg
+            - listitem [ref=f1e801]:
+              - generic [ref=f1e802]: Feijão nhemba
+              - generic [ref=f1e803]: 1 kg
+            - listitem [ref=f1e804]:
+              - generic [ref=f1e805]: Feijão jugo
+              - generic [ref=f1e806]: 1 kg
+            - listitem [ref=f1e807]:
+              - generic [ref=f1e808]: Amendoim moído
+              - generic [ref=f1e809]: 0.3 kg
+            - listitem [ref=f1e810]:
+              - generic [ref=f1e811]: Óleo de cozinha
+              - generic [ref=f1e812]: 1 l
+            - listitem [ref=f1e813]:
+              - generic [ref=f1e814]: Alho
+              - generic [ref=f1e815]: 0.2 kg
+            - listitem [ref=f1e816]:
+              - generic [ref=f1e817]: Sal
+              - generic [ref=f1e818]: 0.5 kg
+            - listitem [ref=f1e819]:
+              - generic [ref=f1e820]: Folha de louro
+              - generic [ref=f1e821]: 1 unidade
+            - listitem [ref=f1e822]:
+              - generic [ref=f1e823]: Piripiri
+              - generic [ref=f1e824]: 0.05 kg
+            - listitem [ref=f1e825]:
+              - generic [ref=f1e826]: Mandioca
+              - generic [ref=f1e827]: 1.5 kg
+            - listitem [ref=f1e828]:
+              - generic [ref=f1e829]: Leite de coco
+              - generic [ref=f1e830]: 0.5 l
+            - listitem [ref=f1e831]:
+              - generic [ref=f1e832]: Banana
+              - generic [ref=f1e833]: 1 kg
+            - listitem [ref=f1e834]:
+              - generic [ref=f1e835]: Chá (saquetas)
+              - generic [ref=f1e836]: 7 unidade
+          - paragraph [ref=f1e837]: "Contacto da loja: +258 84 111 2233"
+          - button "Cancelar encomenda" [ref=f1e838] [cursor=pointer]
+    - navigation "Navegação principal" [ref=f1e170]:
+      - link "Plano" [ref=f1e171] [cursor=pointer]:
+        - /url: /plano
+      - link "Compras" [ref=f1e175] [cursor=pointer]:
+        - /url: /compras
+      - link "Perfil" [ref=f1e181] [cursor=pointer]:
+        - /url: /perfil

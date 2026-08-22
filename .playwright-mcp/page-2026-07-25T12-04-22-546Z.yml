@@ -1,0 +1,22 @@
+- generic [active] [ref=f1e2]:
+  - alert [ref=f1e1]
+  - generic [ref=f1e33]:
+    - main [ref=f1e497]:
+      - generic [ref=f1e734]:
+        - heading "Encomenda enviada" [level=1] [ref=f1e735]
+        - paragraph [ref=f1e736]:
+          - text: A tua encomenda foi enviada para
+          - strong [ref=f1e737]: Mercado Central
+          - text: .
+        - paragraph [ref=f1e738]:
+          - text: "Combina diretamente com a loja o levantamento ou entrega, e o pagamento. Contacto:"
+          - strong [ref=f1e739]: +258 84 111 2233
+        - button "Ver as minhas encomendas" [ref=f1e740] [cursor=pointer]
+    - navigation "Navegação principal" [ref=f1e170]:
+      - link "Plano" [ref=f1e171] [cursor=pointer]:
+        - /url: /plano
+      - link "Compras" [ref=f1e175] [cursor=pointer]:
+        - /url: /compras
+      - link "Perfil" [ref=f1e181] [cursor=pointer]:
+        - /url: /perfil
+  - status [ref=f1e742]: Encomenda enviada.

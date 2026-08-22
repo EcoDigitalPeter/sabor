@@ -9,7 +9,8 @@ public record AppUserResponse(
     String name,
     String email,
     Role role,
-    UserStatus status
+    UserStatus status,
+    Long storeId
 ) {
 
     public static AppUserResponse from(AppUser user) {
@@ -19,7 +20,8 @@ public record AppUserResponse(
             user.name(),
             user.email(),
             user.role(),
-            user.status()
+            user.status(),
+            user.storeId()
         );
     }
 }

@@ -11,6 +11,16 @@ import { getRecipePhoto } from "@/data/recipe-photos";
 import type { components } from "@/types/api";
 import styles from "./MealCard.module.css";
 
+// FE-Y05 (ago/2026) · kcal/gramas de proteína "à vista" no cartão, a pedido do cliente ("o
+// utilizador não precisa de abrir a receita"). `RecipeSnapshot.macros.proteina` é uma percentagem
+// das kcal totais (não gramas) — não há campo de gramas no backend, por isso convertemos aqui pela
+// aproximação nutricional padrão de 4 kcal por grama de proteína.
+const KCAL_PER_GRAM_PROTEIN = 4;
+
+function estimateProteinGrams(kcal: number, proteinPercent: number): number {
+  return Math.round((kcal * (proteinPercent / 100)) / KCAL_PER_GRAM_PROTEIN);
+}
+
 type MealPlanEntry = components["schemas"]["MealPlanEntry"];
 type MealSlot = NonNullable<MealPlanEntry["mealSlot"]>;
 
@@ -32,10 +42,12 @@ export type MealCardProps = {
    * Não interfere com o feedback 👍/👎, que vive só no detalhe da receita.
    */
   onToggleCompleted?: (next: boolean) => void;
+  /** FE-Y05 · destaca visualmente o cartão como a refeição "actual" (ver lib/planStats.ts currentMealSlot). */
+  current?: boolean;
   className?: string;
 };
 
-export function MealCard({ entry, href, onClick, onToggleCompleted, className }: MealCardProps) {
+export function MealCard({ entry, href, onClick, onToggleCompleted, current, className }: MealCardProps) {
   const recipe = entry.recipe;
   const completed = entry.completed ?? false;
   const kcal = recipe?.kcal ?? 0;
@@ -46,6 +58,7 @@ export function MealCard({ entry, href, onClick, onToggleCompleted, className }:
     gordura: recipe?.macros?.gordura ?? 0,
     fibra: recipe?.macros?.fibra ?? 0,
   };
+  const proteinGrams = estimateProteinGrams(kcal, macros.proteina);
   const slotLabel = entry.mealSlot ? SLOT_LABEL[entry.mealSlot] : undefined;
   const photoSrc = getRecipePhoto(recipe?.recipeId);
 
@@ -88,8 +101,13 @@ export function MealCard({ entry, href, onClick, onToggleCompleted, className }:
       <div className={styles.info}>
         {slotLabel ? <span className={styles.slot}>{slotLabel}</span> : null}
         <h3 className={styles.name}>{recipe?.name ?? "Refeição"}</h3>
+        {/* FE-Y05 · etiqueta separada (ex.: "Pequeno-almoço reforçado", "🌙 Jantar leve") em vez
+            de descrição entre parênteses no nome. */}
+        {recipe?.mealTag ? <span className={styles.tag}>{recipe.mealTag}</span> : null}
+        {/* FE-Y05 · kcal + proteína "à vista" — o utilizador não precisa de abrir a receita. */}
         <span className={styles.meta}>
-          <Clock size={14} aria-hidden="true" />
+          {`${kcal} kcal • ${proteinGrams} g proteína • `}
+          <Clock size={12} aria-hidden="true" className={styles.metaIcon} />
           {`${prepMinutes} min`}
         </span>
       </div>
@@ -97,7 +115,7 @@ export function MealCard({ entry, href, onClick, onToggleCompleted, className }:
     </>
   );
 
-  const classes = [styles.card, className].filter(Boolean).join(" ");
+  const classes = [styles.card, current ? styles.cardCurrent : "", className].filter(Boolean).join(" ");
 
   if (href) {
     return (

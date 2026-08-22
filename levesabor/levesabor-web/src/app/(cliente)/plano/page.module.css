@@ -50,6 +50,14 @@
   color: var(--clay);
 }
 
+/* FE-Y05 · resumo diário sob o mês, sempre relativo a "hoje" (ver page.tsx) */
+.todaySummary {
+  margin: 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--clay-soft);
+}
+
 .cardList {
   display: flex;
   flex-direction: column;

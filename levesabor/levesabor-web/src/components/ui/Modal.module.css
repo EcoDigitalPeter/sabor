@@ -20,7 +20,7 @@
   background: var(--cream-card);
   padding: 24px;
   box-shadow: 0 20px 60px rgba(36, 26, 20, 0.35);
-  animation: ls-rise 0.25s ease-out;
+  animation: ls-rise var(--motion-base) var(--ease-out);
 }
 
 .dialog:focus {

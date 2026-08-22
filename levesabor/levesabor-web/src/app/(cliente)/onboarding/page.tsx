@@ -342,7 +342,7 @@ export default function OnboardingPage() {
           <div className={styles.illustration}>
             <BrandIllustration variant="onboarding" size={200} />
           </div>
-          <h1 className={styles.question}>Qual é o teu objetivo?</h1>
+          <h1 className={styles.question}>Qual é o teu objectivo?</h1>
           <div className={styles.optionGrid}>
             {GOAL_OPTIONS.map((opt) => (
               <OptionCard
@@ -629,7 +629,7 @@ export default function OnboardingPage() {
             <dl className={styles.summaryList}>
               <div className={styles.summaryRow}>
                 <div className={styles.summaryRowHead}>
-                  <dt>Objetivo</dt>
+                  <dt>Objectivo</dt>
                   <button type="button" className={styles.editLink} onClick={() => goToStep(0)}>
                     Editar
                   </button>

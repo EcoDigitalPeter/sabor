@@ -14,12 +14,15 @@
   cursor: pointer;
   font-family: var(--font-body);
   transition:
-    border-color 0.15s ease,
-    transform 0.1s ease;
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
 }
 
 .card:hover {
   border-color: var(--tan);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(36, 26, 20, 0.1);
 }
 
 .card:active {
