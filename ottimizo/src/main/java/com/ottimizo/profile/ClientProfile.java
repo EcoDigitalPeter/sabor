@@ -51,9 +51,15 @@ public class ClientProfile {
     @Column(name = "budget_band")
     private BudgetBand budgetBand;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "meals_per_day", nullable = false)
     private Integer mealsPerDay = 3;
 
+    // V002 define household_size como smallint (check 1-8) — SqlTypes.SMALLINT explicito para
+    // que a validacao do schema Hibernate (ddl-auto: validate) nao rejeite o mapeamento por
+    // omissao de Integer (que espera SQL integer/int4). Achado a correr o backend real pela
+    // primeira vez fora de testes (INT-01) — nunca tinha sido apanhado antes.
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "household_size", nullable = false)
     private Integer householdSize = 1;
 
@@ -105,6 +111,10 @@ public class ClientProfile {
         Integer mealsPerDay,
         Integer householdSize,
         List<String> dietaryPreferences,
+        String shoppingProvince,
+        String shoppingCity,
+        String shoppingNeighborhood,
+        String shoppingAddressDescription,
         Boolean medicalDisclaimerAccepted
     ) {
         if (goal != null) {
@@ -133,6 +143,18 @@ public class ClientProfile {
         }
         if (dietaryPreferences != null) {
             this.dietaryPreferences = new ArrayList<>(dietaryPreferences);
+        }
+        if (shoppingProvince != null) {
+            this.shoppingProvince = shoppingProvince;
+        }
+        if (shoppingCity != null) {
+            this.shoppingCity = shoppingCity;
+        }
+        if (shoppingNeighborhood != null) {
+            this.shoppingNeighborhood = shoppingNeighborhood;
+        }
+        if (shoppingAddressDescription != null) {
+            this.shoppingAddressDescription = shoppingAddressDescription;
         }
         if (medicalDisclaimerAccepted != null) {
             this.medicalDisclaimerAccepted = medicalDisclaimerAccepted;
@@ -191,6 +213,22 @@ public class ClientProfile {
 
     public List<String> dietaryPreferences() {
         return dietaryPreferences;
+    }
+
+    public String shoppingProvince() {
+        return shoppingProvince;
+    }
+
+    public String shoppingCity() {
+        return shoppingCity;
+    }
+
+    public String shoppingNeighborhood() {
+        return shoppingNeighborhood;
+    }
+
+    public String shoppingAddressDescription() {
+        return shoppingAddressDescription;
     }
 
     public boolean medicalDisclaimerAccepted() {

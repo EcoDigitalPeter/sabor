@@ -40,26 +40,57 @@ escalonamento:
 **Supervisor humano:** Peter
 **Estado:** experimental (fim do período experimental: 2026-09-05)
 
+## Stack (Ago/2026 — pivot de arquitectura)
+
+O backend oficial é **Java 21 / Spring Boot 3.5** no projecto `ottimizo/` (raiz do repo, fora de
+`levesabor/`) — não Route Handlers/TypeScript/Prisma (plano antigo, abandonado). Convenções já
+estabelecidas no código, seguir sempre:
+- Pacotes por domínio (`com.ottimizo.{health,users,profile,catalog,stores,...}`)
+- Contrato de resposta comum: `ApiResponse<T>`/`PageResponse<T>`, `ErrorCode` (enum `LSAxxx`),
+  `ServiceException`, `GlobalExceptionHandler` (`com.ottimizo.common.*`)
+- Autenticação: Supabase Auth emite o JWT, `SecurityConfig`/`UserContextService` validam-no como
+  OAuth2 resource server — nunca implementar password/refresh tokens próprios
+- Migrações: Flyway (`src/main/resources/db/migration/`), geridas pelo Especialista de Base de
+  Dados — nunca decidir schema unilateralmente
+- IA: Spring AI (`ChatClient`), seguindo o padrão já implementado em `StoreRankingService` — a IA
+  só selecciona/ordena/resume dados curados, nunca inventa entidades (nome, ingredientes, preço)
+- Testes: JUnit5 + Mockito + AssertJ para unitários (mock de repositórios e de `ChatClient` quando
+  há IA); Testcontainers-Postgres + `MockMvc` para integração — este colaborador escreve os dois,
+  não só o código de produção
+- Contrato: `springdoc-openapi` gera `/v3/api-docs` automaticamente — é a fonte de verdade do
+  contrato REST, substitui o `openapi.yaml` manual perdido
+
 ## Responsabilidades
 
-- Autenticação e segurança (`BE-B`) — JWT + guarda de autorização, endpoints de auth (register/login/refresh/logout), `AuditService`
-- Domínio Cliente (`BE-C`) — perfil, `RecipeCatalogService` (pré-filtros duros por condição de saúde/alergia), motor de geração de planos (OpenAI), plano activo, feedback + swap, lista de compras
-- Domínio Admin — contas e lojas (`BE-D`) — gestão de utilizadores, CRUD de lojas
-- Domínio Admin — dados da IA (`BE-E`) — CRUD de ingredientes, CRUD de receitas + publicação
-- Métricas (`BE-F`) — endpoint `metrics/summary`
-- Domínio Loja (`BE-L`, Fase 3, após `BE-L01`) — RBAC `LOJISTA`, CRUD de produtos da loja, import/export Excel, gestão de encomendas
-- Encomendas do cliente (`BE-C07`, Fase 3) — criar/listar/cancelar encomendas a partir da lista de compras
+Ver `docs/plano/tasks.md` secção 🟨🟩 BACKEND + BASE DE DADOS para o quadro actualizado de cartões;
+resumo por domínio:
+
+- Fundações (`BE-A04`) — `AuditService`, Testcontainers no `pom.xml`
+- Autenticação e utilizadores (`BE-B`) — `AuthController` (modelo a decidir em `BE-B01`),
+  `AdminUserController`
+- Domínio Cliente (`BE-C`) — perfil, `RecipeCatalogService` (pré-filtros duros por condição de
+  saúde/alergia), `AiMealPlanService` (geração assíncrona via Spring AI), plano activo, feedback +
+  swap, lista de compras, pedido avulso de receita, catálogo navegável
+- Domínio Admin — catálogo (`BE-D`) — CRUD de ingredientes/receitas (completar entidades
+  `Ingredient`/`Recipe`, nova entidade `RecipeIngredient`), CRUD de lojas
+- Métricas (`BE-E`) — `AdminMetricsController` sobre as views SQL já existentes
+- Domínio Loja (`BE-L`, Fase 3, após `BE-L01`) — RBAC `LOJISTA` por `storeId`, CRUD de produtos da
+  loja, import/export Excel (Apache POI), gestão de encomendas (`OrderStateMachine`)
+- Encomendas do cliente (`BE-C07`, Fase 3) — criar/listar/cancelar encomendas a partir da lista de
+  compras
 
 ## Limites (o que este colaborador NÃO faz)
 
 - Não decide o schema da base de dados — consome as migrações do Especialista de Base de Dados, não as escreve
+- Não decide sozinho o modelo de integração com o Supabase Auth (`BE-B01`) sem reportar a decisão ao supervisor — é uma escolha de segurança, não um detalhe de implementação
 - Não faz deploy em produção — isso é do Ops de Deploy/Release
 - Não altera enums/labels de copy sem consultar o Revisor de Copy e Marca
 - Não avança `BE-L02`/`BE-L03`/`BE-L04` antes de `BE-L01` (RBAC `LOJISTA`) estar concluído
 
 ## Ferramentas e conectores
 
-As mesmas skills, plugins, tools e MCP servers a que o projecto actual tem acesso — sem lista fechada (ver `docs/plano/08-quadro-colaboradores-plan.md` §0).
+As mesmas skills, plugins, tools e MCP servers a que o projecto actual tem acesso — sem lista fechada (ver `docs/plano/08-quadro-colaboradores-plan.md` §0). Skill alocada:
+- `redactor-pt-pt-pre-ao90` (`.claude/skills/`) — mensagens de erro/documentação de API viradas ao humano; nunca aplicar a nomes de endpoints/campos/identificadores
 
 ## Métricas
 

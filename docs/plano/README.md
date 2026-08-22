@@ -48,35 +48,56 @@ Detalhe completo por persona e funcionalidade: [`01-functional-plan.md`](01-func
 
 ## 5. Arquitetura geral
 
-> **Mudança de plano (Jul/2026):** o deploy passa a ser feito no **Vercel**, que não suporta um processo Java/Spring Boot de longa duração. A app torna-se **fullstack num único projeto Next.js** — mantendo frontend e backend como componentes/camadas distintas no código, mas com um único deploy. A base de dados mantém-se remota (Supabase Postgres).
+> **Mudança de plano (Ago/2026):** o backend volta a ser um **serviço Java/Spring Boot separado**
+> (`ottimizo/`, Java 21, Spring Boot 3.5) — a tentativa anterior de backend fullstack dentro do
+> mesmo projeto Next.js (Route Handlers + Prisma) foi abandonada. O frontend Next.js mantém-se
+> como aplicação à parte (PWA, mobile-first) e passa a consumir o backend Java por HTTP
+> (`/api/v1/**`). A base de dados mantém-se remota (Supabase Postgres), mas agora com Supabase
+> Auth também em uso (o backend valida os JWT emitidos pelo Supabase) — decisão que reverte a
+> proibição anterior de usar Supabase Auth.
+>
+> `03-backend-plan.md` e `04-database-plan.md` ainda descrevem a arquitetura anterior
+> (Route Handlers/Prisma) e precisam de ser reescritos para refletir Java/Spring/Flyway — isto
+> ainda não foi feito; não os tratem como espec atual até lá.
 
 ```
-┌────────────────────────────────────────────────┐
-│  Next.js (App Router) — 1 único deploy (Vercel) │
-│  ┌────────────────┐   ┌───────────────────────┐ │
-│  │ Frontend (PWA) │   │ Backend — Route        │ │──────▶ OpenAI API
-│  │ Portal Cliente │   │ Handlers /api/v1/**    │ │        (Structured Outputs,
-│  │ Admin · Loja   │   │ Auth JWT (jose) · RBAC │ │         chamada síncrona)
-│  └────────────────┘   └───────────┬───────────┘ │
-└────────────────────────────────────┼─────────────┘
-                                     │ Prisma (ligação com pooling)
-                                     ▼
-                        ┌─────────────────────────────┐
-                        │  PostgreSQL remoto (Supabase)│  usado APENAS como Postgres gerido —
-                        │  schema gerido por Prisma    │  sem Auth/Storage/Realtime/Edge Functions
-                        │  Migrate                     │
-                        └─────────────────────────────┘
+┌─────────────────────────┐        ┌────────────────────────────────┐
+│ Next.js (App Router)    │        │ Spring Boot — ottimizo          │
+│ Frontend PWA (Vercel)   │──HTTP─▶│ /api/v1/** (Java 21)             │──────▶ OpenAI API
+│ Portal Cliente          │        │ Auth JWT (Supabase) · RBAC       │        (Spring AI ChatClient)
+│ Admin · Loja            │        │ Flyway migrations                │
+└─────────────────────────┘        └────────────────┬─────────────────┘
+                                                      │ Spring Data JPA / Hibernate
+                                                      ▼
+                                     ┌───────────────────────────────┐
+                                     │  PostgreSQL remoto (Supabase)  │
+                                     │  schema gerido por Flyway      │
+                                     │  Auth via Supabase Auth (JWT)  │
+                                     └───────────────────────────────┘
 ```
 
 Decisões estruturantes (fixas para todas as equipas):
 
-- **Deploy**: um único projeto **Next.js (App Router)** no **Vercel**, incluindo frontend e backend (Route Handlers) — sem serviço Java separado. Plano **Vercel Pro** necessário para `maxDuration` alargado (chamada de geração de plano, 10–30 s).
-- **Base de dados**: Supabase **exclusivamente como PostgreSQL remoto** — ligação via Prisma com **pooling obrigatório** (transaction pooler do Supabase; ambiente serverless não sustenta ligações persistentes). É **proibido** usar Supabase Auth, Storage, Edge Functions, Realtime ou depender de RLS, para evitar lock-in. Migrar de fornecedor deve custar apenas mudar a connection string.
-- **Backend**: TypeScript, no mesmo projeto Next.js — Route Handlers (`src/app/api/v1/**/route.ts`) implementam o mesmo contrato REST já documentado (`ApiResponse`, códigos `LSAxxx`, OpenAPI); camadas de serviços/repositórios organizadas por pastas (ver [`03-backend-plan.md`](03-backend-plan.md)).
-- **Autenticação**: JWT próprio (access + refresh token) com a lib `jose`, utilizadores persistidos com hash (`bcrypt`/`argon2`). Zero dependência de Supabase Auth.
-- **Motor de IA**: OpenAI (structured outputs / function calling), chamada **síncrona** dentro do Route Handler de geração (decisão explícita para evitar filas/cron em serverless), abstraído atrás de uma interface (`AiMealPlanService`) para permitir troca de fornecedor.
-- **Frontend**: Next.js com PWA (service worker), mobile-first, identidade visual herdada da landing (`project/Leve Sabor AI.dc.html`).
-- **Migrations**: Prisma Migrate, schema versionado no repositório (`prisma/schema.prisma` + `prisma/migrations/`) — a BD é 100% reprodutível.
+- **Deploy**: dois serviços separados — frontend **Next.js (App Router)** no **Vercel** (PWA,
+  mobile-first) e backend **Spring Boot** (`ottimizo/`, Java 21) como serviço à parte, expondo
+  `/api/v1/**`. Sem lógica de negócio em Route Handlers Next.js — o frontend consome o backend
+  Java por HTTP.
+- **Base de dados**: Supabase PostgreSQL remoto, schema gerido por **Flyway** (migrações
+  versionadas em `ottimizo/src/main/resources/db/migration/`), ligação via Spring Data JPA.
+- **Backend**: Java 21 / Spring Boot 3.5, organizado em pacotes por domínio (`health`, `users`,
+  `profile`, `catalog`, `stores`, …), contrato de resposta comum (`ApiResponse<T>`, códigos
+  `LSAxxx`, `GlobalExceptionHandler`), documentado automaticamente via `springdoc-openapi`
+  (`/v3/api-docs`).
+- **Autenticação**: Supabase Auth emite o JWT; o backend valida-o como *OAuth2 resource server*
+  (issuer/JWKS configuráveis) — sem gerir password nem refresh tokens próprios.
+- **Motor de IA**: Spring AI (`ChatClient`) sobre a API da OpenAI — a IA nunca inventa entidades,
+  só seleciona/ordena/resume dados já curados no catálogo (ver `StoreRankingService` como
+  referência de padrão já implementado).
+- **Frontend**: Next.js com PWA (service worker), mobile-first, identidade visual herdada da
+  landing (`project/Leve Sabor AI.dc.html`), consome o backend Java via `fetch` contra
+  `/api/v1/**`.
+- **Migrations**: Flyway, schema versionado em `ottimizo/src/main/resources/db/migration/` — a
+  BD é 100% reprodutível a partir do repositório.
 
 ## 6. Fases e investimento
 
@@ -104,6 +125,7 @@ Tudo o que não consta das Fases 1–3 está marcado nos documentos como **Futur
 | [`06-guia-de-copy-e-marca.md`](06-guia-de-copy-e-marca.md) | Regras de linguagem e posicionamento destiladas do feedback do cliente sobre a landing — checklist para copy nova em qualquer ecrã | Frontend + Design |
 | [`07-prompts-ilustracoes-gaps.md`](07-prompts-ilustracoes-gaps.md) | Prompts de ilustração para as novas funcionalidades identificadas no feedback do cliente (P-12, P-13) | Frontend + Design |
 | [`08-quadro-colaboradores-plan.md`](08-quadro-colaboradores-plan.md) | Quadro de colaboradores digitais (QUADRO OS) proposto para o backlog `BE-*`/`DB-*`/`INT-*`, e plano de contratação/configuração | Todas |
+| [`10-checklist-integracao-backend.md`](10-checklist-integracao-backend.md) | Checklist passo a passo (básico → avançado) para arrancar o backend real, activar o Supabase Auth Hook, ligar o frontend e chegar ao deploy (`INT-01`/`INT-02`) | Backend + Gestão |
 
 ### Convenção de identificadores de funcionalidades
 

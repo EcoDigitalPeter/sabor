@@ -42,7 +42,8 @@ escalonamento:
 
 ## Ferramentas e conectores
 
-As mesmas skills, plugins, tools e MCP servers a que o projecto actual tem acesso — sem lista fechada (ver `docs/plano/08-quadro-colaboradores-plan.md` §0).
+As mesmas skills, plugins, tools e MCP servers a que o projecto actual tem acesso — sem lista fechada (ver `docs/plano/08-quadro-colaboradores-plan.md` §0). Skill alocada:
+- `redactor-pt-pt-pre-ao90` (`.claude/skills/`) — notas de release, comunicação de incidentes; nunca aplicar a nomes de variáveis de ambiente/comandos
 
 ## Métricas
 

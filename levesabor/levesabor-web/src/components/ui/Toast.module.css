@@ -28,7 +28,7 @@
   text-align: center;
   box-shadow: 0 8px 24px rgba(36, 26, 20, 0.18);
   border-left: 4px solid transparent;
-  animation: ls-rise 0.28s ease-out;
+  animation: ls-rise var(--motion-base) var(--ease-out);
 }
 
 .success {

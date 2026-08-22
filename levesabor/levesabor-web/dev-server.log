@@ -1,0 +1,30 @@
+
+> levesabor-web@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ○ (pwa) PWA support is disabled.
+ ✓ Ready in 21.2s
+ ○ Compiling /registo ...
+ ✓ Compiled /registo in 12s (1253 modules)
+ GET /registo 200 in 12364ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 519ms (1152 modules)
+ GET /icons/icon-192.png 404 in 665ms
+ ○ Compiling /onboarding ...
+ ✓ Compiled /onboarding in 2.2s (1235 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 593ms (1201 modules)
+ GET /icons/icon-192.png 404 in 912ms
+ GET /registo 200 in 122ms
+ GET /icons/icon-192.png 404 in 48ms
+ GET /icons/icon-192.png 404 in 53ms
+ GET /onboarding 200 in 313ms
+ GET /icons/icon-192.png 404 in 38ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1531ms (1207 modules)
+ GET /icons/icon-192.png 404 in 149ms

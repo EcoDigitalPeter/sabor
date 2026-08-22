@@ -91,6 +91,11 @@ public class MealPlanEntry {
         this.feedback = EntryFeedback.NONE;
     }
 
+    /** "Comi isto" (gamificacao discreta, FE-V01) — independente de {@link #feedback} (👍/👎). */
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
     @PrePersist
     void onCreate() {
         OffsetDateTime now = OffsetDateTime.now();

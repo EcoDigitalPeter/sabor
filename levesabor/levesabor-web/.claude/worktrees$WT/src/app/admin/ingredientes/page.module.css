@@ -1,0 +1,45 @@
+/* FE-D07 · T-19 Ingredientes — layout da página, mesmo idioma de admin/page.module.css */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-input);
+  background: transparent;
+  color: var(--terracotta);
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  background: var(--cream-card-alt);
+}
+
+.deleteButton:focus-visible {
+  outline: var(--focus-on-light);
+  outline-offset: 2px;
+}

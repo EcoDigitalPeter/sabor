@@ -1,0 +1,98 @@
+- generic [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e33]:
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - paragraph [ref=e36]: Boa tarde, Amélia
+        - heading "O teu plano · Julho 2026" [level=1] [ref=e37]
+        - generic [ref=e38]:
+          - img "1 de 30 dias com refeições marcadas este mês" [ref=e186]:
+            - generic [ref=e43]: 1/30
+          - paragraph [ref=e44]: Já marcaste refeições em 1 dia seguido.
+      - generic [ref=e45]:
+        - paragraph [ref=e46]: Não sabes o que cozinhar agora?
+        - link "Pedir uma receita" [ref=e47] [cursor=pointer]:
+          - /url: /plano/pedir-agora
+      - tablist "Semanas do plano" [ref=e48]:
+        - tab "Semana 1" [ref=e49] [cursor=pointer]
+        - tab "Semana 2" [selected] [ref=e50] [cursor=pointer]
+        - tab "Semana 3" [ref=e51] [cursor=pointer]
+        - tab "Semana 4" [ref=e52] [cursor=pointer]
+        - tab "Semana 5" [ref=e53] [cursor=pointer]
+      - tablist "Dias da semana" [ref=e54]:
+        - tab "seg 20" [ref=e55] [cursor=pointer]:
+          - generic [ref=e56]: seg
+          - generic [ref=e57]: "20"
+        - tab "ter 21" [ref=e58] [cursor=pointer]:
+          - generic [ref=e59]: ter
+          - generic [ref=e60]: "21"
+        - tab "qua 22" [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: qua
+          - generic [ref=e63]: "22"
+        - tab "qui 23" [ref=e64] [cursor=pointer]:
+          - generic [ref=e65]: qui
+          - generic [ref=e66]: "23"
+        - tab "sex 24" [ref=e67] [cursor=pointer]:
+          - generic [ref=e68]: sex
+          - generic [ref=e69]: "24"
+        - tab "sáb 25" [selected] [ref=e70] [cursor=pointer]:
+          - generic [ref=e71]: sáb
+          - generic [ref=e72]: "25"
+        - tab "dom 26" [ref=e73] [cursor=pointer]:
+          - generic [ref=e74]: dom
+          - generic [ref=e75]: "26"
+      - generic [ref=e76]:
+        - link "Desmarcar \"Comi isto\" Pequeno-almoço Mingau de milho branco com canela 15 min 290 kcal — Proteína 8%, Carboidratos 66%, Gordura 16%, Fibra 10%" [ref=e187] [cursor=pointer]:
+          - /url: /plano/refeicao/37
+          - button "Desmarcar \"Comi isto\"" [active] [pressed] [ref=e188]
+          - generic [ref=e82]:
+            - generic [ref=e83]: Pequeno-almoço
+            - heading "Mingau de milho branco com canela" [level=3] [ref=e84]
+            - generic [ref=e85]: 15 min
+          - img "290 kcal — Proteína 8%, Carboidratos 66%, Gordura 16%, Fibra 10%" [ref=e89]:
+            - generic [ref=e96]: "290"
+        - link "Marcar \"Comi isto\" Almoço Mandioca cozida com molho de amendoim e folhas 40 min 580 kcal — Proteína 14%, Carboidratos 58%, Gordura 22%, Fibra 6%" [ref=e97] [cursor=pointer]:
+          - /url: /plano/refeicao/38
+          - button "Marcar \"Comi isto\"" [ref=e99]
+          - generic [ref=e102]:
+            - generic [ref=e103]: Almoço
+            - heading "Mandioca cozida com molho de amendoim e folhas" [level=3] [ref=e104]
+            - generic [ref=e105]: 40 min
+          - img "580 kcal — Proteína 14%, Carboidratos 58%, Gordura 22%, Fibra 6%" [ref=e109]:
+            - generic [ref=e116]: "580"
+        - link "Marcar \"Comi isto\" Jantar Caril de galinha com batata-doce 45 min 560 kcal — Proteína 26%, Carboidratos 46%, Gordura 22%, Fibra 6%" [ref=e117] [cursor=pointer]:
+          - /url: /plano/refeicao/39
+          - button "Marcar \"Comi isto\"" [ref=e119]
+          - generic [ref=e122]:
+            - generic [ref=e123]: Jantar
+            - heading "Caril de galinha com batata-doce" [level=3] [ref=e124]
+            - generic [ref=e125]: 45 min
+          - img "560 kcal — Proteína 26%, Carboidratos 46%, Gordura 22%, Fibra 6%" [ref=e129]:
+            - generic [ref=e136]: "560"
+      - generic [ref=e138]:
+        - img "1430 kcal — Proteína 17%, Carboidratos 55%, Gordura 21%, Fibra 7%" [ref=e139]:
+          - generic [ref=e146]: "1430"
+        - generic [ref=e147]:
+          - paragraph [ref=e148]: Total do dia
+          - paragraph [ref=e149]: 1430 kcal
+          - list [ref=e150]:
+            - listitem [ref=e151]:
+              - generic [ref=e153]: Proteína
+              - generic [ref=e154]: 17%
+            - listitem [ref=e155]:
+              - generic [ref=e157]: Carboidratos
+              - generic [ref=e158]: 55%
+            - listitem [ref=e159]:
+              - generic [ref=e161]: Gordura
+              - generic [ref=e162]: 21%
+            - listitem [ref=e163]:
+              - generic [ref=e165]: Fibra
+              - generic [ref=e166]: 7%
+      - button "Gerar novo plano" [ref=e168] [cursor=pointer]
+    - navigation "Navegação principal" [ref=e170]:
+      - link "Plano" [ref=e171] [cursor=pointer]:
+        - /url: /plano
+      - link "Compras" [ref=e175] [cursor=pointer]:
+        - /url: /compras
+      - link "Perfil" [ref=e181] [cursor=pointer]:
+        - /url: /perfil

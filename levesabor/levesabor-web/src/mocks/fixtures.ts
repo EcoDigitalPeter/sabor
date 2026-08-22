@@ -134,7 +134,10 @@ export const RECIPE_CATALOG: Record<number, RecipeSnapshot> = {
   },
   5: {
     recipeId: 5,
-    name: "Xima suave com feijão nhemba (pequeno-almoço reforçado)",
+    // FE-Y05 (ago/2026): nome sem descrição entre parênteses — o descritor "pequeno-almoço
+    // reforçado" passou para `mealTag`, mostrado como etiqueta separada por baixo do nome.
+    name: "Xima com feijão nhemba",
+    mealTag: "Pequeno-almoço reforçado",
     kcal: 400,
     prepMinutes: 20,
     estimatedCostMt: 50,
@@ -371,7 +374,9 @@ export const RECIPE_CATALOG: Record<number, RecipeSnapshot> = {
   },
   16: {
     recipeId: 16,
-    name: "Matapa com xima (jantar leve)",
+    // FE-Y05 (ago/2026): idem — "jantar leve" passou para `mealTag`.
+    name: "Matapa com xima",
+    mealTag: "🌙 Jantar leve",
     kcal: 470,
     prepMinutes: 35,
     estimatedCostMt: 130,
@@ -524,6 +529,12 @@ function buildEntries(menu: { breakfast: number; lunch: number; dinner: number }
   ];
 }
 
+// FE-Y05 [Sugestão] (ago/2026): meta diária de kcal para o indicador "dentro do objectivo" —
+// hand-editado, como FE-X03; ainda não existe cálculo real a partir do perfil (peso/altura/
+// objectivo do onboarding), por isso fixamos um valor plausível para 3 refeições/dia moçambicanas
+// (perto da média real do catálogo usado no menu do mês) até o backend calcular a meta por perfil.
+const DEFAULT_DAILY_TARGET_KCAL = 1500;
+
 function buildInitialPlan(): MealPlan {
   const days: MealPlanDay[] = MONTH_MENU.map((menu, index) => {
     const entries = buildEntries(menu, index);
@@ -531,6 +542,7 @@ function buildInitialPlan(): MealPlan {
       date: MONTH_DATES[index],
       weekday: WEEKDAYS_PT[index % WEEKDAYS_PT.length],
       totalKcal: entries.reduce((sum, e) => sum + (e.recipe?.kcal ?? 0), 0),
+      targetKcal: DEFAULT_DAILY_TARGET_KCAL,
       macros: averageMacros(entries),
       entries,
     };
@@ -678,6 +690,10 @@ let profile: Profile = {
   budgetBand: "MEDIO",
   mealsPerDay: 3,
   householdSize: 1,
+  shoppingProvince: "Maputo Cidade",
+  shoppingCity: "Maputo",
+  shoppingNeighborhood: "Polana",
+  shoppingAddressDescription: "Perto da Av. Julius Nyerere",
 };
 
 export function getProfile(): Profile {
@@ -693,6 +709,7 @@ const DIETARY_PREFERENCES_VOCAB = [
   "sem_lactose",
   "alta_proteina",
   "baixo_calorico",
+  "sem_preferencia",
 ];
 
 export function updateProfile(patch: Profile): MockResult<Profile> {
@@ -704,6 +721,18 @@ export function updateProfile(patch: Profile): MockResult<Profile> {
   }
   if (patch.foodExclusions !== undefined && patch.foodExclusions.length > 20) {
     return errResult("LSA001_VALIDATION", "Máximo de 20 alimentos excluídos.", 400);
+  }
+  if (patch.shoppingProvince !== undefined && patch.shoppingProvince.trim().length > 80) {
+    return errResult("LSA001_VALIDATION", "A provÃ­ncia deve ter no mÃ¡ximo 80 caracteres.", 400);
+  }
+  if (patch.shoppingCity !== undefined && patch.shoppingCity.trim().length > 80) {
+    return errResult("LSA001_VALIDATION", "A cidade deve ter no mÃ¡ximo 80 caracteres.", 400);
+  }
+  if (patch.shoppingNeighborhood !== undefined && patch.shoppingNeighborhood.trim().length > 120) {
+    return errResult("LSA001_VALIDATION", "O bairro ou zona deve ter no mÃ¡ximo 120 caracteres.", 400);
+  }
+  if (patch.shoppingAddressDescription !== undefined && patch.shoppingAddressDescription.trim().length > 180) {
+    return errResult("LSA001_VALIDATION", "A descriÃ§Ã£o deve ter no mÃ¡ximo 180 caracteres.", 400);
   }
   if (patch.householdSize !== undefined && (patch.householdSize < 1 || patch.householdSize > 8)) {
     return errResult("LSA001_VALIDATION", "O número de pessoas em casa deve ser entre 1 e 8.", 400);
@@ -744,6 +773,28 @@ function getHouseholdSize(): number {
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+// FE-Y07: feedback do cliente — a quantidade agregada (ex. "800 ml de óleo") não existe como
+// embalagem real na loja; arredonda-se para cima, para o tamanho de embalagem mais próximo
+// disponível (500ml, 1000ml, 2000ml…). Tabela global por unidade (não caso a caso, como pedido) —
+// aplica-se só a "g"/"ml" (quantidades a granel); unidades discretas ("unidade", "saqueta",
+// "fatia"…) já vêm inteiras e não passam por aqui. Fora do âmbito desta tarefa (nota do cliente
+// para "reflexão futura"): unidades mais "naturais" por ingrediente (ex. "1 cabeça de alho").
+const PACKAGE_SIZES_BY_UNIT: Record<string, number[]> = {
+  ml: [250, 500, 1000, 2000, 5000],
+  g: [250, 500, 1000, 2000, 5000],
+};
+
+function roundToPackageSize(quantity: number, unit: string): number {
+  const sizes = PACKAGE_SIZES_BY_UNIT[unit];
+  if (!sizes || quantity <= 0) return quantity;
+  const largest = sizes[sizes.length - 1];
+  if (quantity > largest) {
+    // Acima da maior embalagem da tabela: compram-se várias embalagens desse tamanho.
+    return Math.ceil(quantity / largest) * largest;
+  }
+  return sizes.find((size) => size >= quantity) ?? largest;
 }
 
 function scaleRecipeSnapshot(recipe: RecipeSnapshot | undefined): RecipeSnapshot | undefined {
@@ -1005,7 +1056,7 @@ function buildShoppingList(): ShoppingList {
 
   const items: ShoppingListItem[] = Array.from(aggregates.values()).map((agg, index) => {
     const match = lookup.get(normalizeIngredientName(agg.displayName));
-    const quantity = round2(agg.quantity);
+    const quantity = roundToPackageSize(round2(agg.quantity), agg.unit);
     return {
       id: index + 1,
       ingredientName: agg.displayName,
@@ -1056,7 +1107,8 @@ function scaleShoppingItem(item: ShoppingListItem): ShoppingListItem {
   if (size === 1) return item;
   return {
     ...item,
-    quantity: item.quantity != null ? round2(item.quantity * size) : item.quantity,
+    quantity:
+      item.quantity != null ? roundToPackageSize(round2(item.quantity * size), item.unit ?? "") : item.quantity,
     estimatedCostMt: item.estimatedCostMt == null ? null : round2(item.estimatedCostMt * size),
   };
 }
@@ -1252,12 +1304,85 @@ export const ADMIN_USERS: User[] = [
   },
 ];
 
+// FE-Y08 (ago/2026) — rating/openingHoursText/deliveryAvailable/averagePriceLevel/latitude/longitude
+// são aditivos, só mock (sem endpoint real de avaliações nem geocodificação); coordenadas são
+// aproximadas do bairro só para o mapa ilustrativo da escolha de loja.
 export const ADMIN_STORES: Store[] = [
-  { id: 1, name: "Mercado Central", city: "Maputo", neighborhood: "Baixa", contact: "+258 84 111 2233", status: "ACTIVE", productCount: 48 },
-  { id: 2, name: "Shoprite Matola", city: "Matola", neighborhood: "Fomento", contact: "+258 82 222 3344", status: "ACTIVE", productCount: 120 },
-  { id: 3, name: "Mercado do Povo", city: "Beira", neighborhood: "Centro", contact: null, status: "SUSPENDED", productCount: 15 },
-  { id: 4, name: "Mercearia Central", city: "Maputo", neighborhood: "Polana", contact: "+258 84 333 4455", status: "ACTIVE", productCount: 32 },
-  { id: 5, name: "Loja Zambézia", city: "Quelimane", neighborhood: "Chabeco", contact: "+258 86 555 6677", status: "ACTIVE", productCount: 20 },
+  {
+    id: 1,
+    name: "Mercado Central",
+    city: "Maputo",
+    neighborhood: "Baixa",
+    contact: "+258 84 111 2233",
+    status: "ACTIVE",
+    productCount: 48,
+    rating: 4.8,
+    openingHoursText: "Fecha às 18h",
+    deliveryAvailable: true,
+    averagePriceLevel: "MEDIO",
+    latitude: -25.9658,
+    longitude: 32.5892,
+  },
+  {
+    id: 2,
+    name: "Shoprite Matola",
+    city: "Matola",
+    neighborhood: "Fomento",
+    contact: "+258 82 222 3344",
+    status: "ACTIVE",
+    productCount: 120,
+    rating: 4.5,
+    openingHoursText: "Fecha às 21h",
+    deliveryAvailable: true,
+    averagePriceLevel: "MEDIO",
+    latitude: -25.9622,
+    longitude: 32.4589,
+  },
+  {
+    id: 3,
+    name: "Mercado do Povo",
+    city: "Beira",
+    neighborhood: "Centro",
+    contact: null,
+    status: "SUSPENDED",
+    productCount: 15,
+    rating: 3.9,
+    openingHoursText: "Fecha às 17h",
+    deliveryAvailable: false,
+    averagePriceLevel: "BAIXO",
+    latitude: -19.8436,
+    longitude: 34.8389,
+  },
+  {
+    id: 4,
+    name: "Mercearia Central",
+    city: "Maputo",
+    neighborhood: "Polana",
+    contact: "+258 84 333 4455",
+    status: "ACTIVE",
+    productCount: 32,
+    rating: 4.2,
+    openingHoursText: "Fecha às 19h",
+    deliveryAvailable: false,
+    averagePriceLevel: "ALTO",
+    latitude: -25.9553,
+    longitude: 32.6027,
+  },
+  {
+    id: 5,
+    name: "Loja Zambézia",
+    city: "Quelimane",
+    neighborhood: "Chabeco",
+    contact: "+258 86 555 6677",
+    status: "ACTIVE",
+    productCount: 20,
+    rating: 4.6,
+    openingHoursText: "Fecha às 18h30",
+    deliveryAvailable: true,
+    averagePriceLevel: "BAIXO",
+    latitude: -17.8786,
+    longitude: 36.8883,
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1789,7 +1914,19 @@ export function getStore(id: number): MockResult<Store> {
   return okResult(store);
 }
 
-type StoreInput = { name?: string; city?: string; neighborhood?: string | null; contact?: string | null };
+type StorePriceLevel = components["schemas"]["StorePriceLevel"];
+type StoreInput = {
+  name?: string;
+  city?: string;
+  neighborhood?: string | null;
+  contact?: string | null;
+  rating?: number | null;
+  openingHoursText?: string | null;
+  deliveryAvailable?: boolean;
+  averagePriceLevel?: StorePriceLevel | null;
+  latitude?: number | null;
+  longitude?: number | null;
+};
 
 function isDuplicateStore(name: string, city: string, excludeId?: number): boolean {
   const n = name.trim().toLowerCase();
@@ -1800,6 +1937,12 @@ function isDuplicateStore(name: string, city: string, excludeId?: number): boole
 }
 
 let nextStoreId = 1000;
+
+// FE-Y08 — rating opcional 0-5; fora do intervalo é erro de validação simples, sem novo código
+// dedicado (reaproveita LSA001_VALIDATION).
+function isValidRating(rating: number | null | undefined): boolean {
+  return rating === undefined || rating === null || (rating >= 0 && rating <= 5);
+}
 
 export function createStore(body: StoreInput): MockResult<Store> {
   const name = body.name?.trim() ?? "";
@@ -1813,6 +1956,9 @@ export function createStore(body: StoreInput): MockResult<Store> {
   if (isDuplicateStore(name, city)) {
     return errResult("LSA006_DUPLICATE", "Já existe uma loja com este nome nesta cidade.", 409);
   }
+  if (!isValidRating(body.rating)) {
+    return errResult("LSA001_VALIDATION", "A avaliação deve estar entre 0 e 5.", 400);
+  }
   const store: Store = {
     id: nextStoreId++,
     name,
@@ -1821,6 +1967,12 @@ export function createStore(body: StoreInput): MockResult<Store> {
     contact: body.contact ?? null,
     status: "ACTIVE",
     productCount: 0,
+    rating: body.rating ?? null,
+    openingHoursText: body.openingHoursText ?? null,
+    deliveryAvailable: body.deliveryAvailable ?? false,
+    averagePriceLevel: body.averagePriceLevel ?? null,
+    latitude: body.latitude ?? null,
+    longitude: body.longitude ?? null,
   };
   ADMIN_STORES.push(store);
   return okResult(store, 201);
@@ -1840,10 +1992,19 @@ export function updateStore(id: number, body: StoreInput): MockResult<Store> {
   if (isDuplicateStore(name, city, id)) {
     return errResult("LSA006_DUPLICATE", "Já existe uma loja com este nome nesta cidade.", 409);
   }
+  if (!isValidRating(body.rating)) {
+    return errResult("LSA001_VALIDATION", "A avaliação deve estar entre 0 e 5.", 400);
+  }
   store.name = name;
   store.city = city;
   store.neighborhood = body.neighborhood ?? null;
   store.contact = body.contact ?? null;
+  store.rating = body.rating ?? null;
+  store.openingHoursText = body.openingHoursText ?? null;
+  store.deliveryAvailable = body.deliveryAvailable ?? false;
+  store.averagePriceLevel = body.averagePriceLevel ?? null;
+  store.latitude = body.latitude ?? null;
+  store.longitude = body.longitude ?? null;
   return okResult(store);
 }
 

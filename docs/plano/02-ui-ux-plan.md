@@ -115,7 +115,7 @@ Toda a tela com dados remotos implementa os 4 estados:
 ### T-04 — Dashboard do plano semanal `(/plano)` — Fase 1
 
 - **Objetivo:** consultar a semana e navegar para receitas/compras (F1-CLI-03).
-- **Componentes:** cabeçalho ("O teu plano · 12–18 Jul"), tabs de dias (seg–dom, scroll horizontal, dia atual ativo), lista de cartões de refeição (nome do prato em Bricolage, chips mono `620 kcal · 35 min`, anel `sm`), resumo do dia (kcal totais + macros), banner offline quando aplicável, FAB/botão `Gerar novo plano`.
+- **Componentes:** cabeçalho ("O teu plano · 12–18 Jul"), tabs de dias (seg–dom, scroll horizontal, dia atual ativo), lista de cartões de refeição (nome do prato em Bricolage, chips mono `620 kcal · 35 min`, anel `sm`), resumo do dia (kcal totais + macros), banner offline quando aplicável, FAB/botão `Criar outro plano`.
 - **Ações:** tocar refeição → T-05; `Compras` (bottom-nav) → T-06; gerar novo plano (confirmação: "o plano atual será arquivado") → T-07.
 - **Estados:** `loading (skeleton de 3 cartões) · ready · empty (sem plano → ilustração + CTA "Gerar o meu primeiro plano") · generating (redireciona T-07) · offline (banner "a mostrar plano guardado") · erro`.
 
@@ -202,7 +202,7 @@ Toda a tela com dados remotos implementa os 4 estados:
 ### T-20 — Escolher loja `(/compras/encomendar)` — Fase 3
 
 - **Objetivo:** escolher a loja parceira para onde enviar a encomenda (F3-CLI-07).
-- **Componentes:** lista de lojas ativas (cartão: nome, cidade, contacto), pesquisa simples.
+- **Componentes:** lista de lojas ativas já ordenada pelo backend/mock a partir da zona de compras guardada no perfil; cartão com nome, cidade, contacto, pesquisa simples e mapa aproximado.
 - **Ações:** selecionar loja → T-21.
 - **Estados:** `loading · ready · empty (sem lojas ativas) · erro`.
 

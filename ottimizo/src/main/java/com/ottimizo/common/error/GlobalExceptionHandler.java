@@ -12,9 +12,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<ApiResponse<Void>> handleService(ServiceException ex) {
@@ -60,6 +65,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnknown(Exception ex) {
+        log.error("Unhandled exception", ex);
         return ResponseEntity
             .status(ErrorCode.LSA099_INTERNAL.status())
             .body(ApiResponse.error(ErrorCode.LSA099_INTERNAL.name(), ErrorCode.LSA099_INTERNAL.defaultMessage()));

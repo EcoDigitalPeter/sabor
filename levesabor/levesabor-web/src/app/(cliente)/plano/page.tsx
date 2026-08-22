@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { BrandIllustration } from "@/components/ui/BrandIllustration";
+import { Reveal } from "@/components/ui/Reveal";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useActiveMealPlan } from "@/hooks/useActiveMealPlan";
@@ -25,6 +26,7 @@ import { MonthProgressRing } from "@/components/plan/MonthProgressRing";
 import { useToggleMealPlanEntryCompleted } from "@/hooks/useMealPlanCompleted";
 import {
   computeStreakDays,
+  currentMealSlot,
   formatMonthLabel,
   sortEntriesBySlot,
   streakLabel,
@@ -132,6 +134,17 @@ export default function PlanoPage() {
   const streak = computeStreakDays(days);
   const completedDaysCount = days.filter((day) => (day.entries ?? []).some((entry) => entry.completed)).length;
 
+  // FE-Y05 [nice-to-have] · resumo diário sob o mês, sempre relativo a "hoje" (não ao dia
+  // seleccionado nas tabs) — dá contexto imediato sem depender do "0/30" (feedback do cliente).
+  const todayDay = days.find((day) => day.date === todayIsoDate());
+  const todayEntryCount = todayDay?.entries?.length ?? 0;
+  const todayCostMt = (todayDay?.entries ?? []).reduce((sum, entry) => sum + (entry.recipe?.estimatedCostMt ?? 0), 0);
+
+  // FE-Y05 · destaca o cartão da refeição "actual" por hora do dia — só quando o dia seleccionado
+  // nas tabs é mesmo hoje (noutros dias não faz sentido destacar nada).
+  const isSelectedDayToday = selectedDay?.date === todayIsoDate();
+  const activeMealSlot = currentMealSlot();
+
   return (
     <main className={styles.main}>
       {!isOnline ? (
@@ -149,6 +162,12 @@ export default function PlanoPage() {
             <MonthProgressRing completedDays={completedDaysCount} totalDays={days.length} size="sm" />
             <p className={styles.streakText}>{streakLabel(streak)}</p>
           </div>
+        ) : null}
+        {todayDay ? (
+          <p className={styles.todaySummary}>
+            Hoje · {todayEntryCount} {todayEntryCount === 1 ? "refeição" : "refeições"} · {todayDay.totalKcal ?? 0}{" "}
+            kcal · {todayCostMt} MT
+          </p>
         ) : null}
       </header>
 
@@ -176,32 +195,36 @@ export default function PlanoPage() {
       />
 
       <div className={styles.cardList}>
-        {sortedEntries.map((entry) => (
-          <MealCard
-            key={entry.id}
-            entry={entry}
-            href={`/plano/refeicao/${entry.id}`}
-            onToggleCompleted={(next) => {
-              if (entry.id === undefined) return;
-              toggleCompletedMutation.mutate({ id: entry.id, completed: next });
-            }}
-          />
+        {sortedEntries.map((entry, index) => (
+          <Reveal key={entry.id} delay={index * 40}>
+            <MealCard
+              entry={entry}
+              href={`/plano/refeicao/${entry.id}`}
+              current={isSelectedDayToday && entry.mealSlot === activeMealSlot}
+              onToggleCompleted={(next) => {
+                if (entry.id === undefined) return;
+                toggleCompletedMutation.mutate({ id: entry.id, completed: next });
+              }}
+            />
+          </Reveal>
         ))}
       </div>
 
       {selectedDay ? <DaySummary day={selectedDay} className={styles.summary} /> : null}
 
       <div className={styles.footerActions}>
+        {/* FE-Y05 (ago/2026) · renomeado a pedido do cliente — "Gerar novo plano" soava a apagar
+            tudo; "Criar outro plano" deixa claro que é uma alternativa, não uma substituição. */}
         <Button variant="secondary" onClick={() => setConfirmOpen(true)}>
-          Gerar novo plano
+          Criar outro plano
         </Button>
       </div>
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Gerar novo plano"
-        message="O plano atual será arquivado. Queres continuar?"
-        confirmLabel="Gerar novo plano"
+        title="Criar outro plano"
+        message="O plano actual passa a arquivo e criamos um novo a partir das tuas preferências. Queres continuar?"
+        confirmLabel="Criar outro plano"
         cancelLabel="Cancelar"
         onConfirm={() => {
           setConfirmOpen(false);

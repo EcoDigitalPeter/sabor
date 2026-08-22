@@ -13,6 +13,7 @@ import com.ottimizo.catalog.MealFeedbackService;
 import com.ottimizo.catalog.Recipe;
 import com.ottimizo.catalog.RecipeCatalogService;
 import com.ottimizo.catalog.RecipeSnapshotFactory;
+import com.ottimizo.catalog.RecipeSwapReasonRepository;
 import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
 import com.ottimizo.common.security.CurrentUser;
@@ -50,6 +51,8 @@ class MealPlanSwapServiceTest {
     private RecipeCatalogService recipeCatalogService;
     @Mock
     private MealFeedbackService mealFeedbackService;
+    @Mock
+    private RecipeSwapReasonRepository swapReasons;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RecipeSnapshotFactory recipeSnapshotFactory = new RecipeSnapshotFactory(objectMapper);
@@ -62,7 +65,7 @@ class MealPlanSwapServiceTest {
     @BeforeEach
     void setUp() {
         service = new MealPlanSwapService(
-            mealPlanEntries, clientProfiles, recipeCatalogService, mealFeedbackService, recipeSnapshotFactory
+            mealPlanEntries, clientProfiles, recipeCatalogService, mealFeedbackService, recipeSnapshotFactory, swapReasons
         );
     }
 
@@ -73,7 +76,7 @@ class MealPlanSwapServiceTest {
         CurrentUser actor = clientUser(USER_A);
         when(mealPlanEntries.findByIdWithOwnership(999L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.swap(999L, actor, true))
+        assertThatThrownBy(() -> service.swap(999L, actor, true, null))
             .isInstanceOf(ServiceException.class)
             .extracting("code")
             .isEqualTo(ErrorCode.LSA005_NOT_FOUND);
@@ -85,7 +88,7 @@ class MealPlanSwapServiceTest {
         MealPlanEntry entryOfUserA = mealPlanEntry(USER_A, 1000L, 500);
         when(mealPlanEntries.findByIdWithOwnership(1000L)).thenReturn(Optional.of(entryOfUserA));
 
-        assertThatThrownBy(() -> service.swap(1000L, actorB, true))
+        assertThatThrownBy(() -> service.swap(1000L, actorB, true, null))
             .isInstanceOf(ServiceException.class)
             .extracting("code")
             .isEqualTo(ErrorCode.LSA005_NOT_FOUND);
@@ -110,7 +113,7 @@ class MealPlanSwapServiceTest {
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet()))
             .thenReturn(List.of(tooLow, withinRange, tooHigh));
 
-        SwapResponse response = service.swap(1000L, actor, false);
+        SwapResponse response = service.swap(1000L, actor, false, null);
 
         assertThat(response.state()).isEqualTo("proposed");
         assertThat(response.alternative().recipe().get("recipeId").asLong()).isEqualTo(3L);
@@ -130,7 +133,7 @@ class MealPlanSwapServiceTest {
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet()))
             .thenReturn(List.of(sameRecipe, alternative));
 
-        SwapResponse response = service.swap(1000L, actor, false);
+        SwapResponse response = service.swap(1000L, actor, false, null);
 
         assertThat(response.alternative().recipe().get("recipeId").asLong()).isEqualTo(5L);
     }
@@ -147,7 +150,7 @@ class MealPlanSwapServiceTest {
         Recipe farTooHigh = recipeWithKcal(2L, 2000);
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet())).thenReturn(List.of(farTooHigh));
 
-        assertThatThrownBy(() -> service.swap(1000L, actor, true))
+        assertThatThrownBy(() -> service.swap(1000L, actor, true, null))
             .isInstanceOf(ServiceException.class)
             .extracting("code")
             .isEqualTo(ErrorCode.LSA014_NO_ALTERNATIVE);
@@ -163,7 +166,7 @@ class MealPlanSwapServiceTest {
         when(mealFeedbackService.dislikedRecipeIds(USER_A)).thenReturn(Set.of());
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet())).thenReturn(List.of());
 
-        assertThatThrownBy(() -> service.swap(1000L, actor, true))
+        assertThatThrownBy(() -> service.swap(1000L, actor, true, null))
             .isInstanceOf(ServiceException.class)
             .extracting("code")
             .isEqualTo(ErrorCode.LSA014_NO_ALTERNATIVE);
@@ -182,7 +185,7 @@ class MealPlanSwapServiceTest {
         Recipe alternative = recipeWithKcal(9L, 500);
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet())).thenReturn(List.of(alternative));
 
-        SwapResponse response = service.swap(1000L, actor, false);
+        SwapResponse response = service.swap(1000L, actor, false, null);
 
         assertThat(response.state()).isEqualTo("proposed");
         assertThat(entry.recipeId()).isEqualTo(1L); // entrada nao foi tocada
@@ -201,7 +204,7 @@ class MealPlanSwapServiceTest {
         Recipe alternative = recipeWithKcal(9L, 500);
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet())).thenReturn(List.of(alternative));
 
-        SwapResponse response = service.swap(1000L, actor, true);
+        SwapResponse response = service.swap(1000L, actor, true, null);
 
         assertThat(response.state()).isEqualTo("applied");
         assertThat(entry.recipeId()).isEqualTo(9L);
@@ -221,7 +224,7 @@ class MealPlanSwapServiceTest {
         Recipe alternative = recipeWithKcal(9L, 500);
         when(recipeCatalogService.eligibleFor(profile, Set.of(7L), Set.of(8L))).thenReturn(List.of(alternative));
 
-        service.swap(1000L, actor, false);
+        service.swap(1000L, actor, false, null);
 
         org.mockito.Mockito.verify(recipeCatalogService).eligibleFor(profile, Set.of(7L), Set.of(8L));
     }

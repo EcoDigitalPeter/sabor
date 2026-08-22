@@ -2,7 +2,8 @@
 // FE-P02 · Reveal — revela conteúdo com fade+translate ao entrar no viewport (IntersectionObserver).
 // Sem JS ou antes do observer montar o conteúdo está sempre visível (a classe "hidden" só é
 // aplicada depois do useEffect correr); sob prefers-reduced-motion revela de imediato, sem esperar
-// o scroll. Usado para o stagger das secções da landing v2 — nunca esconde conteúdo indexável.
+// o scroll. Peça partilhada de motion (originalmente só da landing v2, promovida para o resto da
+// app) — nunca esconde conteúdo indexável.
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import styles from "./motion.module.css";
 

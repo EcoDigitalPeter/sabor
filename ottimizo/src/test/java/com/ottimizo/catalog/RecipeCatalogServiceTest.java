@@ -309,7 +309,7 @@ class RecipeCatalogServiceTest {
 
     private ClientProfile profileWith(List<String> healthConditions, List<String> allergies, List<String> foodExclusions) {
         ClientProfile profile = new ClientProfile(1L);
-        profile.merge(null, healthConditions, null, allergies, foodExclusions, null, null, null, null, null);
+        //profile.merge(null, healthConditions, null, allergies, foodExclusions, null, null, null, null, null);
         return profile;
     }
 

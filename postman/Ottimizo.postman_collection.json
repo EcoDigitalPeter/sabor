@@ -1,0 +1,639 @@
+{
+  "info": {
+    "_postman_id": "ottimizo-backend-collection",
+    "name": "Ottimizo Backend (ottimizo)",
+    "description": "Colecao Postman para o backend Java/Spring Boot do Ottimizzo (com.ottimizo, /api/v1/**). Login faz-se via Supabase Auth (nao contra o backend) e o token e guardado automaticamente na variavel de colecao {{access_token}}, usada por Bearer Auth em todos os outros pedidos. Ver README.md ao lado deste ficheiro.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{access_token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080", "type": "string" },
+    { "key": "supabase_url", "value": "https://fdbgtfafynvteakamkuf.supabase.co", "type": "string" },
+    { "key": "supabase_anon_key", "value": "sb_publishable_FZgyFl-JT1I2weI5XVa4EA_D5IyYKl4", "type": "string" },
+    { "key": "test_email", "value": "teste.integracao.1787308566098@gmail.com", "type": "string" },
+    { "key": "test_password", "value": "", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "recipe_id", "value": "1", "type": "string" },
+    { "key": "ingredient_id", "value": "1", "type": "string" },
+    { "key": "store_id", "value": "1", "type": "string" },
+    { "key": "user_id", "value": "1", "type": "string" },
+    { "key": "product_id", "value": "1", "type": "string" },
+    { "key": "order_id", "value": "1", "type": "string" },
+    { "key": "entry_id", "value": "1", "type": "string" },
+    { "key": "item_id", "value": "1", "type": "string" },
+    { "key": "adhoc_id", "value": "1", "type": "string" },
+    { "key": "import_job_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth (Supabase)",
+      "item": [
+        {
+          "name": "Login (password grant) — guarda access_token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{supabase_anon_key}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{supabase_url}}/auth/v1/token?grant_type=password",
+              "host": ["{{supabase_url}}"],
+              "path": ["auth", "v1", "token"],
+              "query": [{ "key": "grant_type", "value": "password" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+            },
+            "description": "Login directo contra o Supabase Auth (nao e' um endpoint do backend). Preenche a variavel de colecao test_password antes de correr. O script em Tests guarda o access_token devolvido na variavel de colecao access_token, usada como Bearer em todos os outros pedidos desta colecao."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.access_token) {",
+                  "    pm.collectionVariables.set('access_token', body.access_token);",
+                  "    console.log('access_token guardado (' + body.access_token.length + ' chars)');",
+                  "} else {",
+                  "    console.warn('Sem access_token na resposta — confere test_email/test_password.');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register (backend) — cria perfil apos signup Supabase",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Utilizador Teste\"\n}"
+            },
+            "description": "Chamado depois do signup no Supabase Auth (o utilizador ja tem de ter sessao — usa o access_token do signup como Bearer). Corpo opcional (so 'name')."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/v1/health", "host": ["{{base_url}}"], "path": ["api", "v1", "health"] }
+          }
+        },
+        {
+          "name": "Actuator Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/actuator/health", "host": ["{{base_url}}"], "path": ["actuator", "health"] }
+          }
+        },
+        {
+          "name": "Lojas (lista publica)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/v1/stores", "host": ["{{base_url}}"], "path": ["api", "v1", "stores"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin / Receitas",
+      "item": [
+        {
+          "name": "Listar receitas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/recipes?status=PUBLISHED&tag=&q=",
+              "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes"],
+              "query": [
+                { "key": "status", "value": "PUBLISHED", "disabled": true },
+                { "key": "tag", "value": "", "disabled": true },
+                { "key": "q", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter receita por id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/v1/admin/recipes/{{recipe_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes", "{{recipe_id}}"] }
+          }
+        },
+        {
+          "name": "Swap reasons da receita",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/v1/admin/recipes/{{recipe_id}}/swap-reasons", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes", "{{recipe_id}}", "swap-reasons"] }
+          }
+        },
+        {
+          "name": "Criar receita",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/recipes", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Receita de teste\",\n  \"description\": \"Descricao de teste\",\n  \"mealTag\": \"almoco\",\n  \"healthNote\": \"\",\n  \"prepMinutes\": 20,\n  \"servings\": 2,\n  \"estimatedCostMt\": 150.00,\n  \"healthTags\": [\"vegetariana\"],\n  \"ingredients\": [\n    { \"ingredientId\": {{ingredient_id}}, \"quantity\": 100, \"unit\": \"g\" }\n  ],\n  \"steps\": [\n    { \"text\": \"Primeiro passo\" }\n  ],\n  \"macrosOverride\": false,\n  \"kcal\": 400,\n  \"proteinPct\": 30,\n  \"carbsPct\": 40,\n  \"fatPct\": 30,\n  \"fiberPct\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar receita",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/recipes/{{recipe_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes", "{{recipe_id}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Receita de teste (actualizada)\",\n  \"description\": \"Descricao actualizada\",\n  \"mealTag\": \"almoco\",\n  \"healthNote\": \"\",\n  \"prepMinutes\": 25,\n  \"servings\": 2,\n  \"estimatedCostMt\": 160.00,\n  \"healthTags\": [\"vegetariana\"],\n  \"ingredients\": [\n    { \"ingredientId\": {{ingredient_id}}, \"quantity\": 120, \"unit\": \"g\" }\n  ],\n  \"steps\": [\n    { \"text\": \"Passo actualizado\" }\n  ],\n  \"macrosOverride\": false,\n  \"kcal\": 420,\n  \"proteinPct\": 30,\n  \"carbsPct\": 40,\n  \"fatPct\": 30,\n  \"fiberPct\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "Publicar / despublicar receita",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/recipes/{{recipe_id}}/status", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes", "{{recipe_id}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"PUBLISHED\"\n}" },
+            "description": "status: DRAFT | PUBLISHED"
+          }
+        },
+        {
+          "name": "Apagar receita",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/api/v1/admin/recipes/{{recipe_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "recipes", "{{recipe_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin / Ingredientes",
+      "item": [
+        {
+          "name": "Listar ingredientes",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/admin/ingredients", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "ingredients"] } }
+        },
+        {
+          "name": "Obter ingrediente por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/admin/ingredients/{{ingredient_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "ingredients", "{{ingredient_id}}"] } }
+        },
+        {
+          "name": "Criar ingrediente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/ingredients", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "ingredients"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ingrediente de teste\",\n  \"category\": \"CEREAIS\",\n  \"baseUnit\": \"g\",\n  \"kcalPer100g\": 350,\n  \"proteinPer100g\": 8,\n  \"carbsPer100g\": 70,\n  \"fatPer100g\": 1.5,\n  \"fiberPer100g\": 2,\n  \"referencePriceMt\": 80.00,\n  \"active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar ingrediente",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/ingredients/{{ingredient_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "ingredients", "{{ingredient_id}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ingrediente de teste (actualizado)\",\n  \"category\": \"CEREAIS\",\n  \"baseUnit\": \"g\",\n  \"kcalPer100g\": 355,\n  \"proteinPer100g\": 8,\n  \"carbsPer100g\": 70,\n  \"fatPer100g\": 1.5,\n  \"fiberPer100g\": 2,\n  \"referencePriceMt\": 85.00,\n  \"active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Apagar ingrediente",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/api/v1/admin/ingredients/{{ingredient_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "ingredients", "{{ingredient_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Admin / Lojas",
+      "item": [
+        {
+          "name": "Listar lojas",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/admin/stores", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "stores"] } }
+        },
+        {
+          "name": "Obter loja por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/admin/stores/{{store_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "stores", "{{store_id}}"] } }
+        },
+        {
+          "name": "Criar loja",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/stores", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "stores"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Loja de teste\",\n  \"province\": \"Maputo\",\n  \"city\": \"Maputo\",\n  \"neighborhood\": \"Sommerschield\",\n  \"addressLine\": \"Av. de teste, 123\",\n  \"contact\": \"+258840000000\",\n  \"deliveryAvailable\": true,\n  \"rating\": 4.5,\n  \"openingHoursText\": \"08:00-18:00\",\n  \"averagePriceLevel\": \"MEDIO\",\n  \"latitude\": -25.9655,\n  \"longitude\": 32.5832\n}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar loja",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/stores/{{store_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "stores", "{{store_id}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Loja de teste (actualizada)\",\n  \"province\": \"Maputo\",\n  \"city\": \"Maputo\",\n  \"neighborhood\": \"Sommerschield\",\n  \"addressLine\": \"Av. de teste, 456\",\n  \"contact\": \"+258840000000\",\n  \"deliveryAvailable\": true,\n  \"rating\": 4.7,\n  \"openingHoursText\": \"08:00-19:00\",\n  \"averagePriceLevel\": \"MEDIO\",\n  \"latitude\": -25.9655,\n  \"longitude\": 32.5832\n}"
+            }
+          }
+        },
+        {
+          "name": "Activar / suspender loja",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/stores/{{store_id}}/status", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "stores", "{{store_id}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACTIVE\"\n}" },
+            "description": "status: ACTIVE | SUSPENDED"
+          }
+        },
+        {
+          "name": "Apagar loja",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/api/v1/admin/stores/{{store_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "stores", "{{store_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Admin / Utilizadores",
+      "item": [
+        {
+          "name": "Listar utilizadores (filtro por role)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users?role=CLIENTE",
+              "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "users"],
+              "query": [{ "key": "role", "value": "CLIENTE", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Obter utilizador por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/admin/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "users", "{{user_id}}"] } }
+        },
+        {
+          "name": "Perfil de saude do utilizador",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/admin/users/{{user_id}}/health-profile", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "users", "{{user_id}}", "health-profile"] } }
+        },
+        {
+          "name": "Criar utilizador (staff)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/users", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "users"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authUserId\": \"00000000-0000-0000-0000-000000000000\",\n  \"name\": \"Utilizador Staff\",\n  \"email\": \"staff@example.com\",\n  \"role\": \"LOJISTA\",\n  \"storeId\": {{store_id}}\n}"
+            },
+            "description": "authUserId tem de corresponder a um utilizador ja existente no Supabase Auth. role: CLIENTE | ADMIN | LOJISTA"
+          }
+        },
+        {
+          "name": "Activar / suspender utilizador",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "users", "{{user_id}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACTIVE\"\n}" },
+            "description": "status: ACTIVE | SUSPENDED — cuidado ao testar contra a conta de teste em uso (evitar auto-suspender)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin / Metricas",
+      "item": [
+        {
+          "name": "Resumo de metricas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/metrics/summary?period=30",
+              "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "metrics", "summary"],
+              "query": [{ "key": "period", "value": "30", "description": "7 | 30 | 90 (omisso cai em 30)" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loja / Produtos",
+      "item": [
+        {
+          "name": "Listar produtos da loja",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/loja/products", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products"] } }
+        },
+        {
+          "name": "Obter produto por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/loja/products/{{product_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "{{product_id}}"] } }
+        },
+        {
+          "name": "Criar produto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/loja/products", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto de teste\",\n  \"category\": \"CEREAIS\",\n  \"unitLabel\": \"kg\",\n  \"priceMt\": 90.00,\n  \"ingredientId\": {{ingredient_id}}\n}"
+            },
+            "description": "category: CEREAIS | PROTEINA | VEGETAIS | LEGUMINOSAS | TEMPEROS | OUTROS"
+          }
+        },
+        {
+          "name": "Actualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/loja/products/{{product_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "{{product_id}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto de teste (actualizado)\",\n  \"category\": \"CEREAIS\",\n  \"unitLabel\": \"kg\",\n  \"priceMt\": 95.00,\n  \"ingredientId\": {{ingredient_id}}\n}"
+            }
+          }
+        },
+        {
+          "name": "Activar / desactivar produto",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/loja/products/{{product_id}}/status", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "{{product_id}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACTIVE\"\n}" },
+            "description": "status: ACTIVE | INACTIVE"
+          }
+        },
+        {
+          "name": "Apagar produto",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/api/v1/loja/products/{{product_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "{{product_id}}"] } }
+        },
+        {
+          "name": "Template de import (.xlsx)",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/loja/products/import-template", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "import-template"] } }
+        },
+        {
+          "name": "Export de produtos (.xlsx)",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/loja/products/export", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "export"] } }
+        },
+        {
+          "name": "Import de produtos (.xlsx)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/v1/loja/products/import", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "import"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": [] }]
+            },
+            "description": "multipart/form-data — anexa o .xlsx exportado (ou o template) no campo 'file'. Devolve um jobId a usar no pedido de confirmacao seguinte."
+          }
+        },
+        {
+          "name": "Confirmar import",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/api/v1/loja/products/import/{{import_job_id}}/confirm", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "products", "import", "{{import_job_id}}", "confirm"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loja / Encomendas",
+      "item": [
+        {
+          "name": "Listar encomendas da loja",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/loja/orders", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "orders"] } }
+        },
+        {
+          "name": "Obter encomenda por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/loja/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "orders", "{{order_id}}"] } }
+        },
+        {
+          "name": "Actualizar estado da encomenda",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/loja/orders/{{order_id}}/status", "host": ["{{base_url}}"], "path": ["api", "v1", "loja", "orders", "{{order_id}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente (/me) / Perfil",
+      "item": [
+        {
+          "name": "Obter o meu perfil",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/profile", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "profile"] } }
+        },
+        {
+          "name": "Actualizar o meu perfil",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/profile", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goal\": \"PERDER_PESO\",\n  \"healthConditions\": [\"NENHUMA\"],\n  \"healthConditionOther\": \"\",\n  \"allergies\": [],\n  \"foodExclusions\": [],\n  \"budgetBand\": \"MEDIO\",\n  \"mealsPerDay\": 3,\n  \"householdSize\": 2,\n  \"dietaryPreferences\": [],\n  \"shoppingProvince\": \"Maputo\",\n  \"shoppingCity\": \"Maputo\",\n  \"shoppingNeighborhood\": \"Sommerschield\",\n  \"shoppingAddressDescription\": \"Perto do mercado\",\n  \"medicalDisclaimerAccepted\": true\n}"
+            },
+            "description": "goal: PERDER_PESO | COMER_MELHOR | GANHAR_MASSA | GERIR_CONDICAO. healthConditions (cada): NENHUMA | DIABETES_TIPO_2 | HIPERTENSAO | DOENCA_CELIACA | OUTRA. budgetBand: BAIXO | MEDIO | CONFORTAVEL. Todos os campos sao opcionais (merge parcial)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente (/me) / Receitas",
+      "item": [
+        {
+          "name": "Catalogo de receitas (filtro tags/q)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/me/recipes?tags=vegetariana&q=frango",
+              "host": ["{{base_url}}"], "path": ["api", "v1", "me", "recipes"],
+              "query": [
+                { "key": "tags", "value": "vegetariana", "disabled": true },
+                { "key": "q", "value": "frango", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dar feedback numa receita",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/recipes/{{recipe_id}}/feedback", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "recipes", "{{recipe_id}}", "feedback"] },
+            "body": { "mode": "raw", "raw": "{\n  \"value\": \"LIKE\"\n}" },
+            "description": "value: NONE | LIKE | DISLIKE"
+          }
+        },
+        {
+          "name": "Criar receita ad-hoc",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/recipes/adhoc", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "recipes", "adhoc"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mealSlot\": \"ALMOCO\",\n  \"goal\": \"PERDER_PESO\",\n  \"note\": \"Sem gluten, por favor\"\n}"
+            },
+            "description": "mealSlot: PEQUENO_ALMOCO | ALMOCO | JANTAR | LANCHE. goal: PERDER_PESO | COMER_MELHOR | GANHAR_MASSA | GERIR_CONDICAO. Requer IA activa (OPENAI_API_KEY)."
+          }
+        },
+        {
+          "name": "Obter receita ad-hoc por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/recipes/adhoc/{{adhoc_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "recipes", "adhoc", "{{adhoc_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Cliente (/me) / Planos de refeicao",
+      "item": [
+        {
+          "name": "Gerar plano de refeicoes (IA)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/api/v1/me/meal-plans", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans"] },
+            "description": "Sem corpo. Requer IA activa (OPENAI_API_KEY) e perfil preenchido."
+          }
+        },
+        {
+          "name": "Obter plano activo",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/meal-plans/active", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans", "active"] } }
+        },
+        {
+          "name": "Obter plano por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/meal-plans/{{recipe_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans", "{{recipe_id}}"] } }
+        },
+        {
+          "name": "Obter entrada do plano",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/meal-plans/entries/{{entry_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans", "entries", "{{entry_id}}"] } }
+        },
+        {
+          "name": "Trocar (swap) entrada do plano",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/meal-plans/entries/{{entry_id}}/swap", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans", "entries", "{{entry_id}}", "swap"] },
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Nao gosto deste ingrediente\"\n}" }
+          }
+        },
+        {
+          "name": "Substituir entrada por receita especifica",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/meal-plans/entries/{{entry_id}}/replace", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans", "entries", "{{entry_id}}", "replace"] },
+            "body": { "mode": "raw", "raw": "{\n  \"recipeId\": {{recipe_id}}\n}" }
+          }
+        },
+        {
+          "name": "Marcar entrada como concluida",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/meal-plans/entries/{{entry_id}}/completed", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "meal-plans", "entries", "{{entry_id}}", "completed"] },
+            "body": { "mode": "raw", "raw": "{\n  \"completed\": true\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente (/me) / Lista de compras",
+      "item": [
+        {
+          "name": "Obter a minha lista de compras",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/shopping-list", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "shopping-list"] } }
+        },
+        {
+          "name": "Adicionar item manual",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/shopping-list/items", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "shopping-list", "items"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ingredientName\": \"Arroz\",\n  \"category\": \"CEREAIS\",\n  \"quantity\": 1,\n  \"unit\": \"kg\",\n  \"estimatedCostMt\": 90.00\n}"
+            },
+            "description": "So funciona com um plano activo (a lista esta presa a um plano — ver relatorio de testes anterior)."
+          }
+        },
+        {
+          "name": "Marcar item como comprado",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/shopping-list/items/{{item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "shopping-list", "items", "{{item_id}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"checked\": true,\n  \"haveQuantity\": 1\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente (/me) / Encomendas",
+      "item": [
+        {
+          "name": "Criar encomenda",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/me/orders", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": {{store_id}},\n  \"note\": \"Entregar de tarde, por favor\",\n  \"items\": [\n    { \"itemId\": {{item_id}}, \"quantity\": 1 }\n  ]\n}"
+            },
+            "description": "itemId refere-se a um ShoppingListItem existente."
+          }
+        },
+        {
+          "name": "Listar as minhas encomendas",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/orders", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "orders"] } }
+        },
+        {
+          "name": "Obter encomenda por id",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/v1/me/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "orders", "{{order_id}}"] } }
+        },
+        {
+          "name": "Cancelar encomenda",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{base_url}}/api/v1/me/orders/{{order_id}}/cancel", "host": ["{{base_url}}"], "path": ["api", "v1", "me", "orders", "{{order_id}}", "cancel"] }
+          }
+        }
+      ]
+    }
+  ]
+}

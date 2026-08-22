@@ -12,6 +12,7 @@ import {
 } from "@/hooks/useShoppingList";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { ShoppingGroup } from "@/components/plan/ShoppingGroup";
+import { ShoppingSummary } from "@/components/plan/ShoppingSummary";
 import type { ShoppingCategory } from "@/components/ui/CategoryIcon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -114,9 +115,10 @@ export default function ComprasPage() {
   const checkedItems = data.checkedItems ?? 0;
   const groups = groupByCategory(data.items ?? []);
   const hasAnyItem = (data.items?.length ?? 0) > 0;
-  // F3-CLI-07 · "Rancho todo marcado" — momento de check-in não gamificado: texto simples a
-  // forest, sem ícone/animação (ver nota de âmbito em CLAUDE.md/instruções da tarefa).
-  const allChecked = hasAnyItem && checkedItems === totalItems;
+  // FE-Y07 · "antes" = custo cheio de cada item (sem descontar "tenho em casa"); "depois" == o
+  // estimatedCostMt já descontado que o backend/mock devolve (ver remainingCost em useShoppingList).
+  const costBeforeMt = (data.items ?? []).reduce((sum, item) => sum + (item.estimatedCostMt ?? 0), 0);
+  const costAfterMt = data.estimatedCostMt ?? costBeforeMt;
 
   return (
     <main className={styles.main}>
@@ -129,6 +131,31 @@ export default function ComprasPage() {
       <p className={styles.subtitle}>
         Rancho do mês inteiro. Ao encomendar, escolhe só o que precisas agora.
       </p>
+
+      {/* FE-Y07 (feedback do cliente, ago/2026): resumo com contadores ANTES dos botões de acção
+          — "fica muito mais fácil perceber a situação". Substitui o antigo .metaRow (que vinha
+          depois) e a mensagem solta de "rancho todo marcado" (o resumo já cobre esse estado). */}
+      {hasAnyItem ? (
+        <ShoppingSummary
+          totalItems={totalItems}
+          checkedItems={checkedItems}
+          costBeforeMt={costBeforeMt}
+          costAfterMt={costAfterMt}
+          costIsPartial={data.costIsPartial ?? false}
+        />
+      ) : null}
+
+      {/* FE-C08 · T-06 estados "offline (badge 'por sincronizar')" e "syncing" — toggles feitos
+          offline ficam na fila local (lib/offline.ts) e sincronizam ao voltar a rede. */}
+      {isSyncing ? (
+        <span className={[styles.syncBadge, styles.syncBadgeSyncing, styles.syncBadgeStandalone].join(" ")}>
+          A sincronizar…
+        </span>
+      ) : pendingCount > 0 ? (
+        <span className={[styles.syncBadge, styles.syncBadgePending, styles.syncBadgeStandalone].join(" ")}>
+          {pendingCount} por sincronizar
+        </span>
+      ) : null}
 
       <div className={styles.orderLinksRow}>
         <Link href="/encomendas" className={styles.ordersLink}>
@@ -147,29 +174,6 @@ export default function ComprasPage() {
       </div>
 
       <AddItemSheet open={addItemOpen} onClose={() => setAddItemOpen(false)} />
-
-      {allChecked ? <p className={styles.allCheckedMessage}>Rancho todo marcado — bom trabalho.</p> : null}
-
-      <div className={styles.metaRow}>
-        <div className={styles.metaLeft}>
-          <p className={styles.progressText}>
-            {checkedItems} de {totalItems} comprados
-          </p>
-          {/* FE-C08 · T-06 estados "offline (badge 'por sincronizar')" e "syncing" — toggles feitos
-              offline ficam na fila local (lib/offline.ts) e sincronizam ao voltar a rede. */}
-          {isSyncing ? (
-            <span className={[styles.syncBadge, styles.syncBadgeSyncing].join(" ")}>A sincronizar…</span>
-          ) : pendingCount > 0 ? (
-            <span className={[styles.syncBadge, styles.syncBadgePending].join(" ")}>
-              {pendingCount} por sincronizar
-            </span>
-          ) : null}
-        </div>
-        <p className={styles.costText}>
-          {data.estimatedCostMt != null ? `${data.estimatedCostMt} MT` : "—"}
-          {data.costIsPartial ? <span className={styles.costPartial}> — estimativa parcial</span> : null}
-        </p>
-      </div>
 
       {!hasAnyItem ? (
         <EmptyState

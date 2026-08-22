@@ -7,7 +7,10 @@ import com.ottimizo.common.security.CurrentUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ProfileService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProfileService.class);
 
     /**
      * Vocabulario fechado de preferencias alimentares (mesmo das healthTags
@@ -43,11 +48,16 @@ public class ProfileService {
 
     @Transactional(readOnly = true)
     public ProfileResponse get(CurrentUser actor) {
-        ProfileResponse response = profiles.findByUserId(actor.id())
-            .map(ProfileResponse::from)
-            .orElseGet(ProfileResponse::empty);
-        audit.record(actor, "profile.view", "ClientProfile", actor.id());
-        return response;
+        Optional<ClientProfile> profile = profiles.findByUserId(actor.id());
+        if (profile.isEmpty()) {
+            return ProfileResponse.empty();
+        }
+        try {
+            audit.record(actor, "profile.view", "ClientProfile", actor.id());
+        } catch (RuntimeException ex) {
+            log.warn("Falha ao registar auditoria de leitura do perfil do utilizador {}.", actor.id(), ex);
+        }
+        return ProfileResponse.from(profile.get());
     }
 
     @Transactional
@@ -75,6 +85,10 @@ public class ProfileService {
             request.mealsPerDay(),
             request.householdSize(),
             request.dietaryPreferences(),
+            request.shoppingProvince(),
+            request.shoppingCity(),
+            request.shoppingNeighborhood(),
+            request.shoppingAddressDescription(),
             request.medicalDisclaimerAccepted()
         );
 
@@ -133,6 +147,18 @@ public class ProfileService {
         }
         if (request.dietaryPreferences() != null) {
             fields.add("dietaryPreferences");
+        }
+        if (request.shoppingProvince() != null) {
+            fields.add("shoppingProvince");
+        }
+        if (request.shoppingCity() != null) {
+            fields.add("shoppingCity");
+        }
+        if (request.shoppingNeighborhood() != null) {
+            fields.add("shoppingNeighborhood");
+        }
+        if (request.shoppingAddressDescription() != null) {
+            fields.add("shoppingAddressDescription");
         }
         if (request.medicalDisclaimerAccepted() != null) {
             fields.add("medicalDisclaimerAccepted");

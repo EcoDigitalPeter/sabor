@@ -1,0 +1,114 @@
+PROMPTS DE IMAGENS NOVAS — Ottimizzo
+=====================================
+
+Mesmo formato/convenção dos PROMPT.md já usados em
+levesabor/levesabor-web/public/images/<pasta>/ — só que consolidados aqui
+num único ficheiro, porque cobrem 3 estados vazios/erro genéricos e não um
+ecrã específico com pasta própria.
+
+Guia de estilo (docs/plano/02-ui-ux-plan.md §4), aplica-se aos 3 prompts:
+- Sem pessoas realistas, sem fotorrealismo de rostos/corpos.
+- Sem texto embutido na imagem (logótipos, palavras, números).
+- Fundo transparente OU creme #F6ECDC — nunca fundo branco puro nem opaco
+  de outra cor.
+- Paleta restrita: terracotta #C43E1C, âmbar #E3A72E, forest #45614A,
+  tan #E7C9A0, ink #241A14, castanho #5B4A3A (contornos).
+- Estilo flat/orgânico, editorial-caloroso — nada de cartoon infantil nem
+  clip-art corporativo.
+- NUNCA incluir: básculas/fitas métricas/imagens antes-depois (sensibilidade
+  a peso), robôs/chips/circuitos como metáfora de "IA" (a app já usa o anel
+  de macros para isso), texto de qualquer tipo, marcas de água.
+- Formato final: SVG se possível; senão PNG optimizado, sempre < 60 KB.
+
+
+-----------------------------------------------------------------
+1) ERRO GENÉRICO
+-----------------------------------------------------------------
+Onde é usada: componente `ErrorState` (src/components/ui/ErrorState.tsx),
+reutilizado em TODOS os ecrãs que podem falhar a carregar dados (plano,
+compras, encomendas, receitas, admin, loja) — hoje só mostra um ícone
+Lucide "AlertCircle". Precisa de um prop `illustration` novo no componente
+(mesmo padrão do `EmptyState`, que já tem esse slot) antes de ser ligada —
+isso é trabalho de código, não deste ficheiro.
+
+Ficheiro esperado: `error-generico.png` (ou .svg) — 400×400, fundo
+transparente, < 60 KB. Guardar em
+levesabor/levesabor-web/public/images/error-generico/.
+
+Prompt para colar no ChatGPT:
+
+  Cria uma ilustração flat minimalista com traço orgânico, tom calmo e
+  NÃO alarmista (isto é um erro de rede/carregamento, não uma falha grave).
+  Formato quadrado 1:1, 400×400 px, fundo transparente.
+
+  Conteúdo: um prato estilizado com uma pequena "nuvem de interrogação"
+  orgânica a pairar por cima (uma forma redonda simples com um traço de
+  interrogação minimalista lá dentro, nada de balão de banda desenhada),
+  sugerindo "algo correu mal, tenta outra vez" — não "está tudo perdido".
+
+  Cores: contornos em castanho #5B4A3A, acentos em terracotta #C43E1C.
+
+  NÃO incluir: texto, pessoas, símbolos de perigo/aviso vermelhos
+  agressivos, X grandes, caras tristes, ícones de wi-fi/rede partidos.
+
+
+-----------------------------------------------------------------
+2) ENCOMENDAS SEM RESULTADOS ("Ainda sem encomendas")
+-----------------------------------------------------------------
+Onde é usada: /encomendas (src/app/(cliente)/encomendas/page.tsx linha
+~99), no `EmptyState` quando `orders.length === 0`. Título actual: "Ainda
+sem encomendas". Descrição actual: "Quando encomendares o teu rancho a uma
+loja parceira, aparece aqui."
+
+Ficheiro esperado: `empty-encomendas.png` — 600×600, fundo transparente,
+< 60 KB. Guardar em
+levesabor/levesabor-web/public/images/empty-encomendas/.
+
+Prompt para colar no ChatGPT:
+
+  Cria uma ilustração flat minimalista com traço orgânico e tom otimista
+  e leve (mesmo espírito de "por chegar", não de vazio triste). Formato
+  quadrado 1:1, 600×600 px, fundo transparente.
+
+  Conteúdo: um saco/cesto de compras estilizado (silhueta simples, sem
+  detalhe realista) parado junto a uma porta de loja estilizada (um arco
+  simples com uma pequena forma de porta), sugerindo "a tua próxima
+  encomenda vai chegar por aqui" — antecipação, não ausência.
+
+  Cores: contornos em castanho #5B4A3A, acentos em âmbar #E3A72E e
+  terracotta #C43E1C, preenchimentos em tan #E7C9A0.
+
+  NÃO incluir: texto, pessoas, caixotes de encomendas genéricos tipo
+  e-commerce ocidental (carrinhas, camiões), relógios/ampulhetas.
+
+
+-----------------------------------------------------------------
+3) PESQUISA DE RECEITAS SEM RESULTADOS ("Nenhuma receita encontrada")
+-----------------------------------------------------------------
+Onde é usada: /receitas (src/app/(cliente)/receitas/page.tsx linha ~126),
+no `EmptyState` quando há filtros/pesquisa activos e `recipes.length === 0`.
+Título actual: "Nenhuma receita encontrada". Descrição actual: "Tenta
+ajustar os filtros ou a pesquisa." (Nota: o MESMO `EmptyState` também serve
+para "Ainda não há receitas no catálogo" sem filtros — esta imagem serve
+para os dois casos, não precisa de duas versões.)
+
+Ficheiro esperado: `empty-busca-receitas.png` — 600×600, fundo
+transparente, < 60 KB. Guardar em
+levesabor/levesabor-web/public/images/empty-busca-receitas/.
+
+Prompt para colar no ChatGPT:
+
+  Cria uma ilustração flat minimalista com traço orgânico, tom neutro e
+  convidativo (não frustrante). Formato quadrado 1:1, 600×600 px, fundo
+  transparente.
+
+  Conteúdo: uma lupa estilizada (traço simples, sem realismo) a pairar
+  sobre um prato vazio com um garfo e faca estilizados ao lado — sugere
+  "procurar" sem ser genérico de e-commerce (nada de caixa de pesquisa
+  desenhada, nada de "404").
+
+  Cores: contornos em castanho #5B4A3A, acentos em âmbar #E3A72E,
+  preenchimento do prato em branco/creme #F6ECDC.
+
+  NÃO incluir: texto, pessoas, números "404", caras confusas, pontos de
+  interrogação múltiplos (isso fica reservado para o erro genérico acima).

@@ -34,6 +34,12 @@ function validate(values: StoreFormValues): StoreFormErrors {
   if (values.contact.trim().length > 60) {
     errors.contact = "O contacto deve ter no máximo 60 caracteres.";
   }
+  if (values.rating.trim() !== "") {
+    const rating = Number(values.rating);
+    if (Number.isNaN(rating) || rating < 0 || rating > 5) {
+      errors.rating = "A avaliação deve estar entre 0 e 5.";
+    }
+  }
   return errors;
 }
 
@@ -48,7 +54,18 @@ export default function LojaDetalhePage({ params }: { params: { id: string } }) 
   const setStoreStatus = useSetStoreStatus();
   const deleteStore = useDeleteStore();
 
-  const [values, setValues] = useState<StoreFormValues>({ name: "", city: "", neighborhood: "", contact: "" });
+  const [values, setValues] = useState<StoreFormValues>({
+    name: "",
+    city: "",
+    neighborhood: "",
+    contact: "",
+    rating: "",
+    openingHoursText: "",
+    deliveryAvailable: false,
+    averagePriceLevel: "",
+    latitude: "",
+    longitude: "",
+  });
   const [errors, setErrors] = useState<StoreFormErrors>({});
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
@@ -61,6 +78,12 @@ export default function LojaDetalhePage({ params }: { params: { id: string } }) 
       city: store.city ?? "",
       neighborhood: store.neighborhood ?? "",
       contact: store.contact ?? "",
+      rating: store.rating != null ? String(store.rating) : "",
+      openingHoursText: store.openingHoursText ?? "",
+      deliveryAvailable: store.deliveryAvailable ?? false,
+      averagePriceLevel: store.averagePriceLevel ?? "",
+      latitude: store.latitude != null ? String(store.latitude) : "",
+      longitude: store.longitude != null ? String(store.longitude) : "",
     });
   }, [store]);
 
@@ -81,6 +104,12 @@ export default function LojaDetalhePage({ params }: { params: { id: string } }) 
       city: values.city.trim(),
       neighborhood: values.neighborhood.trim() || null,
       contact: values.contact.trim() || null,
+      rating: values.rating.trim() === "" ? null : Number(values.rating),
+      openingHoursText: values.openingHoursText.trim() || null,
+      deliveryAvailable: values.deliveryAvailable,
+      averagePriceLevel: values.averagePriceLevel || null,
+      latitude: values.latitude.trim() === "" ? null : Number(values.latitude),
+      longitude: values.longitude.trim() === "" ? null : Number(values.longitude),
     };
 
     updateStore.mutate(body, {

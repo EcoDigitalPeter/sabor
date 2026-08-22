@@ -1,7 +1,11 @@
-// FE-C06 · ShoppingGroup — grupo colapsável por categoria da lista de compras (T-06, F1-CLI-06)
+// FE-C06/FE-Y07 · ShoppingGroup — grupo colapsável por categoria da lista de compras (T-06, F1-CLI-06)
+// FE-Y07 (feedback do cliente, ago/2026): quando todos os itens da categoria ficam comprados, o
+// grupo colapsa-se sozinho e o cabeçalho passa a "✅ {categoria} (n/n)" — reduz o scroll. Os itens
+// comprados também descem para o fundo da lista dentro do grupo (ShoppingItemRow trata do
+// esbatimento visual).
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { CategoryIcon, type ShoppingCategory } from "@/components/ui/CategoryIcon";
 import type { ShoppingListItem } from "@/hooks/useShoppingList";
@@ -36,6 +40,21 @@ export function ShoppingGroup({
 }: ShoppingGroupProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const checkedCount = items.filter((item) => item.checked).length;
+  const allChecked = items.length > 0 && checkedCount === items.length;
+
+  // Colapsa automaticamente só na transição para "tudo comprado" — não força fechado em todos os
+  // renders seguintes, para não brigar com um utilizador que reabre a categoria de propósito.
+  const wasAllChecked = useRef(allChecked);
+  useEffect(() => {
+    if (allChecked && !wasAllChecked.current) {
+      setExpanded(false);
+    }
+    wasAllChecked.current = allChecked;
+  }, [allChecked]);
+
+  // FE-Y07: itens comprados afundam para o fundo da lista (mantendo a ordem relativa entre si e
+  // entre os por comprar — Array.prototype.sort é estável).
+  const sortedItems = [...items].sort((a, b) => Number(!!a.checked) - Number(!!b.checked));
 
   return (
     <section className={styles.group}>
@@ -46,11 +65,19 @@ export function ShoppingGroup({
         aria-expanded={expanded}
       >
         <span className={styles.headerLeft}>
-          <CategoryIcon category={category} size={22} />
-          <span className={styles.title}>{CATEGORY_LABEL[category]}</span>
-          <span className={styles.count}>
-            {checkedCount}/{items.length}
-          </span>
+          {allChecked ? (
+            <span className={styles.title}>
+              ✅ {CATEGORY_LABEL[category]} ({checkedCount}/{items.length})
+            </span>
+          ) : (
+            <>
+              <CategoryIcon category={category} size={22} />
+              <span className={styles.title}>{CATEGORY_LABEL[category]}</span>
+              <span className={styles.count}>
+                {checkedCount}/{items.length}
+              </span>
+            </>
+          )}
         </span>
         <ChevronDown
           className={[styles.chevron, expanded ? styles.chevronExpanded : ""].filter(Boolean).join(" ")}
@@ -61,7 +88,7 @@ export function ShoppingGroup({
 
       {expanded ? (
         <ul className={styles.list}>
-          {items.map((item) => (
+          {sortedItems.map((item) => (
             <ShoppingItemRow
               key={item.id}
               item={item}

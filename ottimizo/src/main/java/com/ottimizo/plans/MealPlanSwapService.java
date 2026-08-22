@@ -5,6 +5,8 @@ import com.ottimizo.catalog.MealFeedbackService;
 import com.ottimizo.catalog.Recipe;
 import com.ottimizo.catalog.RecipeCatalogService;
 import com.ottimizo.catalog.RecipeSnapshotFactory;
+import com.ottimizo.catalog.RecipeSwapReason;
+import com.ottimizo.catalog.RecipeSwapReasonRepository;
 import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
 import com.ottimizo.common.security.CurrentUser;
@@ -43,28 +45,36 @@ public class MealPlanSwapService {
     private final RecipeCatalogService recipeCatalogService;
     private final MealFeedbackService mealFeedbackService;
     private final RecipeSnapshotFactory recipeSnapshotFactory;
+    private final RecipeSwapReasonRepository swapReasons;
 
     public MealPlanSwapService(
         MealPlanEntryRepository mealPlanEntries,
         ClientProfileRepository clientProfiles,
         RecipeCatalogService recipeCatalogService,
         MealFeedbackService mealFeedbackService,
-        RecipeSnapshotFactory recipeSnapshotFactory
+        RecipeSnapshotFactory recipeSnapshotFactory,
+        RecipeSwapReasonRepository swapReasons
     ) {
         this.mealPlanEntries = mealPlanEntries;
         this.clientProfiles = clientProfiles;
         this.recipeCatalogService = recipeCatalogService;
         this.mealFeedbackService = mealFeedbackService;
         this.recipeSnapshotFactory = recipeSnapshotFactory;
+        this.swapReasons = swapReasons;
     }
 
     /**
      * @param confirm {@code false} (omisso) só calcula e devolve a
      *                alternativa (nada é gravado); {@code true} aplica a
      *                troca na entrada, transacionalmente.
+     * @param reason  motivo livre opcional (FE-Q06); só é gravado quando
+     *                {@code confirm=true} e não é vazio — contra a receita
+     *                "de saída" (a que estava na entrada antes da troca),
+     *                que é a que o admin quer perceber porque perdeu
+     *                preferência (ver {@link RecipeSwapReason}).
      */
     @Transactional
-    public SwapResponse swap(Long entryId, CurrentUser actor, boolean confirm) {
+    public SwapResponse swap(Long entryId, CurrentUser actor, boolean confirm, String reason) {
         MealPlanEntry entry = mealPlanEntries.findByIdWithOwnership(entryId)
             .filter(e -> e.day().mealPlan().userId().equals(actor.id()))
             .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
@@ -75,6 +85,10 @@ public class MealPlanSwapService {
 
         if (!confirm) {
             return SwapResponse.proposed(snapshot);
+        }
+
+        if (reason != null && !reason.isBlank()) {
+            swapReasons.save(new RecipeSwapReason(entry.recipeId(), actor.id(), reason.trim()));
         }
 
         // TODO(BE-C06): invocar ShoppingListService.rebuildForPlan(entry.day().mealPlan().id())

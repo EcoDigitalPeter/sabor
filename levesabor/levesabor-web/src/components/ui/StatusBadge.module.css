@@ -10,6 +10,7 @@
   padding: 4px 12px;
   border-radius: var(--radius-pill);
   white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--ease-out);
 }
 
 .forest {

@@ -1,0 +1,106 @@
+[     216ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[    1325ms] [LOG] [Fast Refresh] done in 1108ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[    1677ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[    1804ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[    1941ms] [LOG] [Fast Refresh] done in 136ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[    2096ms] [LOG] %cDocumentation: %chttps://mswjs.io/docs font-weight:bold font-weight:normal @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2565
+[    2096ms] [LOG] Found an issue? https://github.com/mswjs/msw/issues @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2570
+[    2096ms] [LOG] Worker script URL: http://127.0.0.1:3100/mockServiceWorker.js @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2571
+[    2096ms] [LOG] Worker scope: http://127.0.0.1:3100/ @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2572
+[    2096ms] [LOG] Client ID: %s (%s) 5cd9926d-30bc-4688-9a6a-452a733954bc top-level @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2574
+[    2217ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[    2234ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/compras:0
+[    2536ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[    2538ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/login:0
+[    5541ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/login:0
+[   72865ms] [LOG] Request {url: URL, method: POST, headers: Object, body: {"email":"amelia@levesabor.mz","password":"password123"}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[   72865ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[   72865ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"accessToken":"mock-ac…"email":"amelia@levesabor.mz","role":"CLIENTE"}}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[   73212ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[   73212ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[   73212ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":1001,"monthStart"…go."}]},"feedback":"NONE","completed":false}]}]}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[   73482ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[   73504ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/plano:0
+[   76507ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/plano:0
+[  153391ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  153391ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  153391ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":5001,"totalItems"…null,"id":25,"checked":false,"haveQuantity":0}]}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  153481ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[  153485ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/compras:0
+[  156500ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/compras:0
+[  213320ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  214701ms] [LOG] [Fast Refresh] done in 1381ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  214864ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  214864ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  214864ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"items":[{"id":1,"name…"page":0,"size":4,"totalItems":4,"totalPages":1}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  214865ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  214865ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  214865ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":5001,"totalItems"…null,"id":25,"checked":false,"haveQuantity":0}]}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  215068ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[  215072ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/compras/encomendar:0
+[  218079ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/compras/encomendar:0
+[  336357ms] [LOG] Request {url: URL, method: POST, headers: Object, body: {"storeId":1,"items":[{"itemId":1,"quantity":2},{"…Id":24,"quantity":1},{"itemId":25,"quantity":7}]}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  336357ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  336358ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":7000,"storeId":1,…":null}],"createdAt":"2026-07-25T12:04:21.516Z"}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  339372ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/compras/encomendar:0
+[  386741ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  387705ms] [LOG] [Fast Refresh] done in 963ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  387848ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  387848ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  387848ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"items":[{"id":7000,"s…"page":0,"size":1,"totalItems":1,"totalPages":1}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  387909ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  388108ms] [LOG] [Fast Refresh] done in 199ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  388437ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3100/icons/icon-192.png:0
+[  388442ms] [WARNING] Error while trying to use the following icon from the Manifest: http://127.0.0.1:3100/icons/icon-192.png (Download error or resource isn't a valid image) @ http://127.0.0.1:3100/encomendas:0
+[  391456ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/encomendas:0
+[  523882ms] [LOG] Request {url: URL, method: PATCH, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  523882ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  523882ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":7000,"storeId":1,…":null}],"createdAt":"2026-07-25T12:04:21.516Z"}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  523888ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[  523888ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[  523888ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"items":[{"id":7000,"s…"page":0,"size":1,"totalItems":1,"totalPages":1}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[  526900ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/encomendas:0
+[  777938ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  781415ms] [LOG] [Fast Refresh] done in 3477ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  784432ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/encomendas:0
+[  938448ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  942055ms] [LOG] [Fast Refresh] done in 3607ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  945064ms] [WARNING] The resource http://127.0.0.1:3100/_next/static/css/app/(cliente)/compras/page.css?v=1784980726396 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:3100/encomendas:0
+[ 2985433ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://127.0.0.1:3100/plano?_rsc=e6occ:0
+[ 2985437ms] [ERROR] Failed to fetch RSC payload for http://127.0.0.1:3100/plano. Falling back to browser navigation. TypeError: Failed to fetch
+    at fetchServerResponse (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/fetch-server-response.js:59:27)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/prefetch-cache-utils.js:136:106)
+    at Object.task (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/promise-queue.js:30:38)
+    at PromiseQueue.processNext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/promise-queue.js:81:186)
+    at PromiseQueue.enqueue (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/promise-queue.js:45:76)
+    at createLazyPrefetchEntry (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/prefetch-cache-utils.js:136:49)
+    at getOrCreatePrefetchCacheEntry (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/prefetch-cache-utils.js:87:12)
+    at navigateReducer_noPPR (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/reducers/navigate-reducer.js:102:82)
+    at clientReducer (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/router-reducer.js:25:61)
+    at Object.action (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:150:55)
+    at runAction (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:56:38)
+    at dispatchAction (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:113:9)
+    at Object.dispatch (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:145:40)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/use-reducer-with-devtools.js:130:21)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:159:16)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:290:21)
+    at startTransition (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react/cjs/react.development.js:2597:25)
+    at Object.push (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:288:44)
+    at navigate (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/link.js:94:49)
+    at Object.startTransition (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react/cjs/react.development.js:2597:25)
+    at linkClicked (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/link.js:100:24)
+    at onClick (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/link.js:364:13)
+    at HTMLUnknownElement.callCallback (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:20614:16)
+    at invokeGuardedCallback (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:20689:29)
+    at invokeGuardedCallbackAndCatchFirstError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:20703:25)
+    at executeDispatch (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:32128:3)
+    at processDispatchQueueItemsInOrder (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:32160:7)
+    at processDispatchQueue (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:32173:5)
+    at dispatchEventsForPlugins (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:32184:3)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:32374:12)
+    at batchedUpdates$1 (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24953:12)
+    at batchedUpdates (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:28844:12)
+    at dispatchEventForPluginEventSystem (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:32373:3)
+    at dispatchEvent (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:30141:5)
+    at dispatchDiscreteEvent (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:30112:5) @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:32

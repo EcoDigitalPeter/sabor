@@ -11,6 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Um dia do plano mensal (tabela {@code meal_plan_days}, V003), com o
@@ -40,15 +42,19 @@ public class MealPlanDay {
     @Column(name = "target_kcal")
     private BigDecimal targetKcal;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "protein_pct")
     private Integer proteinPct;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "carbs_pct")
     private Integer carbsPct;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "fat_pct")
     private Integer fatPct;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "fiber_pct")
     private Integer fiberPct;
 

@@ -100,37 +100,6 @@
   outline-offset: 2px;
 }
 
-/* F3-CLI-07 · check-in não gamificado — texto simples, sem ícone/confetti (teto: cor forest) */
-.allCheckedMessage {
-  margin: -4px 0 16px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--forest);
-}
-
-.metaRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.metaLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.progressText {
-  margin: 0;
-  color: var(--clay);
-  font-size: 0.95rem;
-}
-
 /* FE-C08 · badge "por sincronizar" / "syncing" (T-06) — mesma linguagem visual do StatusBadge (pílula, texto a branco). */
 .syncBadge {
   display: inline-flex;
@@ -144,25 +113,18 @@
   white-space: nowrap;
 }
 
+/* FE-Y07 · badge passou a viver sozinho entre o resumo e os botões (antes vivia dentro do
+   .metaRow removido) */
+.syncBadgeStandalone {
+  margin-bottom: 12px;
+}
+
 .syncBadgeSyncing {
   background: var(--clay-soft);
 }
 
 .syncBadgePending {
   background: var(--amber);
-}
-
-.costText {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.95rem;
-  color: var(--ink);
-}
-
-.costPartial {
-  font-family: var(--font-body);
-  color: var(--clay-soft);
-  font-size: 0.8rem;
 }
 
 .groupList {

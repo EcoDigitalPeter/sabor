@@ -16,12 +16,15 @@
   cursor: pointer;
   font-family: var(--font-body);
   transition:
-    border-color 0.15s ease,
-    transform 0.1s ease;
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
 }
 
 .card:hover {
   border-color: var(--tan);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(36, 26, 20, 0.1);
 }
 
 .card:active {
@@ -31,6 +34,14 @@
 .card:focus-visible {
   outline: var(--focus-on-light);
   outline-offset: 2px;
+}
+
+/* FE-Y05 · destaca a refeição "actual" por hora do dia (ver lib/planStats.ts currentMealSlot) —
+   só borda/fundo, sem elementos novos, para não competir com o "Comi isto". */
+.cardCurrent {
+  border-color: var(--terracotta);
+  background: var(--cream-card-alt);
+  box-shadow: 0 1px 3px rgba(36, 26, 20, 0.08);
 }
 
 .thumb {
@@ -67,9 +78,9 @@
   cursor: pointer;
   user-select: none;
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
+    background-color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
 }
 
 .completeButton:hover {
@@ -85,6 +96,21 @@
   background: var(--forest);
   border-color: var(--forest);
   color: #ffffff;
+  /* Gamificação discreta (docs/plano/01-functional-plan.md): pequeno "pop" ao marcar "Comi
+     isto" — só o ícone, sem confetti/troféu. Corre uma vez quando a classe é aplicada. */
+  animation: mealCardCheckPop var(--motion-base) var(--ease-out);
+}
+
+@keyframes mealCardCheckPop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .info {
@@ -113,11 +139,24 @@
   line-height: 1.25;
 }
 
+/* FE-Y05 · etiqueta curta (ex.: "Pequeno-almoço reforçado", "🌙 Jantar leve") — substitui a
+   descrição entre parênteses que antes vinha dentro do nome da receita. */
+.tag {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--clay-soft);
+}
+
 .meta {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--clay-soft);
+}
+
+.metaIcon {
+  margin: 0 2px 0 4px;
 }

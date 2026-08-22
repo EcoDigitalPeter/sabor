@@ -25,6 +25,9 @@ export type MacroRingProps = {
   macros: Macros;            // percentagens, somam ~100
   kcal: number;
   size?: "sm" | "md" | "lg"; // 44 / 112 / 220 px; lg inclui legenda
+  /** FE-Y06 · legenda opcional sob o número central (ex.: "kcal") — omitida por defeito para não
+   * alterar o layout dos restantes usos deste componente (sm/md apertam a área central). */
+  unit?: string;
 };
 
 type Size = NonNullable<MacroRingProps["size"]>;
@@ -43,7 +46,7 @@ const GEOMETRY: Record<Size, { viewBox: number; radius: number; stroke: number; 
   lg: { viewBox: 200, radius: 86, stroke: 24, fontSize: 28 },
 };
 
-export function MacroRing({ macros, kcal, size = "md" }: MacroRingProps) {
+export function MacroRing({ macros, kcal, size = "md", unit }: MacroRingProps) {
   const px = MACRO_RING_SIZE[size];
   const { viewBox, radius, stroke, fontSize } = GEOMETRY[size];
   const center = viewBox / 2;
@@ -98,16 +101,41 @@ export function MacroRing({ macros, kcal, size = "md" }: MacroRingProps) {
           />
         ))}
       </g>
-      <text
-        x={center}
-        y={center}
-        textAnchor="middle"
-        dominantBaseline="central"
-        className={styles.kcalText}
-        style={{ fontSize }}
-      >
-        {kcal}
-      </text>
+      {unit ? (
+        <>
+          <text
+            x={center}
+            y={center - fontSize * 0.22}
+            textAnchor="middle"
+            dominantBaseline="central"
+            className={styles.kcalText}
+            style={{ fontSize }}
+          >
+            {kcal}
+          </text>
+          <text
+            x={center}
+            y={center + fontSize * 0.62}
+            textAnchor="middle"
+            dominantBaseline="central"
+            className={styles.kcalUnit}
+            style={{ fontSize: fontSize * 0.4 }}
+          >
+            {unit}
+          </text>
+        </>
+      ) : (
+        <text
+          x={center}
+          y={center}
+          textAnchor="middle"
+          dominantBaseline="central"
+          className={styles.kcalText}
+          style={{ fontSize }}
+        >
+          {kcal}
+        </text>
+      )}
     </svg>
   );
 

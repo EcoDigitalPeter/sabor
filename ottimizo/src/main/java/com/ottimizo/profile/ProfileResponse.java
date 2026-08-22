@@ -12,6 +12,10 @@ public record ProfileResponse(
     Integer mealsPerDay,
     Integer householdSize,
     List<String> dietaryPreferences,
+    String shoppingProvince,
+    String shoppingCity,
+    String shoppingNeighborhood,
+    String shoppingAddressDescription,
     boolean medicalDisclaimerAccepted
 ) {
 
@@ -26,6 +30,10 @@ public record ProfileResponse(
             profile.mealsPerDay(),
             profile.householdSize(),
             profile.dietaryPreferences(),
+            profile.shoppingProvince(),
+            profile.shoppingCity(),
+            profile.shoppingNeighborhood(),
+            profile.shoppingAddressDescription(),
             profile.medicalDisclaimerAccepted()
         );
     }
@@ -36,6 +44,6 @@ public record ProfileResponse(
      * {@code client_profiles} em V002, nada e persistido so por chamar GET.
      */
     public static ProfileResponse empty() {
-        return new ProfileResponse(null, List.of(), null, List.of(), List.of(), null, 3, 1, List.of(), false);
+        return new ProfileResponse(null, List.of(), null, List.of(), List.of(), null, 3, 1, List.of(), null, null, null, null, false);
     }
 }

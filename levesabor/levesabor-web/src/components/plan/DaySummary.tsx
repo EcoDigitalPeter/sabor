@@ -1,6 +1,7 @@
 // FE-C03 · DaySummary — total de kcal + repartição de macros do dia selecionado (T-04, F1-CLI-03)
 import { Card } from "@/components/ui/Card";
 import { MacroRing, MACRO_ORDER } from "@/components/macro-ring/MacroRing";
+import { isWithinDailyTarget } from "@/lib/planStats";
 import type { components } from "@/types/api";
 import styles from "./DaySummary.module.css";
 
@@ -19,6 +20,9 @@ export function DaySummary({ day, className }: DaySummaryProps) {
     gordura: day.macros?.gordura ?? 0,
     fibra: day.macros?.fibra ?? 0,
   };
+  // FE-Y05 · "🟢 Dentro do objectivo" — indicador simples pedido pelo cliente ("ajuda muito o
+  // utilizador"); ver comentário na função isWithinDailyTarget sobre a origem de targetKcal.
+  const withinTarget = isWithinDailyTarget(kcal, day.targetKcal);
 
   return (
     <Card className={[styles.card, className].filter(Boolean).join(" ")}>
@@ -27,6 +31,7 @@ export function DaySummary({ day, className }: DaySummaryProps) {
         <div className={styles.breakdown}>
           <p className={styles.label}>Total do dia</p>
           <p className={styles.kcal}>{kcal} kcal</p>
+          {withinTarget ? <p className={styles.targetBadge}>🟢 Dentro do objectivo</p> : null}
           <ul className={styles.legend}>
             {MACRO_ORDER.map(([key, label, color]) => (
               <li key={key} className={styles.legendRow}>

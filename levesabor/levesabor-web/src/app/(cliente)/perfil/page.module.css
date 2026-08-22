@@ -151,6 +151,20 @@
   min-width: 0;
 }
 
+/* Zona para compras */
+.locationGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.locationHint {
+  margin: 8px 0 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--clay-soft);
+}
+
 /* Pessoas em casa (FE-S03) */
 .householdStepper {
   display: flex;

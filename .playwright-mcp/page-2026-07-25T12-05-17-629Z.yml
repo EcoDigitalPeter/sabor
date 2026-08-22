@@ -1,0 +1,19 @@
+- generic [active] [ref=f1e2]:
+  - alert [ref=f1e1]
+  - generic [ref=f1e33]:
+    - main [ref=f1e743]:
+      - heading "Minhas encomendas" [level=1] [ref=f1e744]
+      - list [ref=f1e745]:
+        - listitem [ref=f1e746]:
+          - button "Mercado Central 25/07/2026 · 25 itens Pendente" [ref=f1e747] [cursor=pointer]:
+            - generic [ref=f1e748]:
+              - generic [ref=f1e749]: Mercado Central
+              - generic [ref=f1e750]: 25/07/2026 · 25 itens
+            - generic [ref=f1e751]: Pendente
+    - navigation "Navegação principal" [ref=f1e170]:
+      - link "Plano" [ref=f1e171] [cursor=pointer]:
+        - /url: /plano
+      - link "Compras" [ref=f1e175] [cursor=pointer]:
+        - /url: /compras
+      - link "Perfil" [ref=f1e181] [cursor=pointer]:
+        - /url: /perfil

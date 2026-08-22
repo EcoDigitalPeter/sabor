@@ -15,7 +15,8 @@ import type { components } from "@/types/api";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import { useActiveStores, useCreateOrder, type Order, type OrderRequest } from "@/hooks/useOrders";
 import { Wizard, type WizardStep } from "@/components/ui/Wizard";
-import { OptionCard } from "@/components/onboarding/OptionCard";
+import { StoreOptionCard } from "@/components/plan/StoreOptionCard";
+import { StoresMiniMap } from "@/components/plan/StoresMiniMap";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
@@ -45,6 +46,9 @@ export default function EncomendarPage() {
 
   const [stepIndex, setStepIndex] = useState(0);
   const [storeId, setStoreId] = useState<number | null>(null);
+  // FE-Y08 (ago/2026): pesquisa de loja, a pedido do cliente ("quando houver muitas lojas") —
+  // filtra só pelo nome, client-side (poucas lojas no mock, sem paginação/endpoint de busca).
+  const [storeSearch, setStoreSearch] = useState("");
   const [selected, setSelected] = useState<Record<number, boolean>>({});
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [note, setNote] = useState("");
@@ -179,6 +183,13 @@ export default function EncomendarPage() {
   }
 
   const stores = storesQuery.data?.items ?? [];
+  // FE-Y08: pesquisa só pelo nome (é o que o utilizador reconhece à primeira vista); o mapa abaixo
+  // mostra sempre TODAS as lojas activas, mesmo com pesquisa aplicada, para não perder o contexto
+  // espacial das restantes ao procurar uma em concreto.
+  const normalizedSearch = storeSearch.trim().toLowerCase();
+  const filteredStores = normalizedSearch
+    ? stores.filter((store) => (store.name ?? "").toLowerCase().includes(normalizedSearch))
+    : stores;
 
   const steps: WizardStep[] = [
     {
@@ -192,19 +203,33 @@ export default function EncomendarPage() {
               description="De momento não há lojas parceiras ativas para encomendas. Tenta novamente mais tarde."
             />
           ) : (
-            <div className={styles.storeList}>
-              {stores.map((store) => (
-                <OptionCard
-                  key={store.id}
-                  label={store.name ?? ""}
-                  description={[[store.neighborhood, store.city].filter(Boolean).join(", "), store.contact ?? null]
-                    .filter(Boolean)
-                    .join(" · ")}
-                  selected={storeId === store.id}
-                  onSelect={() => store.id !== undefined && setStoreId(store.id)}
+            <>
+              <StoresMiniMap stores={stores} selectedStoreId={storeId} />
+              {stores.length > 4 ? (
+                <Input
+                  type="search"
+                  value={storeSearch}
+                  onChange={(event) => setStoreSearch(event.target.value)}
+                  placeholder="🔍 Procurar loja…"
+                  aria-label="Procurar loja"
+                  className={styles.storeSearch}
                 />
-              ))}
-            </div>
+              ) : null}
+              {filteredStores.length === 0 ? (
+                <p className={styles.hint}>Nenhuma loja encontrada para &ldquo;{storeSearch.trim()}&rdquo;.</p>
+              ) : (
+                <div className={styles.storeList}>
+                  {filteredStores.map((store) => (
+                    <StoreOptionCard
+                      key={store.id}
+                      store={store}
+                      selected={storeId === store.id}
+                      onSelect={() => store.id !== undefined && setStoreId(store.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       ),

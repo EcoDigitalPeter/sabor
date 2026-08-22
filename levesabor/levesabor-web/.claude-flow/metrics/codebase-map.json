@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-08-12T17:31:50.783Z",
+  "projectRoot": "D:\\aps\\sabor\\levesabor\\levesabor-web",
+  "structure": {
+    "hasPackageJson": true,
+    "hasTsConfig": true,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1786555910786
+}

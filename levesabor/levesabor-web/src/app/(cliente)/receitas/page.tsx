@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BrandIllustration } from "@/components/ui/BrandIllustration";
 import type { components } from "@/types/api";
 import { RecipeGridCard } from "./RecipeGridCard";
 import { RecipeDetailSheet } from "./RecipeDetailSheet";
@@ -115,6 +116,7 @@ export default function ReceitasPage() {
         </div>
       ) : catalogQuery.isError ? (
         <ErrorState
+          illustration={<BrandIllustration variant="generic-error" />}
           message={
             catalogQuery.error instanceof ApiError
               ? catalogQuery.error.message
@@ -124,6 +126,7 @@ export default function ReceitasPage() {
         />
       ) : recipes.length === 0 ? (
         <EmptyState
+          illustration={<BrandIllustration variant="empty-recipes-search" size={200} />}
           title={hasActiveFilters ? "Nenhuma receita encontrada" : "Ainda não há receitas no catálogo"}
           description={
             hasActiveFilters

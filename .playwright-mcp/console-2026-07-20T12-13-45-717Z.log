@@ -1,0 +1,19 @@
+[   14346ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[   14527ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/favicon.ico:0
+[   15911ms] [LOG] %cDocumentation: %chttps://mswjs.io/docs font-weight:bold font-weight:normal @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2565
+[   15911ms] [LOG] Found an issue? https://github.com/mswjs/msw/issues @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2570
+[   15911ms] [LOG] Worker script URL: http://localhost:3001/mockServiceWorker.js @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2571
+[   15911ms] [LOG] Worker scope: http://localhost:3001/ @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2572
+[   15911ms] [LOG] Client ID: %s (%s) e08a2b81-b4ac-4735-b2c9-7a0089d97983 top-level @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/browser/index.mjs:2574
+[   16299ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/icons/icon-192.png:0
+[   16406ms] [WARNING] Error while trying to use the following icon from the Manifest: http://localhost:3001/icons/icon-192.png (Download error or resource isn't a valid image) @ http://localhost:3001/login:0
+[   68022ms] [LOG] Request {url: URL, method: POST, headers: Object, body: {"email":"amelia@levesabor.mz","password":"password123"}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[   68025ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[   68025ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"accessToken":"mock-ac…"email":"amelia@levesabor.mz","role":"CLIENTE"}}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[   68243ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[   70562ms] [LOG] [Fast Refresh] done in 2320ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[   70761ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:114
+[   70761ms] [LOG] Handler: HttpHandler @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:115
+[   70762ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"status":"success","data":{"id":1001,"weekStart":…ozida e serve quente."}]},"feedback":"NONE"}]}]}}} @ webpack-internal:///(app-pages-browser)/./node_modules/msw/lib/core/handlers/HttpHandler.mjs:116
+[   71223ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/icons/icon-192.png:0
+[   71227ms] [WARNING] Error while trying to use the following icon from the Manifest: http://localhost:3001/icons/icon-192.png (Download error or resource isn't a valid image) @ http://localhost:3001/plano:0

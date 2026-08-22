@@ -11,7 +11,10 @@
 
 ## Faixas de paralelismo (visão rápida)
 
-> **Mudança de plano:** o backend deixou de ser um serviço Java separado — passa a viver **dentro do mesmo projeto Next.js** (Route Handlers), para permitir um único deploy no Vercel. Por isso `BE-A` (fundações do backend) depende agora de `FE-A01` (esqueleto Next.js já existir).
+> **Mudança de plano (Ago/2026):** o backend voltou a ser um serviço **Java/Spring Boot separado**
+> (`ottimizo/`, Java 21) — a tentativa anterior de o meter dentro do projeto Next.js (Route
+> Handlers) foi abandonada. `BE-A` (fundações do backend) já não depende de `FE-A01` — os dois
+> projetos evoluem em paralelo, ligados só pelo contrato REST (`/api/v1/**`).
 
 ```
 FE-A  Fundações ⚡ ──▶  FE-B Componentes UI (todos paralelos entre si)
@@ -19,10 +22,10 @@ FE-A  Fundações ⚡ ──▶  FE-B Componentes UI (todos paralelos entre si)
       │             └▶  FE-D Telas Admin  ──┤
       │             └▶  FE-L Telas Loja  ───┤   (Fase 3, depende de BE-L)
       ▼                                     ▼
-BE-A  Fundações ⚡ ──▶  DB migrations ──▶ BE-B Auth ──▶ BE-C..F Domínios (paralelos) ──▶ BE-L Domínio Loja (Fase 3) ──▶ INT Integração/UAT
+BE-A  Fundações ⚡ ──▶  DB migrations (Flyway) ──▶ BE-B Auth ──▶ BE-C..F Domínios (paralelos) ──▶ BE-L Domínio Loja (Fase 3) ──▶ INT Integração/UAT
 ```
 
-Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qualquer cartão FE-B pode ser pegado por qualquer dev em paralelo; as telas (FE-C/FE-D/FE-L) só dependem dos componentes que usam + mocks; e o backend (`BE-A01`) só arranca depois de `FE-A01` existir, por viverem no mesmo projeto. No backend, após BE-B (auth), os domínios BE-C, BE-D, BE-E e BE-F são faixas independentes.
+Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qualquer cartão FE-B pode ser pegado por qualquer dev em paralelo; as telas (FE-C/FE-D/FE-L) só dependem dos componentes que usam + mocks. O backend Java (`ottimizo/`) evolui em paralelo ao frontend, não depende de `FE-A01`. No backend, após BE-B (auth), os domínios BE-C, BE-D, BE-E e BE-F são faixas independentes.
 
 ---
 
@@ -64,9 +67,9 @@ Regra de ouro: **MOCK-01 e FE-A ficam prontos primeiro** — a partir daí, qual
 - [x] **FE-C04 · T-07 Ecrã de geração** — Chamada síncrona ao endpoint de geração (sem polling — resposta única, até dezenas de segundos), mensagens rotativas por temporizador local enquanto aguarda, estados failed/limit_reached. `[deps: FE-B04]` `[ref: 02 T-07, 01 F1-CLI-02]`
 - [x] **FE-C05 · T-05 Detalhe de refeição/receita** — MacroRing `lg` + legenda, ingredientes, passos numerados, notas de saúde, disclaimer; feedback 👍/👎 otimista; fluxo de troca com bottom-sheet. `[deps: FE-B02, B03, B05]` `[ref: 02 T-05, 01 F1-CLI-04/05]`
 - [x] **FE-C06 · T-06 Lista de compras** — Grupos por categoria (ícones P-06), checkboxes otimistas, progresso, custo estimado com nota de parcialidade. `[deps: FE-B02, B04]` `[ref: 02 T-06, 01 F1-CLI-06]`
-- [x] **FE-C07 · T-08 Perfil** — Edição por secção, aviso "vale a partir do próximo plano", logout. `[deps: FE-B01, B06]` `[ref: 02 T-08, 01 F1-CLI-01]`
+- [x] **FE-C07 · T-08 Perfil** — Edição por secção, aviso "vale a partir do próximo plano", zona para compras (província, cidade, bairro/zona, descrição), logout. `[deps: FE-B01, B06]` `[ref: 02 T-08, 01 F1-CLI-01]`
 - [x] **FE-C08 · Offline/PWA do cliente** — Precache do shell; runtime cache do plano ativo e lista (stale-while-revalidate); fila local de toggles da lista com sync; excluir `/admin` do SW; testar com throttling 3G. `[deps: FE-C03, FE-C06]` `[ref: 02 §5, 01 F1-CLI-03/06]` *(nota: teste manual com throttling 3G ainda por fazer em DevTools — não automatizável pelo agente)*
-- [x] **FE-C09 · T-06 CTA "Encomendar" + T-20/T-21 Escolher loja / Rever encomenda** — Fluxo de encomenda a partir da lista de compras: seleção de loja ativa, revisão de itens (checkbox + quantidade), nota opcional, confirmação. `[deps: FE-B01, B03, B06]` `[ref: 02 T-20/21 (novas), 01 F3-CLI-07]` *(frontend contra mocks — sem depender do backend `BE-L01` da Fase 3; o âmbito/promessa da funcionalidade continua Fase 3 — ver nota em `01-functional-plan.md` F3-CLI-07)*
+- [x] **FE-C09 · T-06 CTA "Encomendar" + T-20/T-21 Escolher loja / Rever encomenda** — Fluxo de encomenda a partir da lista de compras: lista de lojas ativas recebida já ordenada pelo backend/mock com base na zona de compras do perfil, revisão de itens (checkbox + quantidade), nota opcional, confirmação. `[deps: FE-B01, B03, B06, FE-C07]` `[ref: 02 T-20/21 (novas), 01 F3-CLI-07]` *(frontend contra mocks — sem depender do backend `BE-L01` da Fase 3; o âmbito/promessa da funcionalidade continua Fase 3 — ver nota em `01-functional-plan.md` F3-CLI-07)*
 - [x] **FE-C10 · T-22 Minhas encomendas** — Lista de encomendas do cliente com estado-badge, detalhe simples, cancelamento quando permitido. `[deps: FE-B02, B07]` `[ref: 02 T-22 (nova), 01 F3-CLI-07]` *(frontend contra mocks — sem depender do backend `BE-L01` da Fase 3)*
 
 ### FE-Q — Portal do cliente v2 (redesign visual, benchmark de UI de receitas externo)
@@ -155,7 +158,7 @@ Tarefas nascidas de uma análise do feedback recebido do cliente sobre a app, cr
 
 ### FE-X — Gaps de paridade cliente↔admin
 
-Tarefas nascidas de uma análise de correspondência: para cada funcionalidade do lado do cliente, existe o par equivalente do lado do admin (visibilidade em métricas ou ecrã de gestão)? Cruzando `01-functional-plan.md` (F2-ADM-06 foi escrito antes de `FE-T`/`FE-C09`/`FE-C10` existirem) com o código atual, confirmam-se lacunas onde a métrica nunca foi estendida para cobrir a funcionalidade nova — distintas dos gaps de `FE-D02/03/06/07`, que **já têm** o par certo planeado, só ainda por implementar (telas hoje são stubs `TODO`). `[Sugestão]` marca prioridade mais baixa, análogo ao critério usado em `FE-W`.
+Tarefas nascidas de uma análise de correspondência: para cada funcionalidade do lado do cliente, existe o par equivalente do lado do admin (visibilidade em métricas ou ecrã de gestão)? Cruzando `01-functional-plan.md` (F2-ADM-06 foi escrito antes de `FE-T`/`FE-C09`/`FE-C10` existirem) com o código atual, as lacunas de paridade foram fechadas no frontend contra mocks. `FE-D02/03/06/07` já têm telas reais, hooks e handlers MSW; os itens abaixo tratam apenas extensões de métricas no dashboard admin. `[Sugestão]` marca prioridade mais baixa, análogo ao critério usado em `FE-W`.
 
 - [x] **FE-X01 · Métricas — Pedir receita agora** — Campo `adHocRecipeRequestsCount` no contrato `MetricsSummary` (`src/types/api.d.ts`), ligado ao contador real do mock (`dailyAdHocCount`) em `buildMetricsSummary()` (`src/mocks/fixtures.ts`) + `KpiCard` "Pedidos avulsos" no dashboard admin (`src/app/admin/page.tsx`). `[deps: FE-D01, FE-T02]` `[ref: 01 F2-ADM-06 (extensão)]`
 - [x] **FE-X02 · Métricas — Encomendas agregadas** — Campo `ordersInPeriod` (total + contagem por estado) no `MetricsSummary`, derivado ao vivo das encomendas em memória do mock; `KpiCard`/mini-tabela "Encomendas" no dashboard admin. `[deps: FE-D01, FE-C09]` `[ref: 01 F2-ADM-06 (extensão)]`
@@ -169,10 +172,10 @@ Tarefas nascidas de `feedback/feedback.txt` (ago/2026), cobrindo quase toda a jo
 - [x] **FE-Y02 · Onboarding — Objetivo & Condição de saúde** — Nova imagem no passo objetivo; checkmark visual no `OptionCard` selecionado; condição de saúde com opção "Outra" (texto livre) e seleção múltipla (`healthConditions: string[]`, ver `01-functional-plan.md` F1-CLI-01); propagar labels "Ganhar massa muscular"/"Controlar uma condição de saúde" em `onboarding/page.tsx`, `perfil/page.tsx`, `plano/pedir-agora/page.tsx`, `HeroQuiz.tsx`, `LandingPage.tsx` (grep obrigatório, regra 5 do guia). `[deps: —]` `[ref: 01 F1-CLI-01, feedback.txt L20-38]`
 - [x] **FE-Y03 · Onboarding — Alergias, Preferências, Orçamento, Refeições, Pessoas** — Separar Alergias de "Alimentos que não comes"; "Vegan"→"Vegana", "Baixo teor calórico"→"Baixo em calorias", nova opção "Sem preferência"; orçamento `Baixo/Médio/Confortável`→`Económico/Equilibrado/Premium` com faixas indicativas em MT; reformular perguntas de refeições/dia e pessoas em casa. `[deps: FE-Y02 (mesmo ficheiro)]` `[ref: feedback.txt L40-81]`
 - [x] **FE-Y04 · Onboarding — Resumo, ecrã final e consentimento médico** — "Nome"→"Nome completo" no registo; mover o consentimento médico do registo para o resumo do onboarding (antes do CTA de gerar o 1º plano); reformular a frase do aviso; link "Editar" por secção no resumo; hierarquia valores>labels; CTA final renomeado; loading com frases rotativas. `[deps: FE-Y02, FE-Y03 (mesmo ficheiro)]` `[ref: feedback.txt L12-18, L84-133]`
-- [ ] **FE-Y05 · Tela Plano/Início — dashboard e streak** — Renomear CTAs não-destrutivamente; destacar refeição atual por hora do dia; kcal+proteína no `MealCard`; mensagem motivacional junto ao "0/30"; nome de refeição limpo + tag separada (campo novo em `RecipeSnapshot`); indicador "dentro do objetivo". `[deps: —]` `[ref: feedback.txt L136-208, L344-372]`
-- [ ] **FE-Y06 · Pedir receita agora — wizard, resultado e guardar/substituir** — Contexto por passo; seleção preenchida a cor; reformular as 4 perguntas; unidade "kcal" no resultado; CTAs visíveis; renomear "Descartar"; destacar dia/refeição alvo + data completa ao guardar; `ConfirmDialog` ao substituir refeição existente. `[deps: —]` `[ref: feedback.txt L210-326]`
-- [ ] **FE-Y07 · Lista de compras** — Resumo com contadores antes dos botões; "Já tenho um pouco"→"🏠 Tenho em casa" como stepper `[-]/[+]`; arredondar quantidades a tamanho de embalagem real (tabela global por unidade); impacto de custo antes/depois; item comprado esbatido + colapso automático de categoria; barra de progresso. `[deps: —]` `[ref: feedback.txt L374-489]`
-- [ ] **FE-Y08 · Escolha de loja (+ admin de lojas)** — Novos campos em `Store` (rating, horário, entrega, preço médio, coordenadas), editáveis em `StoreFormFields` (admin) e visíveis na escolha de loja do cliente; pesquisa de loja; mapa simples. `[deps: —]` `[ref: feedback.txt L490-509]`
+- [x] **FE-Y05 · Tela Plano/Início — dashboard e streak** — Renomear CTAs não-destrutivamente; destacar refeição atual por hora do dia; kcal+proteína no `MealCard`; mensagem motivacional junto ao "0/30"; nome de refeição limpo + tag separada (campo novo em `RecipeSnapshot`); indicador "dentro do objetivo". `[deps: —]` `[ref: feedback.txt L136-208, L344-372]`
+- [x] **FE-Y06 · Pedir receita agora — wizard, resultado e guardar/substituir** — Contexto por passo; seleção preenchida a cor; reformular as 4 perguntas; unidade "kcal" no resultado; CTAs visíveis; renomear "Descartar"; destacar dia/refeição alvo + data completa ao guardar; `ConfirmDialog` ao substituir refeição existente. `[deps: —]` `[ref: feedback.txt L210-326]`
+- [x] **FE-Y07 · Lista de compras** — Resumo com contadores antes dos botões; "Já tenho um pouco"→"🏠 Tenho em casa" como stepper `[-]/[+]`; arredondar quantidades a tamanho de embalagem real (tabela global por unidade); impacto de custo antes/depois; item comprado esbatido + colapso automático de categoria; barra de progresso. `[deps: —]` `[ref: feedback.txt L374-489]`
+- [x] **FE-Y08 · Escolha de loja (+ admin de lojas)** — Novos campos em `Store` (rating, horário, entrega, preço médio, coordenadas), editáveis em `StoreFormFields` (admin) e visíveis na escolha de loja do cliente; pesquisa de loja; mapa simples. `[deps: —]` `[ref: feedback.txt L490-509]`
 
 ### FE-L — Telas do Portal da Loja (Fase 3; paralelas entre si; deps indicadas + MOCK-02)
 
@@ -201,73 +204,75 @@ Tarefas nascidas de `feedback/feedback.txt` (ago/2026), cobrindo quase toda a jo
 
 ## 🟨🟩 BACKEND + BASE DE DADOS
 
-### BE-A — Fundações ⚡ (sequencial, curto; mudança de plano — vive dentro do projeto Next.js, não num serviço separado)
+> Stack real (Ago/2026): Java 21 / Spring Boot 3.5 em `ottimizo/` (raiz do repo, fora de
+> `levesabor/`), Flyway para migrações, Spring Data JPA/Hibernate, Spring AI (`ChatClient`) para as
+> features de IA, Supabase Auth como emissor do JWT (backend valida via OAuth2 resource server,
+> não gere password/refresh tokens próprios). Contrato de resposta comum já existe:
+> `ApiResponse<T>`/`PageResponse<T>`, `ErrorCode` (`com.ottimizo.common.error`, ~20 códigos `LSAxxx`
+> já reservados), `GlobalExceptionHandler`, `CorrelationIdFilter`. Ver plano de implementação
+> completo em `D:\Users\M001419\.claude\plans\faca-um-plano-para-imperative-petal.md` (fases
+> técnicas detalhadas, riscos em aberto).
 
-- [ ] **BE-A01 · Camada de API no Next.js** — Route Handlers em `src/app/api/v1/**`, estrutura de pastas `src/server/{services,repositories,dto,errors,security}` do `03 §2`; Prisma instalado (`prisma/schema.prisma`); CI a correr lint + typecheck. `[deps: FE-A01]` `[ref: 03 §1-2]`
-- [ ] **BE-A02 · Núcleo transversal** — tipos `ApiResponse`/`PageResponse`, objeto `ErrorCodes` LSAxxx completo, `ServiceError`, handler central de erros para os Route Handlers, `correlationId` por pedido + logging estruturado. `[deps: BE-A01]` `[ref: 03 §3]`
-- [ ] **BE-A03 · Prisma + ambiente local** — `schema.prisma` inicial, Postgres local (Docker) para dev, `DATABASE_URL`/`DIRECT_URL`, `prisma migrate dev`; base de testes de integração com Postgres efémero. `[deps: BE-A01]` `[ref: 03 §10, 05 §5]`
+### BE-A — Fundações ⚡ (sequencial, curto)
 
-### DB — Migrations (sequenciais entre si; paralelas com BE-B após V1)
+- [x] **BE-A01 · Esqueleto Spring Boot** — Projeto `ottimizo/` (Java 21, Spring Boot 3.5), `pom.xml` com starters `web`/`data-jpa`/`security`/`oauth2-resource-server`/`validation`/`actuator`, `flyway-database-postgresql`, `springdoc-openapi` (gera `/v3/api-docs` automaticamente — passa a ser a fonte de verdade do contrato, substitui o `openapi.yaml` manual perdido), `spring-ai-starter-model-openai`. `[deps: —]` `[ref: plano técnico Fase 1]`
+- [x] **BE-A02 · Núcleo transversal** — `ApiResponse<T>`/`PageResponse<T>`, `ErrorCode` (enum `LSAxxx`), `ServiceException`, `GlobalExceptionHandler` (`@RestControllerAdvice`), `CorrelationIdFilter` (header `x-correlation-id` + MDC). `[deps: BE-A01]`
+- [x] **BE-A03 · Segurança e contexto de utilizador** — `SecurityConfig` (JWT OAuth2 resource server contra issuer/JWKS do Supabase, regras de rota por `Role`), `CurrentUser`/`UserContextService` (resolve `AppUser` a partir do `sub` do JWT, bloqueia `SUSPENDED`). `[deps: BE-A01]`
+- [x] **BE-A04 · AuditService + Testcontainers** — Entidade `AuditLog` (mapeia `audit_log`, já existe desde V001) + `AuditService.record(...)` transacional, chamado por todos os services de escrita das fases seguintes. Adicionar `org.testcontainers:postgresql`+`junit-jupiter` ao `pom.xml` (ainda não presente) + classe base `@Testcontainers` a correr as migrações Flyway reais — pré-requisito dos testes de integração de `BE-C`/`BE-D`/`BE-E`/`BE-L` em diante. `[deps: BE-A02]`
 
-- [ ] **DB-01 · V1 auth + audit** — `users`, `refresh_tokens`, `audit_log` (SQL do `04 §3`). `[deps: BE-A03]`
-- [ ] **DB-02 · V2 perfis + catálogo nutricional** — `client_profiles`, `ingredients`, `recipes`, `recipe_ingredients`. `[deps: DB-01]`
-- [ ] **DB-03 · V3 planos + listas** — `meal_plans`, `meal_plan_entries`, `meal_feedback`, `shopping_lists(_items)`, `ai_generation_log`. `[deps: DB-02]`
-- [ ] **DB-04 · V4 lojas** — `stores`. `[deps: DB-02]` *(independente de DB-03 — paralelizável)*
-- [ ] **DB-05 · V5 seed** — Admin inicial (placeholder `${seed_admin_bcrypt}`) + ≥ 40 receitas moçambicanas com nutrição/tags **(conteúdo do cliente — pedir no dia 1, risco R2)** + ~30 ingredientes. `[deps: DB-02, conteúdo do cliente]` `[ref: 04 §3 V5, 05 R2]`
-- [ ] **DB-06 · Projeto Supabase prod** — Criar projeto, configurar pooler de transações + connection string direta para migrations, testar `prisma migrate deploy` contra ele, agendar `pg_dump` externo diário + teste de restore. `[deps: DB-01]` `[ref: 05 §5]`
-- [ ] **DB-07 · V6 loja + catálogo próprio + encomendas (Fase 3)** — `users.store_id` + role `LOJISTA`; `products` redesenhado (por loja, com `price_mt` embutido); `import_jobs` (com `store_id`); `orders`, `order_items`. `[deps: DB-04]` `[ref: 04 §3 V6]`
+### DB — Migrations Flyway (já escritas; entidades JPA/controllers por cima é que faltam)
 
-### BE-B — Autenticação e segurança (sequencial; desbloqueia todos os domínios)
+- [x] **DB-01 · V001 auth + audit** — `users`, `audit_log`. *(sem `refresh_tokens` — decisão de usar Supabase Auth como IdP, não password/refresh tokens próprios; ver risco em aberto sobre o modelo de integração no plano técnico)* `[ref: V001__auth_users_audit.sql]`
+- [x] **DB-02 · V002 perfis + catálogo nutricional** — `client_profiles`, `ingredients`, `recipes`, `recipe_ingredients`, `recipe_steps`, `meal_feedback`, `recipe_swap_reasons`. `[ref: V002__profiles_catalog_plans.sql]`
+- [x] **DB-03 · V003 planos + listas** — `meal_generations`, `meal_plans`, `meal_plan_days`, `meal_plan_entries`, `shopping_lists`, `shopping_list_items`, `ad_hoc_recipe_requests`. `[ref: V003__meal_plans_shopping.sql]`
+- [x] **DB-04 · V004 lojas + catálogo próprio + encomendas** — `stores`, `products`, `import_jobs`, `orders`, `order_items`, `store_rankings_cache`. *(já inclui o âmbito que o plano antigo separava em "DB-04 lojas" + "DB-07 loja Fase 3" — a migração real fundiu os dois)* `[ref: V004__stores_products_orders.sql]`
+- [x] **DB-05 · V005 views + realtime** — `ai_generation_log` + 6 views SQL para dashboards admin (`v_recipe_feedback_summary`, `v_store_product_counts`, `v_admin_recipe_list`, `v_order_status_counts`, `v_admin_metrics_daily`, `v_user_engagement_monthly`) + publicação `supabase_realtime`. *(nota: âmbito diferente do "V5 seed" do plano antigo — seed de receitas/admin inicial ainda não existe como migração, ver `DB-06` abaixo)* `[ref: V005__views_realtime.sql]`
+- [x] **DB-06 · Seed de dados** — Admin inicial + ≥ 40 receitas moçambicanas com nutrição/tags **(conteúdo do cliente — risco R2 do `05-implementation-roadmap.md`)** + ~30 ingredientes, como migração Flyway `V006__seed.sql` ou script separado. `[deps: BE-D/BE-E (CRUD para validar os dados), conteúdo do cliente]`
+- [x] **DB-07 · Projeto Supabase prod** — Confirmar/configurar o projeto Supabase de produção (pooler de transações, JWKS URI, `SUPABASE_JWT_ISSUER`), testar `mvn flyway:migrate`/arranque do Spring Boot contra ele, agendar `pg_dump` externo diário + teste de restore. `[deps: DB-01]`
 
-- [ ] **BE-B01 · JWT + guarda de autorização** — `JwtService` (lib `jose`), helper/middleware de verificação por rota/role do `03 §4`. `[deps: BE-A02, DB-01]`
-- [ ] **BE-B02 · Endpoints de auth** — register/login/refresh (rotativo, cookie httpOnly)/logout, hash de password (bcrypt/argon2), revogação, auditoria de logins falhados; testes de integração. `[deps: BE-B01]` `[ref: 01 F1-VIS-01/02, 03 §4]`
-- [ ] **BE-B03 · AuditService** — `recordAudit(...)` síncrono transacional + convenções de ações auditáveis. `[deps: BE-A02, DB-01]` `[ref: 03 §7]`
+### BE-B — Autenticação e utilizadores (após BE-A; desbloqueia todos os domínios)
+
+- [x] **BE-B01 · Decisão do modelo Supabase Auth** — **Decidido (2026-08-15):** o frontend usa `supabase-js` diretamente para signup/login/refresh (Supabase já emite o JWT que `SecurityConfig` valida via JWKS); o backend só expõe um endpoint de "bootstrap" que cria o `AppUser` local a partir de um JWT já válido. `login`/`refresh`/`logout` **não são** endpoints do backend — o `01-functional-plan.md` descreve-os assumindo password/refresh tokens próprios, isso já não se aplica; corrigir esse documento quando for reescrito. Sem service-role key no backend. `[deps: —]`
+- [x] **BE-B02 · `AuthController`** — `POST /api/v1/auth/register` (bootstrap do `AppUser` local a partir de um JWT Supabase já válido, idempotente — nunca `login`/`refresh`/`logout` no backend, ver `BE-B01`). `[deps: BE-A03]` `[ref: 01 F1-VIS-01/02]`
+- [x] **BE-B03 · `AdminUserController`** — `GET /admin/users` (paginado, filtros role/estado), `GET/PATCH /admin/users/{id}` (suspensão — incluindo invalidar a sessão do lado do Supabase, não só `status=SUSPENDED` local), `POST /admin/users` (criar admin/lojista), regra "último admin ativo" (`LSA022`). `[deps: BE-A04, BE-B02]` `[ref: 01 F2-ADM-01]`
 
 ### BE-C — Domínio Cliente (após BE-B; C1→C2→C3 em cadeia; C4/C5 paralelos a C2)
 
-- [ ] **BE-C01 · Perfil** — `GET/PUT /me/profile`, enums Goal/HealthCondition/BudgetBand, validações Bean Validation. `[deps: BE-B02, DB-02]` `[ref: 01 F1-CLI-01]`
-- [ ] **BE-C01B · Perfil — campo `dietaryPreferences`** — Endpoint `GET/PUT /me/profile` passa a aceitar o novo campo; enum fechado igual ao das `healthTags`. `[deps: BE-C01]` `[ref: 01 F1-CLI-01]`
-- [ ] **BE-C02 · RecipeCatalogService (pré-filtros duros)** — Elegibilidade por condição de saúde (celíaco = filtro duro `sem_gluten`), alergias, feedback 👎 excluído/despriorizado, 👍 preferido. Unit tests exaustivos por condição — é a barreira anti-alucinação. `[deps: BE-C01, DB-03]` `[ref: 01 F1-CLI-02 regras, 03 §5]`
-- [ ] **BE-C03 · Motor de geração (OpenAI)** — `AiMealPlanService` + `openAiMealPlanService` (structured outputs, validação de ids, retries, timeout), chamada **síncrona** dentro do Route Handler (`maxDuration` alargado — Vercel Pro), snapshots, `ai_generation_log`, limite diário; OpenAI mockada nos testes (nock/msw). `[deps: BE-C02]` `[ref: 01 F1-CLI-02, 03 §5]`
-- [ ] **BE-C04 · Plano ativo + entradas** — `GET /me/meal-plans/active` (payload único compacto), `GET .../{id}`, `GET .../entries/{id}`, ownership em tudo. `[deps: BE-C01, DB-03]` *(paralelo a BE-C03 — usa fixtures)* `[ref: 01 F1-CLI-03/04]`
-- [ ] **BE-C05 · Feedback + swap** — `PUT /me/recipes/{id}/feedback`; `POST .../entries/{id}/swap` (alternativa determinística compatível ±20% kcal, transacional com rebuild da lista). `[deps: BE-C02, BE-C04]` `[ref: 01 F1-CLI-05]`
-- [ ] **BE-C06 · Lista de compras** — `ShoppingListService.rebuildForPlan` (agregação + conversão de unidades g/kg, ml/l; preserva checked), `GET /me/shopping-list`, `PATCH .../items/{id}`. `[deps: BE-C04]` `[ref: 01 F1-CLI-06]`
-- [ ] **BE-C06B · Endpoint adicionar item manual** — `POST /me/shopping-list/items`, cria item com `origin: "MANUAL"` na lista ativa. `[deps: BE-C06]` `[ref: 01 F1-CLI-06B]`
-- [ ] **BE-C07 · Encomendas (cliente)** — `POST /me/orders` (a partir da lista de compras ativa, itens selecionados), `GET /me/orders`, `GET /me/orders/{id}`, `PATCH /me/orders/{id}/cancel`; resolução best-effort de preço unitário pelo catálogo da loja. `[deps: BE-C06, BE-L01]` `[ref: 01 F3-CLI-07]` **Fase 3**
-- [ ] **BE-C08 · Endpoint catálogo de receitas navegável** — `GET /me/recipes?tags=...&q=...`, paginado, só `PUBLISHED`. `[deps: BE-E02]` `[ref: 01 F1-CLI-08]`
+- [x] **BE-C01 · Perfil** — Completar entidade `ClientProfile` (falta `healthConditions text[]`, `healthConditionOther`, `allergies`/`foodExclusions jsonb`, `dietaryPreferences text[]` — colunas já existem em V002, só a entidade JPA ficou incompleta; usar `@JdbcTypeCode(SqlTypes.ARRAY)`/`SqlTypes.JSON`, Hibernate 6). `ProfileController` — `GET/PUT /api/v1/me/profile`, validação Bean Validation dos enums `Goal`/`BudgetBand`/vocabulário de `dietaryPreferences` (labels byte-idênticos ao `01-functional-plan.md`). `[deps: BE-B02]` `[ref: 01 F1-CLI-01]`
+- [x] **BE-C02 · `RecipeCatalogService` (pré-filtros duros)** — Elegibilidade por condição de saúde (celíaco = filtro duro `sem_gluten`), alergias, feedback 👎 excluído/despriorizado, 👍 preferido. Sem IA — é puro Java sobre o catálogo `PUBLISHED`. Testes unitários exaustivos por condição — é a barreira anti-alucinação, merece o maior investimento de testes de toda a Fase C. `[deps: BE-C01, BE-D02]` `[ref: 01 F1-CLI-02 regras]`
+- [x] **BE-C03 · `AiMealPlanService` (Spring AI)** — `ChatClient` sobre o catálogo pré-filtrado, valida cada `recipeId` devolvido contra a lista curada (mesmo padrão de `StoreRankingService.normalizeRanking`), retries limitados, `LSA013_AI_UNAVAILABLE` em falha final. Entidades `MealGeneration`/`MealPlan`/`MealPlanDay`/`MealPlanEntry` + `AiGenerationLog`. **Decisão: geração assíncrona** (`POST` devolve 202 + `MealGeneration(GENERATING)`, processamento `@Async`, frontend faz polling — o schema `meal_generations.status` já foi desenhado para isto; o fluxo síncrono do `01-functional-plan.md` era herança do desenho Vercel/Next.js abandonado). `[deps: BE-C02]` `[ref: 01 F1-CLI-02]`
+- [x] **BE-C04 · Plano ativo + entradas** — `GET /me/meal-plans/active`, `GET .../{id}`, `GET .../entries/{id}`, `GET /me/meal-plans/generations/{id}` (polling), ownership em tudo. `[deps: BE-C01]` *(paralelo a BE-C03)* `[ref: 01 F1-CLI-03/04]`
+- [x] **BE-C05 · Feedback + swap** — `PUT /me/recipes/{id}/feedback` (entidade `MealFeedback`); `POST .../entries/{id}/swap` (alternativa determinística compatível ±20% kcal, sem IA, transacional com rebuild da lista; `LSA014_NO_ALTERNATIVE`). `[deps: BE-C02, BE-C04]` `[ref: 01 F1-CLI-05]`
+- [x] **BE-C06 · Lista de compras** — Entidades `ShoppingList`/`ShoppingListItem`. `ShoppingListService.rebuildForPlan` (agregação por `ingredient_id` + conversão g/kg, ml/l; preserva `checked`; item `MANUAL` sobrevive a regenerações), `GET /me/shopping-list`, `PATCH .../items/{id}`, `POST .../items` (item manual). `[deps: BE-C04]` `[ref: 01 F1-CLI-06/06B]`
+- [x] **BE-C07 · Encomendas (cliente)** — `POST /me/orders`, `GET /me/orders`, `GET /me/orders/{id}`, `PATCH /me/orders/{id}/cancel` (`LSA017_ORDER_NOT_CANCELABLE`); resolução best-effort de preço unitário pelo catálogo da loja. `[deps: BE-C06, BE-L02]` `[ref: 01 F3-CLI-07]` **Fase 3**
+- [x] **BE-C08 · Pedido avulso de receita** — Entidade `AdHocRecipeRequest`. `POST /me/recipes/adhoc`, `GET /me/recipes/adhoc/{id}`, `POST /me/meal-plans/entries/{id}/replace`. Reutiliza `RecipeCatalogService`/`AiMealPlanService` em escala menor (1 receita). `LSA015_ADHOC_LIMIT` (3/dia). `[deps: BE-C02, BE-C03]` `[ref: 01 F1-CLI (Pedir agora)]`
+- [x] **BE-C09 · Catálogo de receitas navegável** — `GET /me/recipes?tags=...&q=...`, paginado, só `PUBLISHED`. `[deps: BE-D01]` `[ref: 01 F1-CLI-08]`
 
-### BE-D — Domínio Admin: contas e catálogo de lojas (após BE-B; D1/D2 **paralelos entre si**)
+### BE-D — Domínio Admin: catálogo (após BE-B; D1/D2 paralelos entre si)
 
-- [ ] **BE-D01 · Gestão de utilizadores** — Lista paginada/pesquisa, detalhe, `PATCH status` (revoga refresh, guarda "último admin"), `GET health-profile` auditado; `POST /admin/users` para criar admin ou lojista (`storeId`). `[deps: BE-B02, BE-B03]` `[ref: 01 F2-ADM-01]`
-- [ ] **BE-D02 · CRUD lojas** — Endpoints + regras de suspensão/remoção do registo da loja. `[deps: BE-B02, DB-04]` `[ref: 01 F2-ADM-02]`
+- [x] **BE-D01 · CRUD ingredientes + receitas** — Completar entidades `Ingredient` (campos nutricionais: `kcalPer100g`/`proteinPer100g`/`carbsPer100g`/`fatPer100g`/`fiberPer100g`, já em V002) e `Recipe` (`healthNote`, `healthTags text[]`, `proteinPct`/`carbsPct`/`fatPct`/`fiberPct`, `macrosOverride`, relação com `RecipeStep`); nova entidade `RecipeIngredient` (tabela existe desde V002, sem entidade JPA ainda). `AdminIngredientController`/`AdminRecipeController` — CRUD + `PATCH .../status` (publish/unpublish), `RecipeMacroCalculator`, `RecipePublicationValidator` (`LSA023_RECIPE_INCOMPLETE`), bloqueio de remoção de ingrediente em uso (`LSA021_INGREDIENT_IN_USE`). `[deps: BE-A04]` `[ref: 01 F2-ADM-05]`
+- [x] **BE-D02 · CRUD lojas (admin)** — Completar entidade `Store` (`rating`, `openingHoursText`, `averagePriceLevel`, já em V004). `AdminStoreController` — CRUD + `PATCH .../status`, `LSA006_DUPLICATE` (nome+cidade). `[deps: BE-A04]` `[ref: 01 F2-ADM-02]`
 
-> `BE-D03`/`BE-D04` (produtos/preços e Excel no admin) foram **removidos** — ver `BE-L` abaixo (Fase 3).
+### BE-E — Domínio Admin: métricas (após BE-B/BE-D, paralelo a BE-C)
 
-### BE-E — Domínio Admin: dados da IA (após BE-B; paralelo a BE-D)
+- [x] **BE-E01 · `AdminMetricsController`** — `GET /admin/metrics/summary?period=7d|30d|90d`, mapeando as 6 views SQL de V005 (`@Immutable`/`@Subselect` ou `JdbcTemplate`) — não replicável em H2, exige Testcontainers-Postgres nos testes de integração. `[deps: BE-A04, BE-C03 (para ai_generation_log ter dados)]` `[ref: 01 F2-ADM-06]`
 
-- [ ] **BE-E01 · CRUD ingredientes** — Endpoints + bloqueio de remoção em uso (LSA021 com lista de receitas). `[deps: BE-B02, DB-02]` `[ref: 01 F2-ADM-05]`
-- [ ] **BE-E02 · CRUD receitas + publicação** — Endpoints, cálculo de macros a partir dos ingredientes (+ override), regras de publicação server-side (LSA023 com motivos), feedback agregado por receita. `[deps: BE-E01]` `[ref: 01 F2-ADM-05]`
+### BE-L — Domínio Loja (Fase 3; após BE-B + BE-D02; L1/L2 paralelos entre si, L3 depois)
 
-### BE-F — Métricas (após BE-B; paralelo a BE-C/D/E)
-
-- [ ] **BE-F01 · metrics/summary** — KPIs + séries + custo IA num payload; testes com fixtures. `[deps: BE-B02, DB-03]` `[ref: 01 F2-ADM-06]`
-
-### BE-L — Domínio Loja (Fase 3; após BE-B + DB-07; L1/L2 paralelos entre si, L3 depois)
-
-- [ ] **BE-L01 · RBAC `LOJISTA` + ownership por loja** — Extensão do guarda de autorização e do `JwtService` para resolver `store_id` do token; regra `/api/v1/loja/**` → role `LOJISTA` + filtro de ownership em todos os services do domínio. `[deps: BE-B01, DB-07]` `[ref: 03 §4, 01 Persona 4]`
-- [ ] **BE-L02 · CRUD produtos da loja** — `GET/POST /loja/products`, `GET/PUT/DELETE /loja/products/{id}`, `PATCH .../status`, sempre escopado ao `store_id` do token. `[deps: BE-L01]` `[ref: 01 F3-LOJ-01]`
-- [ ] **BE-L03 · Import/Export Excel da loja (exceljs)** — Template/export/import validar→confirmar escopados à loja; `import_jobs` com `store_id`. `[deps: BE-L02]` `[ref: 01 F3-LOJ-02]`
-- [ ] **BE-L04 · Gestão de encomendas (loja)** — `GET /loja/orders` (paginado, filtro estado), `GET /loja/orders/{id}`, `PATCH /loja/orders/{id}/status` com máquina de estados validada server-side (erro de transição inválida); auditoria de cada mudança. `[deps: BE-L01, BE-C07]` `[ref: 01 F3-LOJ-03]`
+- [x] **BE-L01 · RBAC `LOJISTA` + ownership por loja** — Já parcialmente pronto: `Role.LOJISTA` e a regra `/api/v1/loja/**` → `ROLE_LOJISTA` já existem em `SecurityConfig`; falta o filtro de ownership por `currentUser.storeId()` em todos os services do domínio (nunca aceitar `storeId` vindo do cliente). `[deps: BE-B03]` `[ref: 01 Persona 4]`
+- [x] **BE-L02 · CRUD produtos da loja** — Completar entidade `Product` (tabela já existe em V004). `LojaProductController` — `GET/POST /loja/products`, `GET/PUT/DELETE /loja/products/{id}`, `PATCH .../status`, sempre escopado ao `storeId` do token. `[deps: BE-L01]` `[ref: 01 F3-LOJ-01]`
+- [x] **BE-L03 · Import/Export Excel da loja (Apache POI)** — Adicionar `poi-ooxml` ao `pom.xml` (ainda não presente). Entidade `ImportJob` (tabela já em V004). Template/export/import validar→confirmar escopados à loja. `LSA020_IMPORT_INVALID_FILE`. `[deps: BE-L02]` `[ref: 01 F3-LOJ-02]`
+- [x] **BE-L04 · Gestão de encomendas (loja + cliente)** — Entidades `Order`/`OrderItem` (tabelas já em V004). `OrderStateMachine` (transições `PENDENTE→ACEITE→EM_PREPARACAO→PRONTA→CONCLUIDA`, `RECUSADA`/`CANCELADA` com regras próprias — `LSA030_INVALID_ORDER_TRANSITION`). `LojaOrderController` — `GET/PATCH /loja/orders/**`; liga a `BE-C07` do lado do cliente. `[deps: BE-L01, BE-C06]` `[ref: 01 F3-LOJ-03]`
 
 ---
 
 ## 🟪 INTEGRAÇÃO E ENTREGA (fim de cada fase)
 
-- [ ] **INT-01 · Ligar FE ao backend real (Fase 1)** — Desligar MSW no cliente, correr FE-E01 contra o backend, corrigir divergências de contrato (o OpenAPI manda). `[deps: FE-C*, BE-C*, DB-05]`
-- [ ] **INT-02 · Deploy Fase 1 (Vercel)** — Projeto Vercel (plano Pro), env vars prod, Supabase, smoke tests, UAT com o cliente → checklist F1 do `05 §4` → **saldo 10.500 MT**. `[deps: INT-01, DB-06]`
-- [ ] **INT-03 · Ligar FE admin ao backend real (Fase 2)** — Idem INT-01 para as telas admin. `[deps: FE-D*, BE-D*, BE-E*, BE-F01]`
+- [ ] **INT-01 · Ligar FE ao backend real (Fase 1)** — Desligar MSW no cliente, correr FE-E01 contra o backend Java (`ottimizo/`), corrigir divergências de contrato (o `/v3/api-docs` do `springdoc` manda). `[deps: FE-C*, BE-C*, DB-06]`
+- [ ] **INT-02 · Deploy Fase 1** — Frontend no Vercel (plano Pro) + backend Java num serviço à parte (alvo de deploy do `ottimizo/` por decidir — não é Vercel, que não suporta processo Java de longa duração), env vars prod, Supabase, smoke tests, UAT com o cliente → checklist F1 do `05 §4` → **saldo 10.500 MT**. `[deps: INT-01, DB-07]`
+- [ ] **INT-03 · Ligar FE admin ao backend real (Fase 2)** — Idem INT-01 para as telas admin. `[deps: FE-D*, BE-D*, BE-E01]`
 - [ ] **INT-04 · Deploy Fase 2** — Verificação de restore de backup, UAT → checklist F2 do `05 §4` → **saldo 10.000 MT**. `[deps: INT-03]`
-- [ ] **INT-05 · Ligar FE loja + fluxo de encomendas ao backend real (Fase 3)** — Desligar MSW nas telas `FE-L*`/`FE-C09`/`FE-C10`, corrigir divergências de contrato. `[deps: FE-L*, FE-C09, FE-C10, BE-L*, BE-C07, DB-07]`
+- [ ] **INT-05 · Ligar FE loja + fluxo de encomendas ao backend real (Fase 3)** — Desligar MSW nas telas `FE-L*`/`FE-C09`/`FE-C10`, corrigir divergências de contrato. `[deps: FE-L*, FE-C09, FE-C10, BE-L*, BE-C07]`
 - [ ] **INT-06 · Migração do catálogo de cada loja + Deploy Fase 3** — Lojistas carregam catálogo (Excel/UI), UAT confirmando explicitamente que entrega/pagamento ficam fora do sistema → checklist F3 do `05 §4` → saldo conforme aditamento comercial da Fase 3. `[deps: INT-05]`
 
 ---
@@ -276,10 +281,7 @@ Tarefas nascidas de `feedback/feedback.txt` (ago/2026), cobrindo quase toda a jo
 
 *(referência rápida — o cartão original mantém-se na sua secção acima; lista aqui só o ID enquanto está ativo)*
 
-- **FE-D02** · T-10/T-11 Utilizadores
-- **FE-D03** · T-12/T-13 Lojas
-- **FE-D06** · T-17/T-18 Receitas
-- **FE-D07** · T-19 Ingredientes
+*(sem cartões frontend activos para os portais Admin/Loja; do backend só falta a faixa `INT-*` de integração/deploy — `BE-C08` e `BE-E01` foram implementados em 2026-08-19)*
 
 ## Concluído
 
@@ -308,7 +310,14 @@ Tarefas nascidas de `feedback/feedback.txt` (ago/2026), cobrindo quase toda a jo
 - **FE-C06** · T-06 Lista de compras
 - **FE-C07** · T-08 Perfil
 - **FE-C08** · Offline/PWA do cliente (falta apenas QA manual com throttling 3G)
+- **FE-D00** · Infra mock admin partilhada
 - **FE-D01** · T-09 Dashboard de métricas
+- **FE-D02** · T-10/T-11 Utilizadores
+- **FE-D03** · T-12/T-13 Lojas
+- **FE-D06** · T-17/T-18 Receitas
+- **FE-D07** · T-19 Ingredientes
+- **FE-X01..X03** · Métricas de paridade cliente/admin
+- **FE-L01..L04** · Portal da Loja (layout, produtos, import Excel, encomendas)
 - **FE-P09** · Polimento da landing (mock Stitch)
 - **FE-Q10** · MealCard compacto (mock Stitch)
 - **FE-S01..S04** · Controlo de porções (mock Stitch)
@@ -320,3 +329,12 @@ Tarefas nascidas de `feedback/feedback.txt` (ago/2026), cobrindo quase toda a jo
 - **FE-C10** · Minhas encomendas — confirmado no código, checklist estava desatualizado
 - **FE-Q06** · Motivo livre na troca de refeição
 - **FE-E02** · Auditoria de performance/dados
+- **BE-A04** · AuditService + Testcontainers
+- **DB-06** · Seed de dados dev
+- **DB-07** · Projeto Supabase prod
+- **BE-B02** · `AuthController`
+- **BE-B03** · `AdminUserController`
+- **BE-C01..C09** · Domínio Cliente completo (perfil, catálogo pré-filtrado, geração IA, plano ativo, feedback/swap, lista de compras, encomendas, pedido avulso de receita + "guardar num dia", catálogo navegável)
+- **BE-D01..D02** · Domínio Admin: catálogo (ingredientes/receitas) + lojas
+- **BE-E01** · `AdminMetricsController`/`AdminMetricsService` — `GET /admin/metrics/summary` via `JdbcTemplate` sobre as 6 views de V005; `estimatedAiCostUsd` fica 0 até `ai_generation_log` passar a ter escrita real (BE-C03/BE-C08 ainda não gravam lá)
+- **BE-L01..L04** · Domínio Loja (RBAC, produtos, import/export Excel, encomendas) — confirmado em `quadro/be-a04`, checklist estava desatualizado

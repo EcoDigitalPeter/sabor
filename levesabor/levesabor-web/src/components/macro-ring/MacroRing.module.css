@@ -29,6 +29,16 @@
   user-select: none;
 }
 
+/* FE-Y06 · legenda "kcal" opcional sob o número central (MacroRingProps.unit) */
+.kcalUnit {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--macro-ring-text, var(--clay-soft));
+  user-select: none;
+}
+
 .withLegend {
   display: flex;
   flex-wrap: wrap;

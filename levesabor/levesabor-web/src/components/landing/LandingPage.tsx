@@ -9,7 +9,7 @@ import { ProofStrip } from "./ProofStrip";
 import { BenefitCards } from "./BenefitCards";
 import { DishGallery } from "./DishGallery";
 import { ProductShowcase } from "./ProductShowcase";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/components/ui/Reveal";
 import { Chip } from "@/components/ui/Chip";
 import styles from "./LandingPage.module.css";
 
@@ -17,13 +17,13 @@ const STEPS = [
   {
     num: "01",
     title: "Perfil",
-    desc: "Conta-nos os teus objetivos, preferências alimentares, restrições e orçamento.",
+    desc: "Conta-nos os teus objectivos, preferências alimentares, restrições e orçamento.",
     icon: UserRound,
   },
   {
     num: "02",
     title: "A IA gera o plano",
-    desc: "A IA cria um plano alimentar personalizado, adaptado aos teus objetivos, preferências e estilo de vida.",
+    desc: "A IA cria um plano alimentar personalizado, adaptado aos teus objectivos, preferências e estilo de vida.",
     icon: Sparkles,
   },
   {
@@ -82,7 +82,7 @@ const SCENARIOS = [
   },
   {
     title: "Ganhar massa muscular",
-    body: "Treinas e precisas de comer mais — com um plano alimentar ajustado aos teus objetivos e orçamento.",
+    body: "Treinas e precisas de comer mais — com um plano alimentar ajustado aos teus objectivos e orçamento.",
     color: "var(--amber)",
   },
   {
@@ -122,7 +122,7 @@ export function LandingPage() {
           <div className={styles.heroCopy}>
             <h1 className={styles.heroTitle}>Alimentação inteligente, pensada para ti.</h1>
             <p className={styles.heroSubtitle}>
-              Diz-nos o teu objetivo, as tuas preferências alimentares e o teu orçamento. A Ottimizo cria um plano semanal com
+              Diz-nos o teu objectivo, as tuas preferências alimentares e o teu orçamento. A Ottimizo cria um plano semanal com
               refeições reais — ajustado a ti.
             </p>
             <div className={styles.heroActions}>
@@ -212,7 +212,7 @@ export function LandingPage() {
           <h2 className={styles.sectionTitle}>Vê o que vais receber</h2>
           <p className={styles.sectionLead}>
             Uma experiência simples, clara e pensada para o teu dia-a-dia — tudo organizado para facilitar as tuas
-            decisões. Nada é escolhido ao acaso: cada receita é selecionada de acordo com o teu perfil, objetivos,
+            decisões. Nada é escolhido ao acaso: cada receita é seleccionada de acordo com o teu perfil, objectivos,
             orçamento e preferências alimentares.
           </p>
           <ProductShowcase />
@@ -277,7 +277,7 @@ export function LandingPage() {
               Todos os dias, milhões de pessoas enfrentam a mesma pergunta: &ldquo;O que vou cozinhar hoje?&rdquo;
             </p>
             <p className={styles.trustBody}>
-              Entre a falta de tempo, o orçamento limitado, os objetivos de saúde e as diferentes preferências
+              Entre a falta de tempo, o orçamento limitado, os objectivos de saúde e as diferentes preferências
               alimentares, decidir torna-se mais difícil do que deveria.
             </p>
           </div>
@@ -293,7 +293,7 @@ export function LandingPage() {
             <p className={styles.trustEyebrow}>O nosso compromisso</p>
             <p className={styles.trustVision}>
               Acreditamos que uma alimentação equilibrada deve ser acessível a todos — independentemente do
-              orçamento, da experiência na cozinha ou do objetivo de cada pessoa.
+              orçamento, da experiência na cozinha ou do objectivo de cada pessoa.
             </p>
             <p className={styles.trustVision}>
               A Ottimizo não substitui médicos nem nutricionistas — complementa o seu trabalho, ajudando cada

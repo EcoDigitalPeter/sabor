@@ -35,6 +35,11 @@
 
 /* ---------- Passo 1: escolher loja ---------- */
 
+/* FE-Y08 · pesquisa "🔍 Procurar loja…" — só aparece com mais de 4 lojas (ver page.tsx) */
+.storeSearch {
+  margin: -6px 0 -4px;
+}
+
 .storeList {
   display: flex;
   flex-direction: column;

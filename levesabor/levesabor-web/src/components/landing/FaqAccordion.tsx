@@ -25,16 +25,16 @@ const FAQS = [
     a: "Podes começar gratuitamente. Os planos pagos serão apresentados de forma transparente, sem custos escondidos.",
   },
   {
-    q: "Preciso de cartão de crédito para criar conta?",
-    a: "Não. Só precisas de um email — não pedimos nenhum dado de pagamento para começar. Quando houver planos pagos, aceitaremos os métodos de pagamento disponíveis no teu país.",
+    q: "Preciso de pagar para criar conta?",
+    a: "Não. Só precisas de um email — não pedimos nenhum dado de pagamento para começar. Quando houver planos pagos, apresentaremos os métodos disponíveis no teu país.",
   },
   {
     q: "Quando posso começar a usar?",
     a: "Já — a Ottimizo está em acesso antecipado. Cria a tua conta e recebe o teu primeiro plano em minutos.",
   },
   {
-    q: "A IA cria receitas ou usa receitas reais?",
-    a: "A IA trabalha com receitas reais e adapta-as ao teu perfil, objetivos, preferências e restrições alimentares.",
+    q: "A IA cria refeições ou usa refeições reais?",
+    a: "A IA trabalha com refeições reais e adapta-as ao teu perfil, objectivos, preferências e restrições alimentares.",
   },
   {
     q: "Posso escolher o tipo de cozinha que prefiro?",

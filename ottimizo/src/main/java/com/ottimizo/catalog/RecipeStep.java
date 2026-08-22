@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Passo ordenado de uma receita. A coluna {@code recipe_id} e' propriedade da
@@ -24,6 +26,7 @@ public class RecipeStep {
     @Column(name = "recipe_id", insertable = false, updatable = false)
     private Long recipeId;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "step_order", nullable = false)
     private Integer stepOrder;
 

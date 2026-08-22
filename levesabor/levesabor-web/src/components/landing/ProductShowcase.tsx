@@ -9,7 +9,7 @@ import { DayTabs } from "@/components/plan/DayTabs";
 import { ShoppingGroup } from "@/components/plan/ShoppingGroup";
 import { MacroRing } from "@/components/macro-ring/MacroRing";
 import { Chip } from "@/components/ui/Chip";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/components/ui/Reveal";
 import {
   SHOWCASE_DAYS,
   SHOWCASE_SELECTED_DAY_INDEX,

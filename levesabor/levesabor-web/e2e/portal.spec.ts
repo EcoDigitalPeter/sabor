@@ -21,6 +21,16 @@ async function loginAsClient(page: Page) {
   await page.waitForURL("**/plano");
 }
 
+async function openFirstMealDetail(page: Page) {
+  const firstCard = page.locator('a[href^="/plano/refeicao/"]').first();
+  await expect(firstCard).toBeVisible();
+  await expect(firstCard).toHaveAttribute("href", /\/plano\/refeicao\/\d+/);
+  const cardTitle = firstCard.getByRole("heading");
+  await expect(cardTitle).toBeVisible();
+  await cardTitle.click({ trial: true });
+  await Promise.all([page.waitForURL(/\/plano\/refeicao\/\d+/), cardTitle.click()]);
+}
+
 test.describe("Portal do cliente v2", () => {
   test("mostra saudação pessoal no dashboard", async ({ page }) => {
     await loginAsClient(page);
@@ -30,16 +40,12 @@ test.describe("Portal do cliente v2", () => {
 
   test("MealCard navega para o detalhe da refeição", async ({ page }) => {
     await loginAsClient(page);
-    const firstCard = page.locator('a[href^="/plano/refeicao/"]').first();
-    await expect(firstCard).toBeVisible();
-    await firstCard.click();
-    await expect(page).toHaveURL(/\/plano\/refeicao\/\d+/);
+    await openFirstMealDetail(page);
   });
 
   test("detalhe da receita mostra hero, stat cards e CTA de troca sempre visível", async ({ page }) => {
     await loginAsClient(page);
-    await page.locator('a[href^="/plano/refeicao/"]').first().click();
-    await expect(page).toHaveURL(/\/plano\/refeicao\/\d+/);
+    await openFirstMealDetail(page);
 
     // Hero: sempre presente, foto ou fallback (ambos ocupam o mesmo espaço 4:3).
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -56,8 +62,7 @@ test.describe("Portal do cliente v2", () => {
 
   test("feedback 👍/👎 alterna aria-pressed (regressão)", async ({ page }) => {
     await loginAsClient(page);
-    await page.locator('a[href^="/plano/refeicao/"]').first().click();
-    await expect(page).toHaveURL(/\/plano\/refeicao\/\d+/);
+    await openFirstMealDetail(page);
 
     // exact:true — sem isto, "Gosto desta receita" também corresponde por substring a
     // "Não gosto desta receita" (violação de modo estrito do Playwright).

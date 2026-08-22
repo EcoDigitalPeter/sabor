@@ -5,6 +5,7 @@ import type { components } from "@/types/api";
 
 type MealPlanDay = components["schemas"]["MealPlanDay"];
 type MealPlanEntry = components["schemas"]["MealPlanEntry"];
+type MealSlot = NonNullable<MealPlanEntry["mealSlot"]>;
 
 export const SLOT_ORDER: Record<string, number> = { PEQUENO_ALMOCO: 0, ALMOCO: 1, JANTAR: 2, LANCHE: 3 };
 
@@ -38,6 +39,19 @@ export function formatMonthLabel(monthStartIso: string): string {
 }
 
 /**
+ * FE-Y06 · "Segunda-feira, 3 Agosto" a partir de MealPlanDay.weekday ("segunda-feira") + .date
+ * (YYYY-MM-DD) — usado no ecrã de "guardar num dia" de "pedir receita agora" para o utilizador
+ * saber exactamente que dia está a substituir, não só o nome do dia da semana.
+ */
+export function formatFullDayLabel(weekday: string, dateIso: string): string {
+  const capitalizedWeekday = weekday ? weekday.charAt(0).toUpperCase() + weekday.slice(1) : "";
+  const [, m, d] = dateIso.split("-").map(Number);
+  const month = m && MONTH_FULL_PT[m - 1] ? MONTH_FULL_PT[m - 1] : "";
+  const datePart = [d ? String(d) : "", month].filter(Boolean).join(" ");
+  return [capitalizedWeekday, datePart].filter(Boolean).join(", ");
+}
+
+/**
  * Sequência de dias (FE-C09, não gamificada — só texto + número): conta dias consecutivos, a
  * partir do dia mais recente com data <= hoje, em que pelo menos uma refeição está `completed`.
  * Para no primeiro dia sem nenhuma refeição marcada.
@@ -62,10 +76,40 @@ export function computeStreakDays(days: MealPlanDay[]): number {
   return streak;
 }
 
+/**
+ * FE-Y05 (ago/2026) — a pedido do cliente: "Ainda sem sequência este mês" não era claro e soava
+ * negativo. Em vez de só reformular ("Ainda não começaste..."), usa-se directamente uma das
+ * frases motivadoras sugeridas pelo cliente, que resolve as duas queixas de uma vez (clareza +
+ * tom positivo junto ao "0/30").
+ */
 export function streakLabel(streak: number): string {
-  if (streak <= 0) return "Ainda sem sequência este mês.";
+  if (streak <= 0) return "Hoje é um bom dia para começares.";
   const dayWord = streak === 1 ? "dia seguido" : "dias seguidos";
   return `Já marcaste refeições em ${streak} ${dayWord}.`;
+}
+
+/**
+ * FE-Y05 — refeição "actual" por hora do dia (cliente pediu para destacar visualmente qual é a
+ * próxima refeição, ex.: às 12h destacar o Almoço). Bandas simples e aproximadas, sem depender de
+ * horários reais configurados pelo utilizador (não existem ainda no perfil):
+ * pequeno-almoço 5h-11h, almoço 11h-15h, jantar 18h-22h, lanche no resto (meio da tarde/noite).
+ */
+export function currentMealSlot(hour: number = new Date().getHours()): MealSlot {
+  if (hour >= 5 && hour < 11) return "PEQUENO_ALMOCO";
+  if (hour >= 11 && hour < 15) return "ALMOCO";
+  if (hour >= 18 && hour < 22) return "JANTAR";
+  return "LANCHE";
+}
+
+/**
+ * FE-Y05 — indicador "dentro do objectivo" (ex.: "🟢 Dentro do objetivo"): banda de ±15% à volta
+ * da meta diária de kcal (`MealPlanDay.targetKcal`, ver comentário FE-Y05 em fixtures.ts sobre a
+ * origem do valor). Sem meta conhecida, não há indicador a mostrar.
+ */
+export function isWithinDailyTarget(totalKcal: number, targetKcal: number | null | undefined): boolean {
+  if (!targetKcal || targetKcal <= 0) return false;
+  const tolerance = 0.15;
+  return totalKcal >= targetKcal * (1 - tolerance) && totalKcal <= targetKcal * (1 + tolerance);
 }
 
 /** Saudação por hora do dia (FE-Q03) — mesmo espírito do "Good Morning" das referências. */

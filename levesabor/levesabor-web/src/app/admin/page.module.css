@@ -14,6 +14,33 @@
   flex-wrap: wrap;
 }
 
+/* FE-D01 · P-07 — faixa decorativa no topo, atrás do cabeçalho (imagem sempre presente, textura de
+   fundo discreta — ver public/images/admin-banner/PROMPT.md) */
+.banner {
+  position: relative;
+  min-height: 160px;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+}
+
+.bannerImage {
+  object-fit: cover;
+}
+
+.bannerContent {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 20px 24px;
+}
+
+.bannerContent .title {
+  color: var(--cream-card);
+}
+
 .title {
   margin: 0;
   font-family: var(--font-display);
