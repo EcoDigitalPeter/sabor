@@ -16,10 +16,21 @@
 #     "Connection pooling" -> modo "Transaction" (Supavisor, porta 6543).
 #     O dashboard mostra o URI no formato "postgresql://...". Para o
 #     datasource do Spring/JDBC tem de vir com o prefixo "jdbc:", ex.:
-#       jdbc:postgresql://aws-0-xx-region.pooler.supabase.com:6543/postgres?prepareThreshold=0
+#       jdbc:postgresql://aws-0-xx-region.pooler.supabase.com:6543/postgres?prepareThreshold=0&readOnlyMode=ignore
 #     (o "?prepareThreshold=0" e necessario -- o pooler em modo transaccao
 #     nao suporta prepared statements ao nivel de sessao; sem isto o driver
 #     pgjdbc tenta preparar statements no servidor e falha em produção.)
+#     (o "&readOnlyMode=ignore" e necessario pela mesma razao: o pooler
+#     roda a ligacao fisica por transaccao e nao preserva bem estado de
+#     sessao -- o pgjdbc, ao iniciar uma transaccao Spring marcada
+#     @Transactional(readOnly = true), pode deixar esse estado READ ONLY
+#     "vazar" para uma transaccao REQUIRES_NEW seguinte na mesma ligacao
+#     fisica reciclada pelo pooler, rebentando com "SQLState 25006: cannot
+#     execute INSERT in a read-only transaction" -- apanhado em INT-01 no
+#     AuditService.record(), chamado em REQUIRES_NEW a partir de metodos
+#     de leitura como ProfileService.get(). Sem impacto real: o pooler ja
+#     garante isolamento por transaccao, o hint readOnly do Hibernate aqui
+#     e so optimizacao local, nao uma garantia de BD que se perca.)
 #
 #   SUPABASE_DB_USERNAME
 #     No mesmo ecra ("Connection pooling"). Em modo pooler o utilizador NAO
@@ -89,6 +100,7 @@ spring:
         jwt:
           issuer-uri: ${SUPABASE_JWT_ISSUER}
           jwk-set-uri: ${SUPABASE_JWKS_URI}
+          jws-algorithms: ES256
 
 logging:
   level:
