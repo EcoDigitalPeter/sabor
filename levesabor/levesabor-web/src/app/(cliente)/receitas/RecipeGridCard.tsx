@@ -17,7 +17,7 @@ export type RecipeGridCardProps = {
 };
 
 export function RecipeGridCard({ recipe, onClick }: RecipeGridCardProps) {
-  const photoSrc = getRecipePhoto(recipe.id);
+  const photoSrc = getRecipePhoto(recipe.name);
   const name = recipe.name ?? "Receita";
 
   return (

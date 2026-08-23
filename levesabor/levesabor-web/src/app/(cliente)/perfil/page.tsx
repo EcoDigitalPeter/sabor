@@ -190,6 +190,12 @@ export default function PerfilPage() {
   function save(section: SectionKey, fieldPatch: Partial<Profile>) {
     if (!profile) return;
     const patch: Profile = { ...profile, ...fieldPatch };
+    // "sem_preferencia" é só sentinela de UI (ver toggleDietaryPreference no onboarding, mesmo
+    // padrão aqui) — o backend real (ProfileService.DIETARY_PREFERENCES_VOCAB) não o conhece e
+    // rejeita com LSA001_VALIDATION; array vazio é o equivalente semântico aceite pelo backend.
+    if (patch.dietaryPreferences) {
+      patch.dietaryPreferences = patch.dietaryPreferences.filter((v) => v !== "sem_preferencia");
+    }
     saveMutation.mutate({ section, patch });
   }
 

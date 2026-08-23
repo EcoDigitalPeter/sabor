@@ -702,6 +702,10 @@ export function getProfile(): Profile {
 
 // F1-CLI-01: mesmo vocabulário fechado usado nas healthTags das receitas — reaproveitado como
 // filtro por defeito do catálogo navegável (F1-CLI-08) e pré-filtro de geração/troca (FE-W03).
+// Espelha ottimizo/src/main/java/com/ottimizo/profile/ProfileService.DIETARY_PREFERENCES_VOCAB —
+// "sem_preferencia" fica de fora de propósito: é sentinela de UI, nunca chega ao backend real
+// (onboarding/perfil filtram-no antes do PUT /me/profile), por isso também não pode ser aceite
+// aqui, senão o mock deixa passar um payload que o backend real rejeitaria (LSA001_VALIDATION).
 const DIETARY_PREFERENCES_VOCAB = [
   "vegetariana",
   "vegan",
@@ -709,7 +713,6 @@ const DIETARY_PREFERENCES_VOCAB = [
   "sem_lactose",
   "alta_proteina",
   "baixo_calorico",
-  "sem_preferencia",
 ];
 
 export function updateProfile(patch: Profile): MockResult<Profile> {

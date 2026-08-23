@@ -378,7 +378,7 @@ export default function PedirAgoraPage() {
 
   // phase === "result"
   const recipe = resultRecipe;
-  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const photoSrc = getRecipePhoto(recipe?.name);
   const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
   const days = activePlanQuery.data?.days ?? [];
 

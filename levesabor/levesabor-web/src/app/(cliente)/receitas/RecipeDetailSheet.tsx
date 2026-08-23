@@ -23,7 +23,7 @@ export type RecipeDetailSheetProps = {
 
 export function RecipeDetailSheet({ recipe, onClose }: RecipeDetailSheetProps) {
   const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
-  const photoSrc = getRecipePhoto(recipe?.id);
+  const photoSrc = getRecipePhoto(recipe?.name);
 
   return (
     <BottomSheet open={recipe !== null} onClose={onClose}>

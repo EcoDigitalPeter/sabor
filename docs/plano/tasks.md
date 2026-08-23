@@ -283,6 +283,8 @@ Tarefas nascidas de `feedback/feedback.txt` (ago/2026), cobrindo quase toda a jo
 
 *(sem cartões frontend activos para os portais Admin/Loja; do backend só falta a faixa `INT-*` de integração/deploy — `BE-C08` e `BE-E01` foram implementados em 2026-08-19)*
 
+**INT-01 (Cliente) — progresso 2026-08-24:** ver `docs/superpowers/plans/2026-08-23-frontend-sem-hardcoded-consumir-backend-real.md`. Feito: Tarefa 1 (bug confirmado — `dietaryPreferences: ["sem_preferencia"]` rejeitado pelo backend real com `LSA001_VALIDATION`, corrigido em `onboarding/page.tsx` e `perfil/page.tsx` + simetria no mock), Tarefa 2 (`recipe-photos.ts` deixou de depender do `id` numérico do mock, passou a chave por slug do nome), Tarefa 3 (`docs/plano/10-checklist-ambientes-deploy.md`), Tarefa 4 (`e2e/smoke-real-backend.spec.ts`, idempotente, salta sem credenciais). Suite de mocks re-validada (`registo-onboarding`/`receitas`/`troca-refeicao`, 6/6). **Por fazer antes de fechar `INT-01`:** correr o smoke novo contra o backend real com `SMOKE_CLIENT_EMAIL`/`SMOKE_CLIENT_PASSWORD`; `INT-03`/`INT-05` (Admin/Loja) nem começaram esta verificação.
+
 ## Concluído
 
 - **MOCK-01** · Congelar o contrato da API

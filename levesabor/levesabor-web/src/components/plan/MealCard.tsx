@@ -60,7 +60,7 @@ export function MealCard({ entry, href, onClick, onToggleCompleted, current, cla
   };
   const proteinGrams = estimateProteinGrams(kcal, macros.proteina);
   const slotLabel = entry.mealSlot ? SLOT_LABEL[entry.mealSlot] : undefined;
-  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const photoSrc = getRecipePhoto(recipe?.name);
 
   const content = (
     <>

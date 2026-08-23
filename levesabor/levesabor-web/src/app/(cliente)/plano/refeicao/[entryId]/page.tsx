@@ -182,7 +182,7 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
   }
 
   const recipe = entry.recipe;
-  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const photoSrc = getRecipePhoto(recipe?.name);
   const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
 
   return (
