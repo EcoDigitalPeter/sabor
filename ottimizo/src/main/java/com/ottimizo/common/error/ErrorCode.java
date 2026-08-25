@@ -25,6 +25,7 @@ public enum ErrorCode {
     LSA022_LAST_ADMIN(HttpStatus.CONFLICT, "Tem de existir pelo menos um administrador activo."),
     LSA023_RECIPE_INCOMPLETE(HttpStatus.CONFLICT, "Receita incompleta."),
     LSA024_STORE_IN_USE(HttpStatus.CONFLICT, "Esta loja tem lojistas ou encomendas associadas e nao pode ser removida."),
+    LSA025_IMAGE_GENERATION_FAILED(HttpStatus.BAD_GATEWAY, "Nao foi possivel gerar a imagem. Tenta novamente."),
     LSA030_INVALID_ORDER_TRANSITION(HttpStatus.CONFLICT, "Transicao de estado invalida."),
     LSA031_IMPORT_ALREADY_PROCESSED(HttpStatus.CONFLICT, "Este import ja foi aplicado ou nao esta valido para confirmar."),
     LSA099_INTERNAL(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno. A equipa foi notificada.");
