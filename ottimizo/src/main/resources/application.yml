@@ -32,10 +32,13 @@ spring:
     openai:
       # OPENAI_BASE_URL permite apontar a qualquer endpoint compativel com a API da
       # OpenAI (chat completions) sem mudar de starter/dependencia — ex. NVIDIA NIM
-      # (https://integrate.api.nvidia.com/v1, OPENAI_CHAT_MODEL=deepseek-ai/deepseek-v4-flash-0731)
+      # (https://integrate.api.nvidia.com, OPENAI_CHAT_MODEL=deepseek-ai/deepseek-v4-flash-0731)
       # em vez da OpenAI real. Por omissao fica no endpoint oficial da OpenAI.
-      base-url: ${OPENAI_BASE_URL:https://integrate.api.nvidia.com/v1}
-      api-key: ${OPENAI_API_KEY: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}
+      # SEM sufixo /v1 — o Spring AI OpenAiApi ja acrescenta /v1/chat/completions a
+      # este base-url; com /v1 aqui o path final duplica para /v1/v1/chat/completions,
+      # que a NVIDIA NIM responde com 404 (LSA013_AI_UNAVAILABLE apos as 3 tentativas).
+      base-url: ${OPENAI_BASE_URL:https://integrate.api.nvidia.com}
+      api-key: ${OPENAI_API_KEY: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}
       chat:
         options:
           model: ${OPENAI_CHAT_MODEL:deepseek-ai/deepseek-v4-flash-0731}
@@ -58,4 +61,4 @@ ottimizo:
   cors:
     allowed-origins: ${APP_CORS_ORIGINS:http://localhost:3000}
   ai:
-    meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:3}
+    meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:10}
