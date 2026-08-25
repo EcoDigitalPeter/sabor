@@ -30,16 +30,21 @@ spring:
       max-request-size: 6MB
   ai:
     openai:
-      # OPENAI_BASE_URL permite apontar a qualquer endpoint compativel com a API da
-      # OpenAI (chat completions) sem mudar de starter/dependencia — ex. NVIDIA NIM
-      # (https://integrate.api.nvidia.com/v1, OPENAI_CHAT_MODEL=deepseek-ai/deepseek-v4-flash-0731)
-      # em vez da OpenAI real. Por omissao fica no endpoint oficial da OpenAI.
-      base-url: ${OPENAI_BASE_URL:https://integrate.api.nvidia.com/v1}
-      api-key: ${OPENAI_API_KEY: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}
+      # Endpoint oficial da OpenAI por omissao. OPENAI_BASE_URL so' e' preciso
+      # se um dia se voltar a apontar para um endpoint compativel alternativo
+      # (ja' foi usado NVIDIA NIM nesta app — descontinuado por latencia
+      # inaceitavel: ~170s por geracao de plano mensal, contra o SLA
+      # implicito de poucas dezenas de segundos que o MAX_ATTEMPTS=3 sem
+      # backoff do AiMealPlanService assume).
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
-          model: ${OPENAI_CHAT_MODEL:deepseek-ai/deepseek-v4-flash-0731}
+          model: ${OPENAI_CHAT_MODEL:gpt-4.1-mini}
           temperature: 0.2
+      image:
+        options:
+          model: ${OPENAI_IMAGE_MODEL:gpt-image-1-mini}
 
 server:
   port: ${PORT:8080}
@@ -58,4 +63,6 @@ ottimizo:
   cors:
     allowed-origins: ${APP_CORS_ORIGINS:http://localhost:3000}
   ai:
-    meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:3}
+    meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:10}
+  supabase:
+    storage-url: ${SUPABASE_STORAGE_URL:http://localhost/storage/v1}

@@ -41,6 +41,9 @@ public class Recipe {
     @Column(name = "health_note")
     private String healthNote;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @JdbcTypeCode(SqlTypes.SMALLINT)
     @Column(name = "prep_minutes", nullable = false)
     private Integer prepMinutes = 0;
@@ -184,6 +187,11 @@ public class Recipe {
         this.status = RecipeStatus.DRAFT;
     }
 
+    /** Chamado por {@link RecipeImageService} depois do upload para o Storage ter sucesso. */
+    public void applyImage(String url) {
+        this.imageUrl = url;
+    }
+
     @PrePersist
     void onCreate() {
         OffsetDateTime now = OffsetDateTime.now();
@@ -214,6 +222,10 @@ public class Recipe {
 
     public String healthNote() {
         return healthNote;
+    }
+
+    public String imageUrl() {
+        return imageUrl;
     }
 
     public Integer prepMinutes() {

@@ -30,7 +30,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -79,10 +83,54 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AiMealPlanService {
 
+    private static final Logger log = LoggerFactory.getLogger(AiMealPlanService.class);
+
     private static final int MAX_ATTEMPTS = 3;
     private static final List<MealSlot> ALL_SLOTS =
         List.of(MealSlot.PEQUENO_ALMOCO, MealSlot.ALMOCO, MealSlot.LANCHE, MealSlot.JANTAR);
     private static final Locale PT = Locale.forLanguageTag("pt-PT");
+
+    /**
+     * Forma exigida a resposta da IA via OpenAI Structured Outputs
+     * ({@code response_format: json_schema}) — a API garante esta forma
+     * antes de a resposta chegar aqui, o que elimina a classe de falhas
+     * "JSON estruturalmente invalido" que antes so era apanhada (e
+     * descartada sem log) no {@code catch} de {@link #requestAssignmentFromAi}.
+     * Tem de reflectir exactamente o formato pedido em {@link #systemPrompt()}
+     * e assumido por {@link #normalizeAssignment}.
+     */
+    private static final String MEAL_PLAN_JSON_SCHEMA = """
+        {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "day": {"type": "integer"},
+                  "meals": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "mealSlot": {"type": "string"},
+                        "recipeId": {"type": "integer"}
+                      },
+                      "required": ["mealSlot", "recipeId"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": ["day", "meals"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["days"],
+          "additionalProperties": false
+        }
+        """;
 
     private final MealGenerationRepository mealGenerations;
     private final MealPlanRepository mealPlans;
@@ -310,6 +358,7 @@ public class AiMealPlanService {
                 String answer = chatClient.prompt()
                     .system(systemPrompt())
                     .user(userPrompt(profile, eligible, days, slots))
+                    .options(mealPlanResponseOptions())
                     .call()
                     .content();
                 JsonNode parsed = objectMapper.readTree(answer);
@@ -317,8 +366,7 @@ public class AiMealPlanService {
                     aiPlan = parsed;
                 }
             } catch (Exception ex) {
-                // tentativa falhou (IA indisponivel, JSON invalido, etc.) — proxima tentativa,
-                // ou LSA013 abaixo se esta foi a ultima.
+                log.warn("Tentativa {} de geracao de plano falhou: {}", attempt, ex.toString());
             }
         }
 
@@ -327,6 +375,19 @@ public class AiMealPlanService {
         }
 
         return normalizeAssignment(aiPlan, eligibleIds, eligible, days, slots);
+    }
+
+    private OpenAiChatOptions mealPlanResponseOptions() {
+        return OpenAiChatOptions.builder()
+            .responseFormat(ResponseFormat.builder()
+                .type(ResponseFormat.Type.JSON_SCHEMA)
+                .jsonSchema(ResponseFormat.JsonSchema.builder()
+                    .name("meal_plan")
+                    .schema(MEAL_PLAN_JSON_SCHEMA)
+                    .strict(true)
+                    .build())
+                .build())
+            .build();
     }
 
     private boolean isStructurallyValid(JsonNode parsed) {

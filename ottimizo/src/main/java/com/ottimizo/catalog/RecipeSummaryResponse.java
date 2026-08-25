@@ -7,6 +7,7 @@ import java.util.List;
 public record RecipeSummaryResponse(
     Long id,
     String name,
+    String imageUrl,
     String mealTag,
     List<String> healthTags,
     BigDecimal kcal,
@@ -17,6 +18,7 @@ public record RecipeSummaryResponse(
         return new RecipeSummaryResponse(
             recipe.id(),
             recipe.name(),
+            recipe.imageUrl(),
             recipe.mealTag(),
             recipe.healthTags(),
             recipe.kcal(),

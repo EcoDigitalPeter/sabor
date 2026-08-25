@@ -31,6 +31,9 @@ public class RecipeSnapshotFactory {
         ObjectNode node = objectMapper.createObjectNode();
         node.put("recipeId", recipe.id());
         node.put("name", recipe.name());
+        if (recipe.imageUrl() != null) {
+            node.put("imageUrl", recipe.imageUrl());
+        }
         if (recipe.kcal() != null) {
             node.put("kcal", recipe.kcal());
         }

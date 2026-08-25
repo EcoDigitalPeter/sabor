@@ -106,3 +106,8 @@ logging:
   level:
     root: WARN
     com.ottimizo: INFO
+  # Ficheiro local para diagnostico (ex.: correr o perfil prod localmente contra a Supabase real
+  # para ver stack traces completos que o Railway nao expoe por API/CLI). Caminho relativo ao
+  # diretorio de trabalho do processo java/mvn; rotacao por tamanho e' o default do Spring Boot.
+  file:
+    name: ${LOG_FILE:logs/ottimizo.log}

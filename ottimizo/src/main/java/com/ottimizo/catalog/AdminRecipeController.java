@@ -28,10 +28,16 @@ public class AdminRecipeController {
 
     private final RecipeService recipeService;
     private final UserContextService userContext;
+    private final RecipeImageService recipeImageService;
 
-    public AdminRecipeController(RecipeService recipeService, UserContextService userContext) {
+    public AdminRecipeController(
+        RecipeService recipeService,
+        UserContextService userContext,
+        RecipeImageService recipeImageService
+    ) {
         this.recipeService = recipeService;
         this.userContext = userContext;
+        this.recipeImageService = recipeImageService;
     }
 
     @GetMapping
@@ -54,6 +60,12 @@ public class AdminRecipeController {
     public ApiResponse<java.util.List<RecipeSwapReasonResponse>> swapReasons(@PathVariable Long id) {
         var reasons = recipeService.recentSwapReasons(id).stream().map(RecipeSwapReasonResponse::from).toList();
         return ApiResponse.success(reasons);
+    }
+
+    @PostMapping("/{id}/image")
+    public ApiResponse<RecipeResponse> generateImage(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        Recipe recipe = recipeImageService.generate(id, jwt.getTokenValue());
+        return ApiResponse.success(RecipeResponse.from(recipe));
     }
 
     @PostMapping
