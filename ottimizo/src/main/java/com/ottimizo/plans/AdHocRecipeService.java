@@ -17,6 +17,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -49,6 +51,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class AdHocRecipeService {
+
+    private static final Logger log = LoggerFactory.getLogger(AdHocRecipeService.class);
 
     private final AdHocRecipeRequestRepository adHocRequests;
     private final MealPlanEntryRepository mealPlanEntries;
@@ -129,6 +133,7 @@ public class AdHocRecipeService {
             Recipe chosen = eligible.get(0);
             self.markReady(requestId, recipeSnapshotFactory.from(chosen));
         } catch (Exception ex) {
+            log.warn("Pedido avulso {} falhou: {}", requestId, ex.toString());
             self.markFailed(requestId);
         }
     }
