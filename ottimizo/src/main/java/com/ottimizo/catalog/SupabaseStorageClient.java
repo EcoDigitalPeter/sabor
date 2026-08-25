@@ -1,6 +1,7 @@
 package com.ottimizo.catalog;
 
 import java.net.URI;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ public class SupabaseStorageClient {
     private final RestClient restClient;
     private final String storageBaseUrl;
 
+    @Autowired
     public SupabaseStorageClient(
         RestClient.Builder restClientBuilder,
         @Value("${ottimizo.supabase.storage-url}") String storageBaseUrl
