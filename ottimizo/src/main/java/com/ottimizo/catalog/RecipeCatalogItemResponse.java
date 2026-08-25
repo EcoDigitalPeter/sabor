@@ -15,6 +15,7 @@ import java.util.List;
 public record RecipeCatalogItemResponse(
     Long id,
     String name,
+    String imageUrl,
     String description,
     String mealTag,
     List<String> healthTags,
@@ -27,6 +28,7 @@ public record RecipeCatalogItemResponse(
         return new RecipeCatalogItemResponse(
             recipe.id(),
             recipe.name(),
+            recipe.imageUrl(),
             recipe.description(),
             recipe.mealTag(),
             recipe.healthTags(),
