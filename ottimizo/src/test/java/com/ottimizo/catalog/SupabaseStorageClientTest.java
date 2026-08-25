@@ -20,8 +20,7 @@ class SupabaseStorageClientTest {
         RestClient restClient = mock(RestClient.class);
         RestClient.RequestBodyUriSpec requestSpec = mock(RestClient.RequestBodyUriSpec.class, RETURNS_DEEP_STUBS);
         when(restClient.put()).thenReturn(requestSpec);
-        when(requestSpec.uri(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(Object[].class)))
-            .thenReturn(requestSpec);
+        when(requestSpec.uri(org.mockito.ArgumentMatchers.any(java.net.URI.class))).thenReturn(requestSpec);
         when(requestSpec.headers(org.mockito.ArgumentMatchers.any())).thenReturn(requestSpec);
         when(requestSpec.contentType(org.mockito.ArgumentMatchers.any())).thenReturn(requestSpec);
         when(requestSpec.body(org.mockito.ArgumentMatchers.any(byte[].class))).thenReturn(requestSpec);
