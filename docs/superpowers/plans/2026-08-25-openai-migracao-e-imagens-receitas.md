@@ -47,6 +47,7 @@
 - Modify: `ottimizo/src/main/java/com/ottimizo/catalog/RecipeResponse.java`, `RecipeSummaryResponse.java`, `RecipeCatalogItemResponse.java` — expor `imageUrl`
 - Modify: `ottimizo/src/main/java/com/ottimizo/catalog/RecipeSnapshotFactory.java` — incluir `imageUrl` no snapshot (plano/adhoc herdam automaticamente)
 - Create: `ottimizo/src/main/java/com/ottimizo/catalog/SupabaseStorageClient.java` — upload de bytes para o Storage
+- Create: `ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageDownloader.java` + `HttpRecipeImageDownloader.java` — descarrega os bytes da imagem gerada (interface mockável, mesmo padrão de `SupabaseSessionRevoker`)
 - Create: `ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageService.java` — orquestra prompt + `ImageModel` + upload + persistência
 - Modify: `ottimizo/src/main/java/com/ottimizo/catalog/AdminRecipeController.java` — endpoint `POST /{id}/image`
 - Modify: `ottimizo/src/main/java/com/ottimizo/common/error/ErrorCode.java` — `LSA025_IMAGE_GENERATION_FAILED`
@@ -563,15 +564,18 @@ git commit -m "feat(ottimizo): SupabaseStorageClient para upload de imagens de r
 ### Task B5: `RecipeImageService` + endpoint admin
 
 **Files:**
+- Create: `ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageDownloader.java` (interface)
+- Create: `ottimizo/src/main/java/com/ottimizo/catalog/HttpRecipeImageDownloader.java` (implementação real)
 - Create: `ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageService.java`
 - Test: `ottimizo/src/test/java/com/ottimizo/catalog/RecipeImageServiceTest.java`
 - Modify: `ottimizo/src/main/java/com/ottimizo/catalog/AdminRecipeController.java`
 - Modify: `ottimizo/src/main/java/com/ottimizo/common/error/ErrorCode.java`
-- Create: `ottimizo/src/main/java/com/ottimizo/common/config/HttpClientConfig.java`
 
 **Interfaces:**
 - Consumes: `ImageModel` (Spring AI, autoconfigurado pelo `spring-ai-starter-model-openai` já no `pom.xml` — mesma dependência da Task A1, nenhuma nova), `SupabaseStorageClient.upload(...)` (Task B4), `Recipe.applyImage(...)` (Task B2)
-- Produces: `RecipeImageService.generate(Long recipeId, String bearerToken) -> Recipe` (recipe actualizada, já com `imageUrl`)
+- Produces: `RecipeImageService.generate(Long recipeId, String bearerToken) -> Recipe` (recipe actualizada, já com `imageUrl`); `RecipeImageDownloader.download(String url) -> byte[]`
+
+**Ruling (pré-flight, controlador):** a primeira versão deste plano injectava `HttpClient` directamente em `RecipeImageService` e testava `generate(...)` de ponta a ponta — isso faria o teste `generate_respostaValida_...` abrir uma ligação de rede real contra um URL falso e falhar sempre. Corrigido extraindo o download para uma interface `RecipeImageDownloader`, mesmo padrão já usado neste código para `SupabaseSessionRevoker` (troca de implementação real por uma mockável em teste, sem tocar no service). Custo se esta ruling estiver errada: uma interface a mais para uma única implementação real — trivial de colapsar depois se não compensar.
 
 - [ ] **Step 1: Adicionar o código de erro**
 
@@ -613,12 +617,13 @@ class RecipeImageServiceTest {
     @Mock private RecipeRepository recipes;
     @Mock private ImageModel imageModel;
     @Mock private SupabaseStorageClient storageClient;
+    @Mock private RecipeImageDownloader downloader;
 
     private RecipeImageService service;
 
     @BeforeEach
     void setUp() {
-        service = new RecipeImageService(recipes, imageModel, storageClient, java.net.http.HttpClient.newHttpClient());
+        service = new RecipeImageService(recipes, imageModel, storageClient, downloader);
     }
 
     private Recipe recipeWithId(long id) {
@@ -657,6 +662,8 @@ class RecipeImageServiceTest {
         Image image = new Image("https://oaidalleapiprodscus.blob.core.windows.net/fake.png", null);
         ImageResponse response = new ImageResponse(List.of(new ImageGeneration(image)));
         when(imageModel.call(any())).thenReturn(response);
+        when(downloader.download("https://oaidalleapiprodscus.blob.core.windows.net/fake.png"))
+            .thenReturn(new byte[]{9, 9, 9});
         when(storageClient.upload(any(), anyString(), anyString(), anyString()))
             .thenReturn("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/9.png");
 
@@ -667,28 +674,76 @@ class RecipeImageServiceTest {
 }
 ```
 
-Nota: o teste `generate_respostaValida_...` chama `downloadBytes` de verdade contra um URL falso — vai falhar de rede. Ajustar `RecipeImageService` (Step 4) para extrair o download para um método `protected` sobreponível, ou injectar uma função `BiFunction<String, HttpClient, byte[]>` — decisão de implementação a tomar no Step 4, o objectivo do teste é confirmar que `storageClient.upload(...)` é chamado com os bytes certos e que `applyImage` é chamado, não exercitar rede real.
-
 - [ ] **Step 3: Correr o teste para confirmar que falha**
 
 ```bash
 cd ottimizo && mvn test -Dtest=RecipeImageServiceTest
 ```
 
-Esperado: FAIL, `RecipeImageService` não existe.
+Esperado: FAIL, `RecipeImageService`/`RecipeImageDownloader` não existem.
 
-- [ ] **Step 4: Implementar `RecipeImageService`** (com o download extraído para ser testável — `protected byte[] downloadBytes(...)` que os testes não sobrepõem no MVP, aceitando que `generate_respostaValida_...` só passa contra um URL que responda de facto; alternativa mais limpa: extrair um `ImageDownloader` como dependência do construtor, mockável como `storageClient`)
+- [ ] **Step 4: Implementar a interface `RecipeImageDownloader`**
+
+```java
+package com.ottimizo.catalog;
+
+/**
+ * Descarrega os bytes de uma imagem gerada pelo {@code ImageModel} (URL
+ * temporario devolvido pela OpenAI) para persistencia propria. Interface
+ * separada de {@link RecipeImageService} para ser mockavel em teste sem
+ * rede real — mesmo padrao ja usado em
+ * {@code com.ottimizo.users.SupabaseSessionRevoker}.
+ */
+public interface RecipeImageDownloader {
+
+    byte[] download(String url);
+}
+```
+
+- [ ] **Step 5: Implementar `HttpRecipeImageDownloader`**
 
 ```java
 package com.ottimizo.catalog;
 
 import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HttpRecipeImageDownloader implements RecipeImageDownloader {
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(30))
+        .build();
+
+    @Override
+    public byte[] download(String url) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
+            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            if (response.statusCode() != 200) {
+                throw new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED);
+            }
+            return response.body();
+        } catch (java.io.IOException | InterruptedException ex) {
+            throw new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED);
+        }
+    }
+}
+```
+
+- [ ] **Step 6: Implementar `RecipeImageService`**
+
+```java
+package com.ottimizo.catalog;
+
+import com.ottimizo.common.error.ErrorCode;
+import com.ottimizo.common.error.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.image.ImageModel;
@@ -710,18 +765,18 @@ public class RecipeImageService {
     private final RecipeRepository recipes;
     private final ImageModel imageModel;
     private final SupabaseStorageClient storageClient;
-    private final HttpClient httpClient;
+    private final RecipeImageDownloader downloader;
 
     public RecipeImageService(
         RecipeRepository recipes,
         ImageModel imageModel,
         SupabaseStorageClient storageClient,
-        HttpClient httpClient
+        RecipeImageDownloader downloader
     ) {
         this.recipes = recipes;
         this.imageModel = imageModel;
         this.storageClient = storageClient;
-        this.httpClient = httpClient;
+        this.downloader = downloader;
     }
 
     public Recipe generate(Long recipeId, String bearerToken) {
@@ -734,7 +789,7 @@ public class RecipeImageService {
                 OpenAiImageOptions.builder().quality("standard").N(1).build()
             ));
             String generatedUrl = response.getResult().getOutput().getUrl();
-            byte[] bytes = downloadBytes(generatedUrl);
+            byte[] bytes = downloader.download(generatedUrl);
 
             String path = "receitas/%d.png".formatted(recipe.id());
             String publicUrl = storageClient.upload(bytes, path, "image/png", bearerToken);
@@ -757,41 +812,10 @@ public class RecipeImageService {
             Sem texto, sem logotipos, sem pessoas na imagem. Foco no prato servido, fundo simples.
             """.formatted(recipe.name(), recipe.description() == null ? "" : recipe.description());
     }
-
-    byte[] downloadBytes(String url) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
-        HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-        if (response.statusCode() != 200) {
-            throw new IOException("Download da imagem gerada falhou: HTTP " + response.statusCode());
-        }
-        return response.body();
-    }
 }
 ```
 
-- [ ] **Step 5: Adicionar o bean `HttpClient`**
-
-Verificar primeiro se já existe algum `@Bean HttpClient` no projecto (`grep -rn "HttpClient" ottimizo/src/main/java`); se não existir, criar `ottimizo/src/main/java/com/ottimizo/common/config/HttpClientConfig.java`:
-
-```java
-package com.ottimizo.common.config;
-
-import java.net.http.HttpClient;
-import java.time.Duration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class HttpClientConfig {
-
-    @Bean
-    public HttpClient httpClient() {
-        return HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
-    }
-}
-```
-
-- [ ] **Step 6: Endpoint no `AdminRecipeController`**
+- [ ] **Step 7: Endpoint no `AdminRecipeController`**
 
 Depois de `swapReasons` (linha ~57):
 
@@ -805,17 +829,17 @@ public ApiResponse<RecipeResponse> generateImage(@PathVariable Long id, @Authent
 
 Injectar `RecipeImageService recipeImageService` no construtor do controller (mesmo padrão de `recipeService`/`userContext`).
 
-- [ ] **Step 7: Correr os testes**
+- [ ] **Step 8: Correr os testes**
 
 ```bash
 cd ottimizo && mvn test -Dtest=RecipeImageServiceTest
 mvn compile
 ```
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageService.java ottimizo/src/test/java/com/ottimizo/catalog/RecipeImageServiceTest.java ottimizo/src/main/java/com/ottimizo/catalog/AdminRecipeController.java ottimizo/src/main/java/com/ottimizo/common/error/ErrorCode.java ottimizo/src/main/java/com/ottimizo/common/config/HttpClientConfig.java
+git add ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageDownloader.java ottimizo/src/main/java/com/ottimizo/catalog/HttpRecipeImageDownloader.java ottimizo/src/main/java/com/ottimizo/catalog/RecipeImageService.java ottimizo/src/test/java/com/ottimizo/catalog/RecipeImageServiceTest.java ottimizo/src/main/java/com/ottimizo/catalog/AdminRecipeController.java ottimizo/src/main/java/com/ottimizo/common/error/ErrorCode.java
 git commit -m "feat(ottimizo): geracao de imagem de prato por IA (POST /admin/recipes/{id}/image)"
 ```
 
