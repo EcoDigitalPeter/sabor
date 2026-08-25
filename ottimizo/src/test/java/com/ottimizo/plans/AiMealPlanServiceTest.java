@@ -215,6 +215,7 @@ class AiMealPlanServiceTest {
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.system(anyString())).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callResponseSpec);
         when(callResponseSpec.content()).thenThrow(new RuntimeException("IA indisponivel"));
 
@@ -246,6 +247,7 @@ class AiMealPlanServiceTest {
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.system(anyString())).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callResponseSpec);
         when(callResponseSpec.content()).thenReturn("""
             {"days":[{"day":1,"meals":[
@@ -284,6 +286,7 @@ class AiMealPlanServiceTest {
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.system(anyString())).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callResponseSpec);
         // 9999 nao existe no catalogo elegivel -> tem de ser descartado e substituido
         when(callResponseSpec.content()).thenReturn("""
@@ -320,6 +323,7 @@ class AiMealPlanServiceTest {
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.system(anyString())).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callResponseSpec);
         when(callResponseSpec.content()).thenReturn("{\"days\":[]}");
 
