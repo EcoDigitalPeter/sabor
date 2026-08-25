@@ -64,3 +64,5 @@ ottimizo:
     allowed-origins: ${APP_CORS_ORIGINS:http://localhost:3000}
   ai:
     meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:10}
+  supabase:
+    storage-url: ${SUPABASE_STORAGE_URL:http://localhost/storage/v1}
