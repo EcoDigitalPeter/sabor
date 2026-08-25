@@ -30,19 +30,21 @@ spring:
       max-request-size: 6MB
   ai:
     openai:
-      # OPENAI_BASE_URL permite apontar a qualquer endpoint compativel com a API da
-      # OpenAI (chat completions) sem mudar de starter/dependencia — ex. NVIDIA NIM
-      # (https://integrate.api.nvidia.com, OPENAI_CHAT_MODEL=deepseek-ai/deepseek-v4-flash-0731)
-      # em vez da OpenAI real. Por omissao fica no endpoint oficial da OpenAI.
-      # SEM sufixo /v1 — o Spring AI OpenAiApi ja acrescenta /v1/chat/completions a
-      # este base-url; com /v1 aqui o path final duplica para /v1/v1/chat/completions,
-      # que a NVIDIA NIM responde com 404 (LSA013_AI_UNAVAILABLE apos as 3 tentativas).
-      base-url: ${OPENAI_BASE_URL:https://integrate.api.nvidia.com}
-      api-key: ${OPENAI_API_KEY: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}
+      # Endpoint oficial da OpenAI por omissao. OPENAI_BASE_URL so' e' preciso
+      # se um dia se voltar a apontar para um endpoint compativel alternativo
+      # (ja' foi usado NVIDIA NIM nesta app — descontinuado por latencia
+      # inaceitavel: ~170s por geracao de plano mensal, contra o SLA
+      # implicito de poucas dezenas de segundos que o MAX_ATTEMPTS=3 sem
+      # backoff do AiMealPlanService assume).
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
-          model: ${OPENAI_CHAT_MODEL:deepseek-ai/deepseek-v4-flash-0731}
+          model: ${OPENAI_CHAT_MODEL:gpt-4.1-mini}
           temperature: 0.2
+      image:
+        options:
+          model: ${OPENAI_IMAGE_MODEL:gpt-image-1-mini}
 
 server:
   port: ${PORT:8080}
