@@ -47,7 +47,7 @@ public class RecipeImageService {
         try {
             ImageResponse response = imageModel.call(new ImagePrompt(
                 prompt(recipe),
-                OpenAiImageOptions.builder().quality("standard").N(1).build()
+                OpenAiImageOptions.builder().quality("medium").N(1).build()
             ));
             String generatedUrl = response.getResult().getOutput().getUrl();
             byte[] bytes = downloader.download(generatedUrl);
