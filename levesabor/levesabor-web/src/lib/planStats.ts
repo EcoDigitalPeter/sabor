@@ -9,6 +9,10 @@ type MealSlot = NonNullable<MealPlanEntry["mealSlot"]>;
 
 export const SLOT_ORDER: Record<string, number> = { PEQUENO_ALMOCO: 0, ALMOCO: 1, JANTAR: 2, LANCHE: 3 };
 
+/** FE-Y09 (ago/2026) — o backend passou a gerar o plano mensal por semanas de 7 dias em vez do
+ * mês inteiro de uma só vez (custo de IA); `MealPlan.days` só traz os dias já gerados. */
+export const DAYS_PER_WEEK = 7;
+
 const MONTH_FULL_PT = [
   "Janeiro",
   "Fevereiro",
@@ -123,4 +127,48 @@ export function timeOfDayGreeting(): string {
 /** Entradas de um dia, ordenadas por refeição (pequeno-almoço → lanche). */
 export function sortEntriesBySlot(entries: MealPlanEntry[]): MealPlanEntry[] {
   return [...entries].sort((a, b) => (SLOT_ORDER[a.mealSlot ?? ""] ?? 99) - (SLOT_ORDER[b.mealSlot ?? ""] ?? 99));
+}
+
+/**
+ * FE-Y09 · Nº de dias do mês de `monthStartIso` (YYYY-MM-DD) — usado para saber quantas
+ * "semanas" o plano tem no total (7/14/21/28/resto do mês), mesmo quando `MealPlan.days` só traz
+ * os dias já gerados pelo backend.
+ */
+export function daysInMonth(monthStartIso: string): number {
+  const [y, m] = monthStartIso.split("-").map(Number);
+  if (!y || !m) return 30; // fallback razoável — não deveria acontecer com uma data ISO válida
+  return new Date(y, m, 0).getDate();
+}
+
+/**
+ * FE-Y09 · Um dia conta como concluído quando tem pelo menos uma refeição e todas estão
+ * marcadas "Comi isto" — um dia ainda sem refeições (não gerado) nunca conta como concluído.
+ */
+export function isDayFullyCompleted(day: MealPlanDay): boolean {
+  const entries = day.entries ?? [];
+  return entries.length > 0 && entries.every((entry) => entry.completed);
+}
+
+/**
+ * FE-Y09 · Semana "terminada" — é isto que despoleta a geração da semana seguinte no backend,
+ * em segundo plano. Precisa de ter pelo menos um dia devolvido e todos os dias devolvidos
+ * concluídos (nunca uma semana vazia).
+ */
+export function isWeekFullyCompleted(weekDays: MealPlanDay[]): boolean {
+  return weekDays.length > 0 && weekDays.every(isDayFullyCompleted);
+}
+
+/**
+ * FE-Y09 · Progresso de refeições concluídas numa semana, para o indicador "X de Y" do cartão de
+ * semana bloqueada — nunca um número nu (docs/plano/06-guia-de-copy-e-marca.md, regra 13).
+ */
+export function countWeekMealsProgress(weekDays: MealPlanDay[]): { completed: number; total: number } {
+  let completed = 0;
+  let total = 0;
+  for (const day of weekDays) {
+    const entries = day.entries ?? [];
+    total += entries.length;
+    completed += entries.filter((entry) => entry.completed).length;
+  }
+  return { completed, total };
 }
