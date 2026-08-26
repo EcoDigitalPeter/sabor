@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.beans.factory.annotation.Value;
@@ -233,7 +234,17 @@ public class AiMealPlanService {
             throw new ServiceException(ErrorCode.LSA012_GENERATION_LIMIT);
         }
 
-        MealGeneration generation = mealGenerations.save(new MealGeneration(actor.id(), MealGenerationKind.MONTHLY_PLAN));
+        // O existsByUserIdAndKindAndStatus acima nao e' atomico (TOCTOU): dois
+        // pedidos concorrentes do mesmo utilizador podem passar ambos antes de
+        // qualquer um committar. ux_meal_generations_one_in_progress (V011,
+        // indice unico parcial) e' quem realmente impede o duplicado -- se o
+        // insert seguinte violar esse indice, e' exactamente essa corrida.
+        MealGeneration generation;
+        try {
+            generation = mealGenerations.save(new MealGeneration(actor.id(), MealGenerationKind.MONTHLY_PLAN));
+        } catch (DataIntegrityViolationException ex) {
+            throw new ServiceException(ErrorCode.LSA011_GENERATION_IN_PROGRESS);
+        }
         audit.record(actor, "meal_plan.generation.requested", "MealGeneration", generation.id());
         return generation;
     }
@@ -365,7 +376,16 @@ public class AiMealPlanService {
             userId, MealGenerationKind.MONTHLY_PLAN, MealGenerationStatus.GENERATING)) {
             return null;
         }
-        return mealGenerations.save(new MealGeneration(userId, MealGenerationKind.MONTHLY_PLAN));
+        // Mesma corrida documentada em createGeneration -- aqui pode acontecer
+        // se duas entradas da mesma semana forem marcadas "Comi isto" quase ao
+        // mesmo tempo. ux_meal_generations_one_in_progress (V011) e' o
+        // guard real; null tem o mesmo significado que o caminho acima
+        // (ja ha uma geracao em curso, nao repetir).
+        try {
+            return mealGenerations.save(new MealGeneration(userId, MealGenerationKind.MONTHLY_PLAN));
+        } catch (DataIntegrityViolationException ex) {
+            return null;
+        }
     }
 
     /**
