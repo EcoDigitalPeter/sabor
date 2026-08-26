@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,6 +99,18 @@ public class RecipeCatalogService {
         // preservando a ordem relativa dentro do grupo "preferida" e do
         // grupo "restante".
         eligible.sort(Comparator.comparing(recipe -> !liked.contains(recipe.id())));
+
+        // Inicializa as colecoes lazy (ingredients, steps) ainda dentro desta
+        // transaccao: os chamadores (AiMealPlanService/AdHocRecipeService/
+        // MealPlanSwapService) usam estas receitas mais tarde, ja fora desta
+        // sessao Hibernate (ex. RecipeSnapshotFactory#from numa transaccao
+        // propria e posterior) -- sem isto, qualquer acesso a ingredients()/
+        // steps() nessa altura rebenta com LazyInitializationException,
+        // mesmo a entidade estando "detached" dentro de outra @Transactional.
+        eligible.forEach(recipe -> {
+            Hibernate.initialize(recipe.ingredients());
+            Hibernate.initialize(recipe.steps());
+        });
 
         return eligible;
     }
