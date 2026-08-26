@@ -316,10 +316,10 @@ export default function OnboardingPage() {
       healthConditionOther: draft.healthConditions.includes("OUTRA") ? draft.healthConditionOther : undefined,
       allergies: draft.allergies,
       foodExclusions: draft.foodExclusions,
-      // dietaryPreferences: campo novo do FE-W02 (F1-CLI-01) — Profile ainda não o declara em
-      // src/types/api.d.ts (outro agente em paralelo trata desse ficheiro); assume-se que vai
-      // existir como `dietaryPreferences?: string[]`.
-      dietaryPreferences: draft.dietaryPreferences,
+      // "sem_preferencia" é valor só de UI (chip mutuamente exclusivo) — o backend
+      // (ProfileService.DIETARY_PREFERENCES_VOCAB) não o reconhece e rejeita com
+      // LSA001_VALIDATION; "sem preferências" chega ao backend como array vazio.
+      dietaryPreferences: draft.dietaryPreferences.filter((v) => v !== "sem_preferencia"),
       budgetBand: draft.budgetBand ?? undefined,
       mealsPerDay: draft.mealsPerDay,
       householdSize: draft.householdSize,

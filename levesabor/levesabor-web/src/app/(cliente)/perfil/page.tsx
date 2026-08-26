@@ -590,7 +590,14 @@ export default function PerfilPage() {
           }
           onEdit={() => startEdit("preferencias")}
           onCancel={cancelEdit}
-          onSave={() => save("preferencias", { dietaryPreferences: dietaryPreferencesDraft })}
+          onSave={() =>
+            // "sem_preferencia" é valor só de UI (chip mutuamente exclusivo) — o backend
+            // (ProfileService.DIETARY_PREFERENCES_VOCAB) não o reconhece e rejeita com
+            // LSA001_VALIDATION; "sem preferências" chega ao backend como array vazio.
+            save("preferencias", {
+              dietaryPreferences: dietaryPreferencesDraft.filter((v) => v !== "sem_preferencia"),
+            })
+          }
         >
           <div className={styles.chipRow}>
             {DIETARY_PREFERENCE_OPTIONS.map((opt) => {
