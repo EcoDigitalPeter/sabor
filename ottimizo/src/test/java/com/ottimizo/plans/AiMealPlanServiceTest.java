@@ -263,9 +263,9 @@ class AiMealPlanServiceTest {
 
         service.requestGeneration(actor);
 
-        int daysInMonth = YearMonth.now().lengthOfMonth();
-        verify(mealPlanDays, times(daysInMonth)).save(any());
-        verify(mealPlanEntries, times(daysInMonth * 2)).save(any());
+        int firstWeekDays = Math.min(7, YearMonth.now().lengthOfMonth());
+        verify(mealPlanDays, times(firstWeekDays)).save(any());
+        verify(mealPlanEntries, times(firstWeekDays * 2)).save(any());
         verify(mealPlans).save(any());
 
         assertThat(lastSavedGeneration().status()).isEqualTo(MealGenerationStatus.READY);
@@ -307,7 +307,7 @@ class AiMealPlanServiceTest {
 
         verify(recipeImageService).ensureGenerated(21L);
         var entryCaptor = org.mockito.ArgumentCaptor.forClass(MealPlanEntry.class);
-        verify(mealPlanEntries, times(YearMonth.now().lengthOfMonth() * 2)).save(entryCaptor.capture());
+        verify(mealPlanEntries, times(Math.min(7, YearMonth.now().lengthOfMonth()) * 2)).save(entryCaptor.capture());
         assertThat(entryCaptor.getAllValues().get(0).recipeSnapshot().path("imageUrl").asText())
             .isEqualTo("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/21.png");
     }
@@ -343,7 +343,7 @@ class AiMealPlanServiceTest {
 
         assertThat(lastSavedGeneration().status()).isEqualTo(MealGenerationStatus.READY);
         var entryCaptor = org.mockito.ArgumentCaptor.forClass(MealPlanEntry.class);
-        verify(mealPlanEntries, times(YearMonth.now().lengthOfMonth() * 2)).save(entryCaptor.capture());
+        verify(mealPlanEntries, times(Math.min(7, YearMonth.now().lengthOfMonth()) * 2)).save(entryCaptor.capture());
         assertThat(entryCaptor.getAllValues().get(0).recipeSnapshot().has("imageUrl")).isFalse();
     }
 
@@ -378,7 +378,7 @@ class AiMealPlanServiceTest {
 
         assertThat(lastSavedGeneration().status()).isEqualTo(MealGenerationStatus.READY);
         var entryCaptor = org.mockito.ArgumentCaptor.forClass(MealPlanEntry.class);
-        verify(mealPlanEntries, times(YearMonth.now().lengthOfMonth() * 2)).save(entryCaptor.capture());
+        verify(mealPlanEntries, times(Math.min(7, YearMonth.now().lengthOfMonth()) * 2)).save(entryCaptor.capture());
         assertThat(entryCaptor.getAllValues())
             .extracting(MealPlanEntry::recipeId)
             .allMatch(id -> id.equals(77L)); // unico elegivel -> tanto o valido como o fallback do alucinado apontam para ele

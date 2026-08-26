@@ -87,6 +87,13 @@ public class AiMealPlanService {
     private static final Logger log = LoggerFactory.getLogger(AiMealPlanService.class);
 
     private static final int MAX_ATTEMPTS = 2;
+    /**
+     * O plano deixou de ser gerado de uma vez so' (mes inteiro, ~30 dias
+     * numa unica chamada a IA) por custo -- passa a ser gerado por semanas,
+     * a seguinte so' quando a anterior estiver toda completada (ver
+     * {@link #maybeGenerateNextWeek}, {@link MealPlan#daysGenerated}, V010).
+     */
+    private static final int WEEK_SIZE = 7;
     private static final List<MealSlot> ALL_SLOTS =
         List.of(MealSlot.PEQUENO_ALMOCO, MealSlot.ALMOCO, MealSlot.LANCHE, MealSlot.JANTAR);
     private static final Locale PT = Locale.forLanguageTag("pt-PT");
@@ -256,7 +263,8 @@ public class AiMealPlanService {
 
             List<MealSlot> slots = slotsFor(profile);
             LocalDate monthStart = YearMonth.now().atDay(1);
-            int days = YearMonth.now().lengthOfMonth();
+            int monthLength = YearMonth.now().lengthOfMonth();
+            int days = Math.min(WEEK_SIZE, monthLength);
 
             Map<Integer, Map<MealSlot, Long>> assignment = requestAssignmentFromAi(profile, eligible, days, slots);
 
@@ -293,6 +301,124 @@ public class AiMealPlanService {
     }
 
     /**
+     * Chamado por {@link MealPlanController} depois de {@code PATCH
+     * .../entries/{id}/completed} confirmar {@code completed=true} (fora da
+     * transaccao desse pedido, ja commitada -- ver {@link #generateNextWeekAsync}
+     * para o porque disto importar). Verifica se a semana ficou toda
+     * completada e, se sim, dispara a geracao da seguinte.
+     */
+    public void notifyEntryCompleted(Long entryId, boolean completed) {
+        if (!completed) {
+            return;
+        }
+        MealPlanEntry entry = mealPlanEntries.findByIdWithOwnership(entryId).orElse(null);
+        if (entry == null) {
+            return;
+        }
+        maybeGenerateNextWeek(entry.day().mealPlan().id());
+    }
+
+    /**
+     * So' avanca se TODAS as entradas actualmente persistidas do plano
+     * estiverem completadas -- como as semanas anteriores so' desbloqueiam
+     * a seguinte depois de completadas por inducao, isto equivale a "a
+     * ultima semana gerada esta completa", sem precisar de guardar
+     * explicitamente os limites de cada semana.
+     */
+    private void maybeGenerateNextWeek(Long planId) {
+        List<MealPlanDay> days = mealPlanDays.findByMealPlan_IdOrderByDateAsc(planId);
+        if (days.isEmpty()) {
+            return;
+        }
+        List<Long> dayIds = days.stream().map(MealPlanDay::id).toList();
+        List<MealPlanEntry> entries = mealPlanEntries.findByDay_IdInOrderByIdAsc(dayIds);
+        if (entries.isEmpty() || !entries.stream().allMatch(MealPlanEntry::completed)) {
+            return;
+        }
+
+        MealPlan plan = mealPlans.findById(planId).orElse(null);
+        if (plan == null || plan.status() != MealPlanStatus.ACTIVE) {
+            return;
+        }
+        int monthLength = YearMonth.from(plan.monthStart()).lengthOfMonth();
+        if (plan.daysGenerated() >= monthLength) {
+            return;
+        }
+
+        MealGeneration generation = self.createContinuationGeneration(plan.userId());
+        if (generation == null) {
+            return;
+        }
+        self.generateNextWeekAsync(generation.id());
+    }
+
+    /**
+     * Mesmo guard de corrida ja usado em {@link #createGeneration}
+     * (existsByUserIdAndKindAndStatus) -- evita duas semanas seguintes
+     * geradas em duplicado se duas entradas da mesma semana forem marcadas
+     * completas quase ao mesmo tempo (dois pedidos concorrentes).
+     * {@code null} sinaliza "ja ha uma geracao em curso, nao repetir".
+     */
+    @Transactional
+    public MealGeneration createContinuationGeneration(Long userId) {
+        if (mealGenerations.existsByUserIdAndKindAndStatus(
+            userId, MealGenerationKind.MONTHLY_PLAN, MealGenerationStatus.GENERATING)) {
+            return null;
+        }
+        return mealGenerations.save(new MealGeneration(userId, MealGenerationKind.MONTHLY_PLAN));
+    }
+
+    /**
+     * Continuacao assincrona da geracao (BE-C03, revisao Free/custo): gera
+     * so' a semana seguinte (ou o resto do mes, se for menor) do plano
+     * ACTIVE do utilizador. Chamado a partir de {@link #maybeGenerateNextWeek}
+     * (via {@link #self}, nunca directamente dentro da mesma transaccao que
+     * cria a {@link MealGeneration} -- mesmo motivo ja documentado em
+     * {@link #requestGeneration}: o thread @Async podia nao ver a geracao
+     * ainda por commitar).
+     */
+    @Async
+    public void generateNextWeekAsync(Long generationId) {
+        MealGeneration generation = mealGenerations.findById(generationId).orElse(null);
+        if (generation == null) {
+            return;
+        }
+        Long userId = generation.userId();
+        try {
+            MealPlan plan = mealPlans.findByUserIdAndStatus(userId, MealPlanStatus.ACTIVE).orElse(null);
+            if (plan == null) {
+                throw new ServiceException(ErrorCode.LSA005_NOT_FOUND);
+            }
+            int monthLength = YearMonth.from(plan.monthStart()).lengthOfMonth();
+            int remaining = monthLength - plan.daysGenerated();
+            if (remaining <= 0) {
+                self.markReady(generationId, plan.id(), userId);
+                return;
+            }
+            int batchSize = Math.min(WEEK_SIZE, remaining);
+
+            ClientProfile profile = clientProfiles.findByUserId(userId).orElse(null);
+            Set<Long> liked = mealFeedbackService.likedRecipeIds(userId);
+            Set<Long> disliked = mealFeedbackService.dislikedRecipeIds(userId);
+            List<Recipe> eligible = recipeCatalogService.eligibleFor(profile, liked, disliked);
+            if (eligible.isEmpty()) {
+                throw new ServiceException(ErrorCode.LSA018_INSUFFICIENT_CATALOG);
+            }
+
+            List<MealSlot> slots = slotsFor(profile);
+            Map<Integer, Map<MealSlot, Long>> assignment = requestAssignmentFromAi(profile, eligible, batchSize, slots);
+            Map<Long, Recipe> eligibleById = eligible.stream()
+                .collect(Collectors.toMap(Recipe::id, r -> r, (a, b) -> a, LinkedHashMap::new));
+
+            self.appendWeek(plan.id(), plan.daysGenerated(), batchSize, slots, assignment, eligibleById);
+            self.markReady(generationId, plan.id(), userId);
+        } catch (Exception ex) {
+            log.warn("Continuacao do plano do utilizador {} falhou: {}", userId, ex.toString(), ex);
+            self.markFailed(generationId, userId, ex);
+        }
+    }
+
+    /**
      * Persiste o plano mensal (arquiva o plano {@code ACTIVE} anterior do
      * utilizador, se existir, cria o novo {@code MealPlan}/dias/entradas).
      * Chamado atraves de {@link #self} a partir de {@link #generateAsync}
@@ -313,13 +439,55 @@ public class AiMealPlanService {
 
         MealPlan plan = mealPlans.save(new MealPlan(userId, monthStart, profileSnapshot));
         Map<Long, Recipe> recipesWithImages = ensureImagesForPlan(assignment, eligibleById);
+        persistDays(plan, 0, days, slots, assignment, recipesWithImages);
+        plan.extendDaysGenerated(days);
 
-        for (int dayIndex = 1; dayIndex <= days; dayIndex++) {
-            LocalDate date = monthStart.plusDays(dayIndex - 1L);
-            Map<MealSlot, Long> daySlots = assignment.getOrDefault(dayIndex, Map.of());
+        return plan.id();
+    }
+
+    /**
+     * Acrescenta mais uma semana (ou o resto do mes, se for menor que
+     * {@link #WEEK_SIZE}) a um plano ja existente -- nunca arquiva nem cria
+     * um {@link MealPlan} novo, so' os {@link MealPlanDay}/{@link MealPlanEntry}
+     * seguintes. Chamado por {@link #generateNextWeekAsync}.
+     */
+    @Transactional
+    public void appendWeek(
+        Long planId,
+        int dayOffset,
+        int days,
+        List<MealSlot> slots,
+        Map<Integer, Map<MealSlot, Long>> assignment,
+        Map<Long, Recipe> eligibleById
+    ) {
+        MealPlan plan = mealPlans.findById(planId)
+            .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
+        Map<Long, Recipe> recipesWithImages = ensureImagesForPlan(assignment, eligibleById);
+        persistDays(plan, dayOffset, days, slots, assignment, recipesWithImages);
+        plan.extendDaysGenerated(days);
+    }
+
+    /**
+     * Persiste {@code days} dias a partir de {@code dayOffset} (numero
+     * absoluto de dias do mes ja gerados antes desta chamada -- 0 na
+     * primeira geracao). {@code assignment}/{@code slots} sao sempre
+     * indexados de forma relativa (1..days), independente do offset.
+     */
+    private void persistDays(
+        MealPlan plan,
+        int dayOffset,
+        int days,
+        List<MealSlot> slots,
+        Map<Integer, Map<MealSlot, Long>> assignment,
+        Map<Long, Recipe> recipesWithImages
+    ) {
+        for (int relativeDay = 1; relativeDay <= days; relativeDay++) {
+            int absoluteDayNumber = dayOffset + relativeDay;
+            LocalDate date = plan.monthStart().plusDays(absoluteDayNumber - 1L);
+            Map<MealSlot, Long> daySlots = assignment.getOrDefault(relativeDay, Map.of());
 
             List<Recipe> dayRecipes = daySlots.values().stream()
-                .map(eligibleById::get)
+                .map(recipesWithImages::get)
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -347,8 +515,6 @@ public class AiMealPlanService {
                 mealPlanEntries.save(new MealPlanEntry(day, slot, recipe.id(), snapshot));
             }
         }
-
-        return plan.id();
     }
 
     private Map<Long, Recipe> ensureImagesForPlan(

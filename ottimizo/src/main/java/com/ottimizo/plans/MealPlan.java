@@ -50,6 +50,17 @@ public class MealPlan {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    /**
+     * Quantos dias do mes (a partir de {@link #monthStart}) ja foram gerados
+     * e persistidos como {@link MealPlanDay}. O plano deixou de ser gerado
+     * de uma vez so' (mes inteiro, ~30 dias numa unica chamada a IA) por
+     * custo -- passa a ser gerado por semanas de 7 dias, a seguinte so'
+     * quando a anterior estiver toda completada (ver
+     * {@link AiMealPlanService#maybeGenerateNextWeek}). V010.
+     */
+    @Column(name = "days_generated", nullable = false)
+    private int daysGenerated;
+
     protected MealPlan() {
     }
 
@@ -58,6 +69,7 @@ public class MealPlan {
         this.monthStart = monthStart;
         this.profileSnapshot = profileSnapshot;
         this.status = MealPlanStatus.ACTIVE;
+        this.daysGenerated = 0;
     }
 
     /**
@@ -68,6 +80,11 @@ public class MealPlan {
      */
     public void archive() {
         this.status = MealPlanStatus.ARCHIVED;
+    }
+
+    /** Chamado depois de persistir mais uma semana de dias (BE-C03). */
+    public void extendDaysGenerated(int additionalDays) {
+        this.daysGenerated += additionalDays;
     }
 
     @PrePersist
@@ -108,5 +125,9 @@ public class MealPlan {
 
     public OffsetDateTime updatedAt() {
         return updatedAt;
+    }
+
+    public int daysGenerated() {
+        return daysGenerated;
     }
 }

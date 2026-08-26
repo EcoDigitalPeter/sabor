@@ -136,6 +136,12 @@ public class MealPlanController {
         @AuthenticationPrincipal Jwt jwt
     ) {
         CurrentUser actor = userContext.currentUser(jwt);
-        return ApiResponse.success(mealPlanService.setCompleted(id, request.completed(), actor));
+        MealPlanEntryResponse response = mealPlanService.setCompleted(id, request.completed(), actor);
+        // Fora da transaccao de setCompleted (ja commitada a esta altura,
+        // este metodo do controller nao e' @Transactional) -- ver
+        // AiMealPlanService#generateNextWeekAsync para o porque de isto
+        // importar (o thread @Async nao pode arrancar antes do commit).
+        aiMealPlanService.notifyEntryCompleted(id, request.completed());
+        return ApiResponse.success(response);
     }
 }
