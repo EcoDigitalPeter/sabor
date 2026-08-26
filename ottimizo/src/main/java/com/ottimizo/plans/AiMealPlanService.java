@@ -263,6 +263,7 @@ public class AiMealPlanService {
 
             self.markReady(generationId, planId, userId);
         } catch (Exception ex) {
+            log.warn("Geracao {} do plano do utilizador {} falhou: {}", generationId, userId, ex.toString(), ex);
             self.markFailed(generationId, userId, ex);
         }
     }
