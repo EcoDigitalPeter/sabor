@@ -668,7 +668,10 @@ public class AiMealPlanService {
     private String systemPrompt() {
         return """
             Es um planeador de refeicoes para clientes em Mocambique.
-            Para cada dia do mes e cada refeicao do dia, escolhe UM recipeId da lista de receitas elegiveis fornecida.
+            Tem em conta o objectivo do cliente (perder peso, ganhar massa, comer melhor, gerir condicao)
+            e as suas restricoes de saude/alergia (ja aplicadas na lista abaixo) ao escolher.
+            Para cada dia do mes e cada refeicao do dia, escolhe UM recipeId da lista de receitas
+            elegiveis fornecida -- essa lista e' o catalogo real, ja registado pelo admin.
             Usa apenas os ids recebidos - nunca inventes um recipeId novo nem uma receita nova.
             Varia as escolhas ao longo do mes sempre que possivel; repetir e aceitavel se o catalogo for pequeno.
             Responde APENAS com JSON, sem texto a volta, no formato:

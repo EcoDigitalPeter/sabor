@@ -3,7 +3,9 @@ package com.ottimizo.plans;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -13,6 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ottimizo.catalog.MealFeedbackService;
 import com.ottimizo.catalog.Recipe;
 import com.ottimizo.catalog.RecipeCatalogService;
+import com.ottimizo.catalog.RecipeImageService;
 import com.ottimizo.catalog.RecipeService;
 import com.ottimizo.catalog.RecipeSnapshotFactory;
 import com.ottimizo.common.audit.AuditService;
@@ -32,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -58,7 +62,17 @@ class AdHocRecipeServiceTest {
     @Mock
     private RecipeService recipeService;
     @Mock
+    private RecipeImageService recipeImageService;
+    @Mock
     private AuditService audit;
+    @Mock
+    private ChatClient.Builder chatClientBuilder;
+    @Mock
+    private ChatClient chatClient;
+    @Mock
+    private ChatClient.ChatClientRequestSpec requestSpec;
+    @Mock
+    private ChatClient.CallResponseSpec callResponseSpec;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RecipeSnapshotFactory recipeSnapshotFactory = new RecipeSnapshotFactory(objectMapper);
@@ -70,9 +84,11 @@ class AdHocRecipeServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(chatClientBuilder.build()).thenReturn(chatClient);
         service = new AdHocRecipeService(
             adHocRequests, mealPlanEntries, clientProfiles, recipeCatalogService,
-            mealFeedbackService, recipeService, recipeSnapshotFactory, audit, null
+            mealFeedbackService, recipeService, recipeSnapshotFactory, recipeImageService,
+            audit, chatClientBuilder, objectMapper, null
         );
         ReflectionTestUtils.setField(service, "self", service);
     }
@@ -130,6 +146,14 @@ class AdHocRecipeServiceTest {
         when(mealFeedbackService.dislikedRecipeIds(USER_A)).thenReturn(Set.of());
         Recipe chosen = recipeWithId(9L);
         when(recipeCatalogService.eligibleFor(any(), anySet(), anySet())).thenReturn(List.of(chosen));
+        when(chatClient.prompt()).thenReturn(requestSpec);
+        when(requestSpec.system(anyString())).thenReturn(requestSpec);
+        when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
+        when(requestSpec.call()).thenReturn(callResponseSpec);
+        // IA indisponivel -- esgota MAX_ATTEMPTS e cai no fallback (primeira elegivel).
+        when(callResponseSpec.content()).thenThrow(new RuntimeException("IA indisponivel"));
+        when(recipeImageService.ensureGenerated(9L)).thenReturn(chosen);
 
         service.requestGeneration(new AdHocRecipeCreateRequest(MealSlot.JANTAR, null, "sem picante"), actor);
 
