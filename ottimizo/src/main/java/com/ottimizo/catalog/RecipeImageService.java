@@ -15,6 +15,7 @@ import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -60,8 +61,18 @@ public class RecipeImageService {
      * Garante imagem para uma receita usada por fluxos internos, como a geracao
      * assincrona do plano alimentar. Idempotente: se a receita ja tiver imagem,
      * devolve-a sem chamar IA/Storage.
+     *
+     * <p>{@code REQUIRES_NEW}: quando chamado a partir de
+     * {@code AiMealPlanService.persistPlan} (a sua propria transaccao), uma
+     * falha aqui nao pode "envenenar" essa transaccao maior. Com a
+     * propagacao por omissao (REQUIRED) isto corria na MESMA transaccao
+     * fisica -- mesmo o chamador apanhando a ServiceException e continuando,
+     * o interceptor @Transactional desta chamada ja tinha marcado a
+     * transaccao inteira como rollback-only, e o commit final de persistPlan
+     * rebentava com UnexpectedRollbackException (apanhado em producao: plano
+     * inteiro perdido so' porque uma imagem falhou a gerar).
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Recipe ensureGenerated(Long recipeId) {
         Object lock = imageLocks.computeIfAbsent(recipeId, ignored -> new Object());
         try {
