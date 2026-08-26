@@ -12,7 +12,7 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { MacroRing } from "@/components/macro-ring/MacroRing";
 import { RecipeHero } from "@/components/plan/RecipeHero";
 import { RecipeStatCard } from "@/components/plan/RecipeStatCard";
-import { getRecipePhoto } from "@/data/recipe-photos";
+import { resolveRecipePhoto } from "@/data/recipe-photos";
 import type { Recipe } from "@/hooks/useRecipeCatalog";
 import styles from "./RecipeDetailSheet.module.css";
 
@@ -23,7 +23,7 @@ export type RecipeDetailSheetProps = {
 
 export function RecipeDetailSheet({ recipe, onClose }: RecipeDetailSheetProps) {
   const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
-  const photoSrc = getRecipePhoto(recipe?.id);
+  const photoSrc = resolveRecipePhoto(recipe?.imageUrl, recipe?.id);
 
   return (
     <BottomSheet open={recipe !== null} onClose={onClose}>

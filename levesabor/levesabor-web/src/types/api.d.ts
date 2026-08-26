@@ -785,6 +785,8 @@ export interface components {
             healthNote?: string | null;
             ingredients?: components["schemas"]["RecipeIngredientLine"][];
             steps?: components["schemas"]["RecipeStep"][];
+            /** @description Imagem de prato gerada por IA (BE-C10, POST /admin/recipes/{id}/image) — ausente até alguém gerar a imagem dessa receita; frontend cai no fallback presentacional (src/data/recipe-photos.ts) enquanto não vier. */
+            imageUrl?: string | null;
         };
         MealPlanEntry: {
             /** Format: int64 */
@@ -1126,6 +1128,8 @@ export interface components {
             dislikeCount?: number;
             ingredients?: components["schemas"]["RecipeIngredientLine"][];
             steps?: components["schemas"]["RecipeStep"][];
+            /** @description Imagem de prato gerada por IA (BE-C10, POST /admin/recipes/{id}/image) — ausente até alguém gerar a imagem dessa receita; frontend cai no fallback presentacional (src/data/recipe-photos.ts) enquanto não vier. */
+            imageUrl?: string | null;
         };
         RecipeRequest: {
             name: string;

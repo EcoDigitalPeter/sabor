@@ -7,7 +7,7 @@
 import Image from "next/image";
 import { UtensilsCrossed } from "lucide-react";
 import { Chip } from "@/components/ui/Chip";
-import { getRecipePhoto } from "@/data/recipe-photos";
+import { resolveRecipePhoto } from "@/data/recipe-photos";
 import type { Recipe } from "@/hooks/useRecipeCatalog";
 import styles from "./RecipeGridCard.module.css";
 
@@ -17,7 +17,7 @@ export type RecipeGridCardProps = {
 };
 
 export function RecipeGridCard({ recipe, onClick }: RecipeGridCardProps) {
-  const photoSrc = getRecipePhoto(recipe.id);
+  const photoSrc = resolveRecipePhoto(recipe.imageUrl, recipe.id);
   const name = recipe.name ?? "Receita";
 
   return (

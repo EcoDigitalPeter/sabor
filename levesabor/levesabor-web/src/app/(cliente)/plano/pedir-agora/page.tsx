@@ -26,7 +26,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { RecipeHero } from "@/components/plan/RecipeHero";
 import { RecipeStatCard } from "@/components/plan/RecipeStatCard";
 import { MacroRing } from "@/components/macro-ring/MacroRing";
-import { getRecipePhoto } from "@/data/recipe-photos";
+import { resolveRecipePhoto } from "@/data/recipe-photos";
 import { formatFullDayLabel, sortEntriesBySlot, todayIsoDate } from "@/lib/planStats";
 import { ROTATING_MESSAGES, MESSAGE_ROTATE_INTERVAL_MS } from "../gerar/messages";
 import styles from "./page.module.css";
@@ -378,7 +378,7 @@ export default function PedirAgoraPage() {
 
   // phase === "result"
   const recipe = resultRecipe;
-  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const photoSrc = resolveRecipePhoto(recipe?.imageUrl, recipe?.recipeId);
   const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
   const days = activePlanQuery.data?.days ?? [];
 

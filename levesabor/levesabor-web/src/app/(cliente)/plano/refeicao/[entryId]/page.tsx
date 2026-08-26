@@ -16,7 +16,7 @@ import { MacroRing } from "@/components/macro-ring/MacroRing";
 import { SwapSheet } from "@/components/plan/SwapSheet";
 import { RecipeHero } from "@/components/plan/RecipeHero";
 import { RecipeStatCard } from "@/components/plan/RecipeStatCard";
-import { getRecipePhoto } from "@/data/recipe-photos";
+import { resolveRecipePhoto } from "@/data/recipe-photos";
 import type { components } from "@/types/api";
 import styles from "./page.module.css";
 
@@ -182,7 +182,7 @@ export default function RefeicaoPage({ params }: { params: { entryId: string } }
   }
 
   const recipe = entry.recipe;
-  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const photoSrc = resolveRecipePhoto(recipe?.imageUrl, recipe?.recipeId);
   const costLabel = recipe?.estimatedCostMt != null ? `${recipe.estimatedCostMt} MT` : "—";
 
   return (

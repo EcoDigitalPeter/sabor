@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Check, Clock } from "lucide-react";
 import { MacroRing } from "@/components/macro-ring/MacroRing";
-import { getRecipePhoto } from "@/data/recipe-photos";
+import { resolveRecipePhoto } from "@/data/recipe-photos";
 import type { components } from "@/types/api";
 import styles from "./MealCard.module.css";
 
@@ -60,7 +60,7 @@ export function MealCard({ entry, href, onClick, onToggleCompleted, current, cla
   };
   const proteinGrams = estimateProteinGrams(kcal, macros.proteina);
   const slotLabel = entry.mealSlot ? SLOT_LABEL[entry.mealSlot] : undefined;
-  const photoSrc = getRecipePhoto(recipe?.recipeId);
+  const photoSrc = resolveRecipePhoto(recipe?.imageUrl, recipe?.recipeId);
 
   const content = (
     <>

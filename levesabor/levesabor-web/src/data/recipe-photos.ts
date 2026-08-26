@@ -1,10 +1,12 @@
 // FE-Q01 · recipe-photos — lookup presentacional entre RecipeSnapshot.recipeId (fonte:
 // RECIPE_CATALOG, src/mocks/fixtures.ts) e a foto gerada em public/images/receitas/<slug>/photo.webp.
-// NÃO faz parte do contrato OpenAPI (RecipeSnapshot não tem campo de imagem) — mesmo padrão
-// presentacional do DishGallery/dish-gallery-data.ts na landing. Chave por recipeId (estável,
-// já existe em MealPlanEntry.recipe.recipeId) em vez de nome (texto, mais frágil a edições de copy).
-// Só entram aqui as receitas com foto já gerada — as restantes caem no fallback em MealCard/RecipeHero.
-// FE-Q07: as 18 receitas de RECIPE_CATALOG (src/mocks/fixtures.ts) têm foto.
+// Fallback só: desde BE-C10 o contrato (RecipeSnapshot/Recipe) já tem `imageUrl` (foto real gerada
+// por IA, ver POST /admin/recipes/{id}/image) — usar sempre resolveRecipePhoto() em vez deste lookup
+// directamente, para preferir a imagem real quando existir e só cair aqui quando `imageUrl` for
+// null/undefined (receita ainda sem imagem gerada). Mesmo padrão presentacional do
+// DishGallery/dish-gallery-data.ts na landing. Chave por recipeId (estável, já existe em
+// MealPlanEntry.recipe.recipeId) em vez de nome (texto, mais frágil a edições de copy).
+// FE-Q07: as 18 receitas de RECIPE_CATALOG (src/mocks/fixtures.ts) têm foto de fallback.
 export const RECIPE_PHOTOS: Partial<Record<number, string>> = {
   1: "/images/receitas/papinha-de-amendoim-com-banana/photo.webp",
   2: "/images/receitas/pao-com-ovo-estrelado-e-cha-de-limao/photo.webp",
@@ -28,4 +30,12 @@ export const RECIPE_PHOTOS: Partial<Record<number, string>> = {
 
 export function getRecipePhoto(recipeId: number | undefined): string | undefined {
   return recipeId !== undefined ? RECIPE_PHOTOS[recipeId] : undefined;
+}
+
+/** Prefere a imagem real (BE-C10) sobre o fallback estático; usar em vez de getRecipePhoto directo. */
+export function resolveRecipePhoto(
+  imageUrl: string | null | undefined,
+  recipeId: number | undefined
+): string | undefined {
+  return imageUrl ?? getRecipePhoto(recipeId);
 }
