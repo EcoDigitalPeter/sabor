@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ottimizo.catalog.MealFeedbackService;
 import com.ottimizo.catalog.Recipe;
 import com.ottimizo.catalog.RecipeCatalogService;
+import com.ottimizo.catalog.RecipeImageService;
 import com.ottimizo.catalog.RecipeSnapshotFactory;
 import com.ottimizo.common.audit.AuditService;
 import com.ottimizo.common.error.ErrorCode;
@@ -71,6 +72,8 @@ class AiMealPlanServiceTest {
     @Mock
     private MealFeedbackService mealFeedbackService;
     @Mock
+    private RecipeImageService recipeImageService;
+    @Mock
     private AuditService audit;
     @Mock
     private ChatClient.Builder chatClientBuilder;
@@ -97,7 +100,7 @@ class AiMealPlanServiceTest {
         service = new AiMealPlanService(
             mealGenerations, mealPlans, mealPlanDays, mealPlanEntries,
             clientProfiles, recipeCatalogService, mealFeedbackService, recipeSnapshotFactory,
-            audit, chatClientBuilder, objectMapper, null
+            recipeImageService, audit, chatClientBuilder, objectMapper, null
         );
         ReflectionTestUtils.setField(service, "self", service);
 
@@ -117,6 +120,8 @@ class AiMealPlanServiceTest {
         });
         org.mockito.Mockito.lenient().when(mealPlanDays.save(any())).thenAnswer(inv -> inv.getArgument(0));
         org.mockito.Mockito.lenient().when(mealPlanEntries.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        org.mockito.Mockito.lenient().when(recipeImageService.ensureGenerated(any()))
+            .thenReturn(null);
     }
 
     // ---- guardas sincronas (createGeneration) ------------------------------
@@ -221,7 +226,7 @@ class AiMealPlanServiceTest {
 
         service.requestGeneration(actor);
 
-        verify(callResponseSpec, times(3)).content(); // MAX_ATTEMPTS = 3
+        verify(callResponseSpec, times(2)).content(); // MAX_ATTEMPTS = 2
         assertThat(lastSavedGeneration().status()).isEqualTo(MealGenerationStatus.FAILED);
         assertThat(lastSavedGeneration().errorCode()).isEqualTo(ErrorCode.LSA013_AI_UNAVAILABLE.name());
         verify(mealPlans, never()).save(any());
@@ -267,6 +272,79 @@ class AiMealPlanServiceTest {
         assertThat(lastSavedGeneration().mealPlanId()).isEqualTo(500L);
 
         verify(audit).record(eq(USER_ID), eq("meal_plan.generation.ready"), eq("MealPlan"), eq(500L), any());
+    }
+
+    @Test
+    void generateAsync_receitaSemImagem_geraImagemAntesDeGravarSnapshot() {
+        CurrentUser actor = clientUser(USER_ID);
+        ClientProfile profile = completeProfile(USER_ID, 2);
+        when(clientProfiles.findByUserId(USER_ID)).thenReturn(Optional.of(profile));
+        when(mealGenerations.existsByUserIdAndKindAndStatus(any(), any(), any())).thenReturn(false);
+        when(mealGenerations.countByUserIdAndKindAndCreatedAtGreaterThanEqual(any(), any(), any())).thenReturn(0L);
+        when(mealFeedbackService.likedRecipeIds(USER_ID)).thenReturn(Set.of());
+        when(mealFeedbackService.dislikedRecipeIds(USER_ID)).thenReturn(Set.of());
+
+        Recipe recipe = recipeWithKcal(21L, 500);
+        Recipe recipeWithImage = recipeWithKcal(21L, 500);
+        recipeWithImage.applyImage("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/21.png");
+        when(recipeCatalogService.eligibleFor(any(), any(), any())).thenReturn(List.of(recipe));
+        when(recipeImageService.ensureGenerated(21L)).thenReturn(recipeWithImage);
+        when(mealPlans.findByUserIdAndStatus(USER_ID, MealPlanStatus.ACTIVE)).thenReturn(Optional.empty());
+
+        when(chatClient.prompt()).thenReturn(requestSpec);
+        when(requestSpec.system(anyString())).thenReturn(requestSpec);
+        when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
+        when(requestSpec.call()).thenReturn(callResponseSpec);
+        when(callResponseSpec.content()).thenReturn("""
+            {"days":[{"day":1,"meals":[
+                {"mealSlot":"PEQUENO_ALMOCO","recipeId":21},
+                {"mealSlot":"ALMOCO","recipeId":21}
+            ]}]}
+            """);
+
+        service.requestGeneration(actor);
+
+        verify(recipeImageService).ensureGenerated(21L);
+        var entryCaptor = org.mockito.ArgumentCaptor.forClass(MealPlanEntry.class);
+        verify(mealPlanEntries, times(YearMonth.now().lengthOfMonth() * 2)).save(entryCaptor.capture());
+        assertThat(entryCaptor.getAllValues().get(0).recipeSnapshot().path("imageUrl").asText())
+            .isEqualTo("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/21.png");
+    }
+
+    @Test
+    void generateAsync_falhaImagem_naoFalhaPlano() {
+        CurrentUser actor = clientUser(USER_ID);
+        ClientProfile profile = completeProfile(USER_ID, 2);
+        when(clientProfiles.findByUserId(USER_ID)).thenReturn(Optional.of(profile));
+        when(mealGenerations.existsByUserIdAndKindAndStatus(any(), any(), any())).thenReturn(false);
+        when(mealGenerations.countByUserIdAndKindAndCreatedAtGreaterThanEqual(any(), any(), any())).thenReturn(0L);
+        when(mealFeedbackService.likedRecipeIds(USER_ID)).thenReturn(Set.of());
+        when(mealFeedbackService.dislikedRecipeIds(USER_ID)).thenReturn(Set.of());
+
+        Recipe recipe = recipeWithKcal(22L, 500);
+        when(recipeCatalogService.eligibleFor(any(), any(), any())).thenReturn(List.of(recipe));
+        when(recipeImageService.ensureGenerated(22L)).thenThrow(new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED));
+        when(mealPlans.findByUserIdAndStatus(USER_ID, MealPlanStatus.ACTIVE)).thenReturn(Optional.empty());
+
+        when(chatClient.prompt()).thenReturn(requestSpec);
+        when(requestSpec.system(anyString())).thenReturn(requestSpec);
+        when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.options(any(org.springframework.ai.chat.prompt.ChatOptions.class))).thenReturn(requestSpec);
+        when(requestSpec.call()).thenReturn(callResponseSpec);
+        when(callResponseSpec.content()).thenReturn("""
+            {"days":[{"day":1,"meals":[
+                {"mealSlot":"PEQUENO_ALMOCO","recipeId":22},
+                {"mealSlot":"ALMOCO","recipeId":22}
+            ]}]}
+            """);
+
+        service.requestGeneration(actor);
+
+        assertThat(lastSavedGeneration().status()).isEqualTo(MealGenerationStatus.READY);
+        var entryCaptor = org.mockito.ArgumentCaptor.forClass(MealPlanEntry.class);
+        verify(mealPlanEntries, times(YearMonth.now().lengthOfMonth() * 2)).save(entryCaptor.capture());
+        assertThat(entryCaptor.getAllValues().get(0).recipeSnapshot().has("imageUrl")).isFalse();
     }
 
     @Test

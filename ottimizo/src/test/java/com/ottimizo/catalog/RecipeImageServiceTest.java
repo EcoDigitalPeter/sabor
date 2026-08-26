@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.ottimizo.common.error.ErrorCode;
@@ -33,7 +35,7 @@ class RecipeImageServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new RecipeImageService(recipes, imageModel, storageClient, downloader);
+        service = new RecipeImageService(recipes, imageModel, storageClient, downloader, "service-role-key");
     }
 
     private Recipe recipeWithId(long id) {
@@ -80,5 +82,37 @@ class RecipeImageServiceTest {
         Recipe result = service.generate(9L, "token");
 
         assertThat(result.imageUrl()).isEqualTo("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/9.png");
+    }
+
+    @Test
+    void ensureGenerated_receitaJaTemImagem_naoChamaIaNemStorage() {
+        Recipe recipe = recipeWithId(10L);
+        recipe.applyImage("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/10.png");
+        when(recipes.findById(10L)).thenReturn(Optional.of(recipe));
+
+        Recipe result = service.ensureGenerated(10L);
+
+        assertThat(result.imageUrl()).isEqualTo("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/10.png");
+        verify(imageModel, never()).call(any());
+        verify(storageClient, never()).uploadWithServiceRole(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void ensureGenerated_receitaSemImagem_usaServiceRoleKey() {
+        Recipe recipe = recipeWithId(11L);
+        when(recipes.findById(11L)).thenReturn(Optional.of(recipe));
+
+        Image image = new Image("https://oaidalleapiprodscus.blob.core.windows.net/fake.png", null);
+        ImageResponse response = new ImageResponse(List.of(new ImageGeneration(image)));
+        when(imageModel.call(any())).thenReturn(response);
+        when(downloader.download("https://oaidalleapiprodscus.blob.core.windows.net/fake.png"))
+            .thenReturn(new byte[]{1, 1, 1});
+        when(storageClient.uploadWithServiceRole(any(), anyString(), anyString(), anyString()))
+            .thenReturn("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/11.png");
+
+        Recipe result = service.ensureGenerated(11L);
+
+        assertThat(result.imageUrl()).isEqualTo("https://proj.supabase.co/storage/v1/object/public/recipe-images/receitas/11.png");
+        verify(storageClient).uploadWithServiceRole(any(), anyString(), anyString(), anyString());
     }
 }

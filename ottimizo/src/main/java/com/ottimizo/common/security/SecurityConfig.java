@@ -92,9 +92,12 @@ public class SecurityConfig {
 
     private Collection<GrantedAuthority> authoritiesFromClaims(Jwt jwt) {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        String role = claimAsString(jwt, "role");
+        String role = appMetadataRole(jwt);
         if (role == null) {
-            role = appMetadataRole(jwt);
+            role = claimAsString(jwt, "role");
+            if ("authenticated".equalsIgnoreCase(role)) {
+                role = Role.CLIENTE.name();
+            }
         }
         if (role != null && !role.isBlank()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.trim().toUpperCase()));

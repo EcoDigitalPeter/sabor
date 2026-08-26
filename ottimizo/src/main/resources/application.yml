@@ -66,3 +66,4 @@ ottimizo:
     meal-plan-daily-limit: ${MEAL_PLAN_DAILY_LIMIT:10}
   supabase:
     storage-url: ${SUPABASE_STORAGE_URL:http://localhost/storage/v1}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}

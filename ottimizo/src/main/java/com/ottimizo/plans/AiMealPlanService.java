@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ottimizo.catalog.MealFeedbackService;
 import com.ottimizo.catalog.Recipe;
 import com.ottimizo.catalog.RecipeCatalogService;
+import com.ottimizo.catalog.RecipeImageService;
 import com.ottimizo.catalog.RecipeSnapshotFactory;
 import com.ottimizo.common.audit.AuditService;
 import com.ottimizo.common.error.ErrorCode;
@@ -85,7 +86,7 @@ public class AiMealPlanService {
 
     private static final Logger log = LoggerFactory.getLogger(AiMealPlanService.class);
 
-    private static final int MAX_ATTEMPTS = 3;
+    private static final int MAX_ATTEMPTS = 2;
     private static final List<MealSlot> ALL_SLOTS =
         List.of(MealSlot.PEQUENO_ALMOCO, MealSlot.ALMOCO, MealSlot.LANCHE, MealSlot.JANTAR);
     private static final Locale PT = Locale.forLanguageTag("pt-PT");
@@ -140,6 +141,7 @@ public class AiMealPlanService {
     private final RecipeCatalogService recipeCatalogService;
     private final MealFeedbackService mealFeedbackService;
     private final RecipeSnapshotFactory recipeSnapshotFactory;
+    private final RecipeImageService recipeImageService;
     private final AuditService audit;
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
@@ -165,6 +167,7 @@ public class AiMealPlanService {
         RecipeCatalogService recipeCatalogService,
         MealFeedbackService mealFeedbackService,
         RecipeSnapshotFactory recipeSnapshotFactory,
+        RecipeImageService recipeImageService,
         AuditService audit,
         ChatClient.Builder chatClientBuilder,
         ObjectMapper objectMapper,
@@ -178,6 +181,7 @@ public class AiMealPlanService {
         this.recipeCatalogService = recipeCatalogService;
         this.mealFeedbackService = mealFeedbackService;
         this.recipeSnapshotFactory = recipeSnapshotFactory;
+        this.recipeImageService = recipeImageService;
         this.audit = audit;
         this.chatClient = chatClientBuilder.build();
         this.objectMapper = objectMapper;
@@ -308,6 +312,7 @@ public class AiMealPlanService {
         mealPlans.findByUserIdAndStatus(userId, MealPlanStatus.ACTIVE).ifPresent(MealPlan::archive);
 
         MealPlan plan = mealPlans.save(new MealPlan(userId, monthStart, profileSnapshot));
+        Map<Long, Recipe> recipesWithImages = ensureImagesForPlan(assignment, eligibleById);
 
         for (int dayIndex = 1; dayIndex <= days; dayIndex++) {
             LocalDate date = monthStart.plusDays(dayIndex - 1L);
@@ -334,7 +339,7 @@ public class AiMealPlanService {
 
             for (MealSlot slot : slots) {
                 Long recipeId = daySlots.get(slot);
-                Recipe recipe = recipeId == null ? null : eligibleById.get(recipeId);
+                Recipe recipe = recipeId == null ? null : recipesWithImages.get(recipeId);
                 if (recipe == null) {
                     continue;
                 }
@@ -344,6 +349,34 @@ public class AiMealPlanService {
         }
 
         return plan.id();
+    }
+
+    private Map<Long, Recipe> ensureImagesForPlan(
+        Map<Integer, Map<MealSlot, Long>> assignment,
+        Map<Long, Recipe> eligibleById
+    ) {
+        Map<Long, Recipe> result = new LinkedHashMap<>(eligibleById);
+        Set<Long> usedRecipeIds = assignment.values().stream()
+            .flatMap(daySlots -> daySlots.values().stream())
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (Long recipeId : usedRecipeIds) {
+            Recipe recipe = eligibleById.get(recipeId);
+            if (recipe == null || (recipe.imageUrl() != null && !recipe.imageUrl().isBlank())) {
+                continue;
+            }
+            try {
+                Recipe withImage = recipeImageService.ensureGenerated(recipeId);
+                if (withImage != null) {
+                    result.put(recipeId, withImage);
+                }
+            } catch (Exception ex) {
+                log.warn("Imagem da receita {} nao foi gerada durante o plano: {}", recipeId, ex.toString());
+            }
+        }
+
+        return result;
     }
 
     // ---- IA -------------------------------------------------------------

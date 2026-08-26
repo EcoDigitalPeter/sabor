@@ -3,6 +3,8 @@ package com.ottimizo.catalog;
 import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
 import java.util.Base64;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiImageOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,17 +31,21 @@ public class RecipeImageService {
     private final ImageModel imageModel;
     private final SupabaseStorageClient storageClient;
     private final RecipeImageDownloader downloader;
+    private final String serviceRoleKey;
+    private final ConcurrentMap<Long, Object> imageLocks = new ConcurrentHashMap<>();
 
     public RecipeImageService(
         RecipeRepository recipes,
         ImageModel imageModel,
         SupabaseStorageClient storageClient,
-        RecipeImageDownloader downloader
+        RecipeImageDownloader downloader,
+        @Value("${ottimizo.supabase.service-role-key:}") String serviceRoleKey
     ) {
         this.recipes = recipes;
         this.imageModel = imageModel;
         this.storageClient = storageClient;
         this.downloader = downloader;
+        this.serviceRoleKey = serviceRoleKey;
     }
 
     @Transactional
@@ -46,6 +53,35 @@ public class RecipeImageService {
         Recipe recipe = recipes.findById(recipeId)
             .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
 
+        return generateAndPersist(recipe, bearerToken, false);
+    }
+
+    /**
+     * Garante imagem para uma receita usada por fluxos internos, como a geracao
+     * assincrona do plano alimentar. Idempotente: se a receita ja tiver imagem,
+     * devolve-a sem chamar IA/Storage.
+     */
+    @Transactional
+    public Recipe ensureGenerated(Long recipeId) {
+        Object lock = imageLocks.computeIfAbsent(recipeId, ignored -> new Object());
+        try {
+            synchronized (lock) {
+                Recipe recipe = recipes.findById(recipeId)
+                    .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
+                if (recipe.imageUrl() != null && !recipe.imageUrl().isBlank()) {
+                    return recipe;
+                }
+                if (serviceRoleKey == null || serviceRoleKey.isBlank()) {
+                    throw new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED);
+                }
+                return generateAndPersist(recipe, serviceRoleKey, true);
+            }
+        } finally {
+            imageLocks.remove(recipeId, lock);
+        }
+    }
+
+    private Recipe generateAndPersist(Recipe recipe, String bearerToken, boolean serviceRoleUpload) {
         try {
             ImageResponse response = imageModel.call(new ImagePrompt(
                 prompt(recipe),
@@ -54,7 +90,9 @@ public class RecipeImageService {
             byte[] bytes = extractBytes(response.getResult().getOutput());
 
             String path = "receitas/%d.png".formatted(recipe.id());
-            String publicUrl = storageClient.upload(bytes, path, "image/png", bearerToken);
+            String publicUrl = serviceRoleUpload
+                ? storageClient.uploadWithServiceRole(bytes, path, "image/png", bearerToken)
+                : storageClient.upload(bytes, path, "image/png", bearerToken);
 
             recipe.applyImage(publicUrl);
             recipes.save(recipe);
@@ -70,7 +108,7 @@ public class RecipeImageService {
         } catch (ServiceException se) {
             throw se;
         } catch (Exception ex) {
-            log.warn("Falha ao gerar imagem para a receita {}: {}", recipeId, ex.toString(), ex);
+            log.warn("Falha ao gerar imagem para a receita {}: {}", recipe.id(), ex.toString(), ex);
             throw new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED);
         }
     }

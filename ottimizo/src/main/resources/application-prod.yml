@@ -50,6 +50,12 @@
 #     Authentication -> JWT Settings -> "JWKS URL", tipicamente
 #     https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json
 #
+#   SUPABASE_SERVICE_ROLE_KEY
+#     Project Settings -> API -> service_role key. Usada apenas pelo backend
+#     em operacoes internas de catalogo, como gerar imagens de receitas
+#     durante a geracao assincrona do plano alimentar. Nunca expor no
+#     frontend, Postman publico, logs ou respostas da API.
+#
 # DECISAO issuer-uri vs jwk-set-uri: definimos as duas propriedades, tal
 # como ja acontecia em application.yml (base). O Spring Boot usa o
 # jwk-set-uri directamente para ir buscar as chaves publicas (nao depende

@@ -8,13 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 /**
- * Upload de bytes para o Supabase Storage, autenticado com o JWT de quem
- * pediu a operacao (nunca uma service-role key — ver "Decisoes tomadas
- * neste plano" no plano de implementacao). Mesma politica de evitar a
- * service-role key ja seguida no pacote {@code com.ottimizo.users} (ver
- * {@code SupabaseSessionRevoker}), ainda que ali a key esteja simplesmente
- * por configurar (implementacao no-op) em vez de deliberadamente evitada
- * a favor do JWT do chamador, como aqui.
+ * Upload de bytes para o Supabase Storage. Operacoes pedidas directamente por
+ * admin usam o JWT do chamador; operacoes internas do backend podem usar a
+ * service-role key configurada, sem a expor ao frontend.
  */
 @Component
 public class SupabaseStorageClient {
@@ -39,6 +35,15 @@ public class SupabaseStorageClient {
 
     /** @return URL publico final do objecto, pronto a guardar em {@code Recipe.imageUrl}. */
     public String upload(byte[] bytes, String path, String contentType, String bearerToken) {
+        return uploadWithAuth(bytes, path, contentType, bearerToken, null);
+    }
+
+    /** @return URL publico final do objecto, pronto a guardar em {@code Recipe.imageUrl}. */
+    public String uploadWithServiceRole(byte[] bytes, String path, String contentType, String serviceRoleKey) {
+        return uploadWithAuth(bytes, path, contentType, serviceRoleKey, serviceRoleKey);
+    }
+
+    private String uploadWithAuth(byte[] bytes, String path, String contentType, String bearerToken, String apiKey) {
         // URI.create(...) em vez de template vars: o DefaultUriBuilderFactory do Spring
         // percent-encodeia o valor substituido em "{base}" (e as barras de "path"), partindo
         // o esquema do URL e a semantica de pastas do Supabase — nao e' so' texto literal.
@@ -46,6 +51,9 @@ public class SupabaseStorageClient {
             .uri(URI.create("%s/object/%s/%s".formatted(storageBaseUrl, BUCKET, path)))
             .headers(headers -> {
                 headers.setBearerAuth(bearerToken);
+                if (apiKey != null && !apiKey.isBlank()) {
+                    headers.add("apikey", apiKey);
+                }
                 headers.add("x-upsert", "true");
             })
             .contentType(MediaType.parseMediaType(contentType))
