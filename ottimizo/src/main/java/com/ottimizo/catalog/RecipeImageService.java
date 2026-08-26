@@ -66,7 +66,7 @@ public class RecipeImageService {
         } catch (ServiceException se) {
             throw se;
         } catch (Exception ex) {
-            log.warn("Falha ao gerar imagem para a receita {}: {}", recipeId, ex.toString());
+            log.warn("Falha ao gerar imagem para a receita {}: {}", recipeId, ex.toString(), ex);
             throw new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED);
         }
     }
