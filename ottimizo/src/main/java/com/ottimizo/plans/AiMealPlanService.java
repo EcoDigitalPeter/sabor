@@ -455,7 +455,16 @@ public class AiMealPlanService {
         Map<Integer, Map<MealSlot, Long>> assignment,
         Map<Long, Recipe> eligibleById
     ) {
-        mealPlans.findByUserIdAndStatus(userId, MealPlanStatus.ACTIVE).ifPresent(MealPlan::archive);
+        // saveAndFlush (nao so' save) e' proposital: o Hibernate manda sempre
+        // INSERTs antes de UPDATEs na mesma flush, seja qual for a ordem do
+        // codigo -- sem forcar este UPDATE agora, o INSERT do plano novo
+        // (2 linhas mais abaixo) seria enviado primeiro, com as duas linhas
+        // ACTIVE ao mesmo tempo, rebentando ux_meal_plans_one_active. Real em
+        // producao, nao so' um caso raro de concorrencia.
+        mealPlans.findByUserIdAndStatus(userId, MealPlanStatus.ACTIVE).ifPresent(existing -> {
+            existing.archive();
+            mealPlans.saveAndFlush(existing);
+        });
 
         MealPlan plan = mealPlans.save(new MealPlan(userId, monthStart, profileSnapshot));
         Map<Long, Recipe> recipesWithImages = ensureImagesForPlan(assignment, eligibleById);
