@@ -2,6 +2,7 @@ package com.ottimizo.catalog;
 
 import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.image.ImageModel;
@@ -9,6 +10,7 @@ import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Geracao de imagem de prato por IA (BE-C10). Sincrono e admin-only —
@@ -37,6 +39,7 @@ public class RecipeImageService {
         this.downloader = downloader;
     }
 
+    @Transactional
     public Recipe generate(Long recipeId, String bearerToken) {
         Recipe recipe = recipes.findById(recipeId)
             .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
@@ -54,6 +57,11 @@ public class RecipeImageService {
 
             recipe.applyImage(publicUrl);
             recipes.save(recipe);
+            // RecipeResponse.from (chamado pelo controller logo a seguir, ja
+            // fora desta transaccao) toca ingredients()/steps() -- inicializa
+            // aqui, mesmo padrao ja usado em RecipeService#get.
+            Hibernate.initialize(recipe.ingredients());
+            Hibernate.initialize(recipe.steps());
             return recipe;
         } catch (ServiceException se) {
             throw se;
