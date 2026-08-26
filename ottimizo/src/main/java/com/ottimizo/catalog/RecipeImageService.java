@@ -2,9 +2,11 @@ package com.ottimizo.catalog;
 
 import com.ottimizo.common.error.ErrorCode;
 import com.ottimizo.common.error.ServiceException;
+import java.util.Base64;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.image.Image;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
@@ -49,8 +51,7 @@ public class RecipeImageService {
                 prompt(recipe),
                 OpenAiImageOptions.builder().quality("medium").N(1).build()
             ));
-            String generatedUrl = response.getResult().getOutput().getUrl();
-            byte[] bytes = downloader.download(generatedUrl);
+            byte[] bytes = extractBytes(response.getResult().getOutput());
 
             String path = "receitas/%d.png".formatted(recipe.id());
             String publicUrl = storageClient.upload(bytes, path, "image/png", bearerToken);
@@ -72,6 +73,25 @@ public class RecipeImageService {
             log.warn("Falha ao gerar imagem para a receita {}: {}", recipeId, ex.toString(), ex);
             throw new ServiceException(ErrorCode.LSA025_IMAGE_GENERATION_FAILED);
         }
+    }
+
+    /**
+     * gpt-image-1-mini (ao contrario dos modelos DALL-E anteriores) so
+     * devolve {@code b64_json}, nunca {@code url} -- confirmado em producao:
+     * {@code getOutput().getUrl()} vinha sempre null, rebentando com NPE em
+     * {@link HttpRecipeImageDownloader#download} ao tentar criar um URI a
+     * partir de null. Preferimos o base64 (decodificado directamente, sem
+     * pedido HTTP extra) e so caimos para download por URL se algum dia um
+     * modelo devolver essa forma em vez da outra.
+     */
+    private byte[] extractBytes(Image image) {
+        if (image.getB64Json() != null) {
+            return Base64.getDecoder().decode(image.getB64Json());
+        }
+        if (image.getUrl() != null) {
+            return downloader.download(image.getUrl());
+        }
+        throw new IllegalStateException("Resposta da IA sem b64_json nem url.");
     }
 
     private String prompt(Recipe recipe) {
