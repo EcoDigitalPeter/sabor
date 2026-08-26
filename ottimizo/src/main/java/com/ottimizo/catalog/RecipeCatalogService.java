@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Pre-filtros duros de elegibilidade do catalogo de receitas para um cliente
@@ -79,6 +80,7 @@ public class RecipeCatalogService {
      * @return lista de receitas elegiveis, receitas preferidas primeiro,
      *         ordem estavel dentro de cada grupo.
      */
+    @Transactional(readOnly = true)
     public List<Recipe> eligibleFor(ClientProfile profile, Set<Long> likedRecipeIds, Set<Long> dislikedRecipeIds) {
         Set<Long> liked = likedRecipeIds == null ? Set.of() : likedRecipeIds;
         Set<Long> disliked = dislikedRecipeIds == null ? Set.of() : dislikedRecipeIds;
