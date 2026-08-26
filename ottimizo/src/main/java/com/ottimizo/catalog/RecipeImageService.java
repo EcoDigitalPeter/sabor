@@ -62,6 +62,9 @@ public class RecipeImageService {
             // aqui, mesmo padrao ja usado em RecipeService#get.
             Hibernate.initialize(recipe.ingredients());
             Hibernate.initialize(recipe.steps());
+            // RecipeIngredient.ingredient() e' outra proxy lazy propria --
+            // mesmo gap corrigido em RecipeService#get.
+            recipe.ingredients().forEach(line -> Hibernate.initialize(line.ingredient()));
             return recipe;
         } catch (ServiceException se) {
             throw se;

@@ -89,6 +89,13 @@ public class RecipeService {
             .orElseThrow(() -> new ServiceException(ErrorCode.LSA005_NOT_FOUND));
         Hibernate.initialize(recipe.ingredients());
         Hibernate.initialize(recipe.steps());
+        // Cada RecipeIngredient.ingredient() e' tambem uma proxy lazy
+        // (@ManyToOne) -- inicializar so a colecao acima nao chega,
+        // RecipeIngredientResponse#from acede a ingredient().id() depois de a
+        // sessao ja ter fechado (apanhado a testar o portal admin: GET
+        // /admin/recipes/{id} rebentava com LazyInitializationException em
+        // Ingredient, nao em RecipeIngredient).
+        recipe.ingredients().forEach(line -> Hibernate.initialize(line.ingredient()));
         return recipe;
     }
 

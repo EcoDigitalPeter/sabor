@@ -110,6 +110,13 @@ public class RecipeCatalogService {
         eligible.forEach(recipe -> {
             Hibernate.initialize(recipe.ingredients());
             Hibernate.initialize(recipe.steps());
+            // RecipeIngredient.ingredient() e' outra proxy lazy propria --
+            // acessores fluentes (id() em vez de getId()) nao beneficiam do
+            // atalho do Hibernate para ler so o identificador de uma proxy
+            // por inicializar, por isso qualquer .id() nela ainda rebenta se
+            // a sessao ja tiver fechado (mesmo gap corrigido em
+            // RecipeService#get e RecipeImageService#generate).
+            recipe.ingredients().forEach(line -> Hibernate.initialize(line.ingredient()));
         });
 
         return eligible;
