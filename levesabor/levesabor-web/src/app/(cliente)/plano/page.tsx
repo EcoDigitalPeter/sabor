@@ -23,11 +23,16 @@ import { WeekSelector } from "@/components/plan/WeekSelector";
 import { MealCard } from "@/components/plan/MealCard";
 import { DaySummary } from "@/components/plan/DaySummary";
 import { MonthProgressRing } from "@/components/plan/MonthProgressRing";
+import { LockedWeekCard } from "@/components/plan/LockedWeekCard";
 import { useToggleMealPlanEntryCompleted } from "@/hooks/useMealPlanCompleted";
 import {
   computeStreakDays,
+  countWeekMealsProgress,
   currentMealSlot,
+  DAYS_PER_WEEK,
+  daysInMonth,
   formatMonthLabel,
+  isWeekFullyCompleted,
   sortEntriesBySlot,
   streakLabel,
   timeOfDayGreeting,
@@ -35,8 +40,6 @@ import {
 } from "@/lib/planStats";
 import mealCardStyles from "@/components/plan/MealCard.module.css";
 import styles from "./page.module.css";
-
-const DAYS_PER_WEEK = 7;
 
 /** Mesma geometria do MealCard real (regra "loading = skeleton com a geometria do conteúdo"). */
 function MealCardSkeleton() {
@@ -110,15 +113,20 @@ export default function PlanoPage() {
   const days = plan.days ?? [];
   const todayIndex = days.findIndex((day) => day.date === todayIsoDate());
 
-  // FE-C09 · 30 dias não cabem/funcionam num único DayTabs em 360px — fatiam-se em semanas de
-  // 7 dias (a última pode ter menos) e só a semana selecionada é passada ao DayTabs existente,
-  // que continua a receber a mesma forma de `days` que já recebia (T-04).
-  const weekCount = Math.max(1, Math.ceil(days.length / DAYS_PER_WEEK));
+  // FE-Y09 (ago/2026) · o backend gera o plano por semanas de 7 dias — `days` só traz os dias já
+  // gerados, nunca o mês inteiro. `weekCount` conta as semanas do MÊS TODO (para as semanas
+  // seguintes ainda por gerar aparecerem como chips navegáveis no WeekSelector), enquanto
+  // `generatedWeekCount` conta só as semanas já devolvidas pelo backend — a diferença entre os
+  // dois é o que decide se uma semana mostra os MealCard reais ou o LockedWeekCard.
+  const totalDaysInMonth = daysInMonth(plan.monthStart ?? days[0]?.date ?? todayIsoDate());
+  const generatedWeekCount = Math.max(1, Math.ceil(days.length / DAYS_PER_WEEK));
+  const weekCount = Math.max(generatedWeekCount, Math.ceil(totalDaysInMonth / DAYS_PER_WEEK));
   const defaultWeekIndex = todayIndex >= 0 ? Math.floor(todayIndex / DAYS_PER_WEEK) : 0;
   const activeWeekIndex =
     selectedWeekIndex !== null && selectedWeekIndex < weekCount ? selectedWeekIndex : defaultWeekIndex;
   const weekStart = activeWeekIndex * DAYS_PER_WEEK;
   const weekDays = days.slice(weekStart, weekStart + DAYS_PER_WEEK);
+  const isActiveWeekGenerated = weekDays.length > 0;
 
   const todayIndexInWeek =
     todayIndex >= weekStart && todayIndex < weekStart + weekDays.length ? todayIndex - weekStart : undefined;
@@ -128,8 +136,21 @@ export default function PlanoPage() {
       ? selectedDayIndex - weekStart
       : defaultLocalIndex;
   const activeIndex = weekStart + activeLocalIndex;
-  const selectedDay = days[activeIndex];
+  const selectedDay = isActiveWeekGenerated ? days[activeIndex] : undefined;
   const sortedEntries = selectedDay ? sortEntriesBySlot(selectedDay.entries ?? []) : [];
+
+  // FE-Y09 · progresso da semana já gerada mais recente — é o que falta terminar para desbloquear
+  // a semana seguinte, por isso é o que se mostra no cartão de semana bloqueada (regra 13 do guia
+  // de copy: nunca um número nu, sempre acompanhado de mensagem de incentivo).
+  const lastGeneratedWeekStart = (generatedWeekCount - 1) * DAYS_PER_WEEK;
+  const lastGeneratedWeekDays = days.slice(lastGeneratedWeekStart, lastGeneratedWeekStart + DAYS_PER_WEEK);
+  const currentWeekProgress = countWeekMealsProgress(lastGeneratedWeekDays);
+  const isMonthFullyGenerated = days.length >= totalDaysInMonth;
+  // Só a próxima semana ainda por gerar pode estar "a preparar-se" (a geração é sequencial) —
+  // semanas mais à frente ficam sempre no estado simples de bloqueada.
+  const isNextLockedWeek = activeWeekIndex === generatedWeekCount;
+  const isPreparingActiveWeek =
+    isNextLockedWeek && !isMonthFullyGenerated && isWeekFullyCompleted(lastGeneratedWeekDays);
 
   const streak = computeStreakDays(days);
   const completedDaysCount = days.filter((day) => (day.entries ?? []).some((entry) => entry.completed)).length;
@@ -187,30 +208,43 @@ export default function PlanoPage() {
         }}
       />
 
-      <DayTabs
-        days={weekDays.map((day) => ({ date: day.date ?? "", weekday: day.weekday ?? "" }))}
-        selectedIndex={activeLocalIndex}
-        onSelect={(localIndex) => setSelectedDayIndex(weekStart + localIndex)}
-        todayIndex={todayIndexInWeek}
-      />
+      {isActiveWeekGenerated ? (
+        <>
+          <DayTabs
+            days={weekDays.map((day) => ({ date: day.date ?? "", weekday: day.weekday ?? "" }))}
+            selectedIndex={activeLocalIndex}
+            onSelect={(localIndex) => setSelectedDayIndex(weekStart + localIndex)}
+            todayIndex={todayIndexInWeek}
+          />
 
-      <div className={styles.cardList}>
-        {sortedEntries.map((entry, index) => (
-          <Reveal key={entry.id} delay={index * 40}>
-            <MealCard
-              entry={entry}
-              href={`/plano/refeicao/${entry.id}`}
-              current={isSelectedDayToday && entry.mealSlot === activeMealSlot}
-              onToggleCompleted={(next) => {
-                if (entry.id === undefined) return;
-                toggleCompletedMutation.mutate({ id: entry.id, completed: next });
-              }}
-            />
-          </Reveal>
-        ))}
-      </div>
+          <div className={styles.cardList}>
+            {sortedEntries.map((entry, index) => (
+              <Reveal key={entry.id} delay={index * 40}>
+                <MealCard
+                  entry={entry}
+                  href={`/plano/refeicao/${entry.id}`}
+                  current={isSelectedDayToday && entry.mealSlot === activeMealSlot}
+                  onToggleCompleted={(next) => {
+                    if (entry.id === undefined) return;
+                    toggleCompletedMutation.mutate({ id: entry.id, completed: next });
+                  }}
+                />
+              </Reveal>
+            ))}
+          </div>
 
-      {selectedDay ? <DaySummary day={selectedDay} className={styles.summary} /> : null}
+          {selectedDay ? <DaySummary day={selectedDay} className={styles.summary} /> : null}
+        </>
+      ) : (
+        <Reveal>
+          <LockedWeekCard
+            weekLabel={`Semana ${activeWeekIndex + 1}`}
+            completedMeals={currentWeekProgress.completed}
+            totalMeals={currentWeekProgress.total}
+            preparing={isPreparingActiveWeek}
+          />
+        </Reveal>
+      )}
 
       <div className={styles.footerActions}>
         {/* FE-Y05 (ago/2026) · renomeado a pedido do cliente — "Gerar novo plano" soava a apagar

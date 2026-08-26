@@ -1,0 +1,77 @@
+/* FE-Y09 · LockedWeekCard — mesma família visual do fallback "sem foto" (RecipeHero/
+   RecipeGridCard.module.css): ícone sobre gradiente terracotta/tan, nunca um bloqueio agressivo. */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px 32px;
+  text-align: center;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--tan), var(--cream-card-alt));
+  color: var(--terracotta);
+  margin-bottom: 4px;
+}
+
+.iconPreparing {
+  animation: ls-week-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconPreparing {
+    animation: none;
+  }
+}
+
+@keyframes ls-week-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+
+.weekLabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--clay-soft);
+}
+
+.progress {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clay);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink);
+  max-width: 34ch;
+}
+
+.description {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay-soft);
+  max-width: 32ch;
+}
