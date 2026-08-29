@@ -7,6 +7,7 @@ export type Status =
   | "SUSPENDED"
   | "DRAFT"
   | "PUBLISHED"
+  | "AI_GENERATED"
   // FE-D07 · Ingredient.active (boolean) mapeado para um estado exibível, mesmo padrão dos outros
   | "INACTIVE"
   // F3-CLI-07 · estados de encomenda (Order.status)
@@ -27,6 +28,7 @@ const STATUS_LABEL: Record<Status, string> = {
   SUSPENDED: "Suspenso",
   DRAFT: "Rascunho",
   PUBLISHED: "Publicada",
+  AI_GENERATED: "Gerada por IA",
   INACTIVE: "Inativo",
   PENDENTE: "Pendente",
   ACEITE: "Aceite",
@@ -42,6 +44,7 @@ const STATUS_LABEL: Record<Status, string> = {
 const STATUS_TONE: Record<Status, string> = {
   ACTIVE: styles.forest,
   PUBLISHED: styles.forest,
+  AI_GENERATED: styles.amber,
   SUSPENDED: styles.terracotta,
   DRAFT: styles.claySoft,
   INACTIVE: styles.claySoft,
